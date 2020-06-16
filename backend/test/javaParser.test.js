@@ -15,6 +15,7 @@ package conversation.library;
 
 import java.sql.PreparedStatement;
 import java.util.List;
+import annotation.ScrumTeam;
 
 /**
  * Tests various insert scenarios for the sharing record collection entities
@@ -22,6 +23,7 @@ import java.util.List;
  * @author alicia.ong
  * @since 228
  */
+@ScrumTeam("Team_01")
 public class SharingRecordCollectionInsertFTest extends SharingRecordCollectionBaseTest{
 
     /**
@@ -43,6 +45,7 @@ public class SharingRecordCollectionInsertFTest extends SharingRecordCollectionB
      * @expectedResults other item saved successfully
      * @throws Exception
      */
+    @ScrumTeam("Team_02")
     public void testPartialSharingRecordCollectionItemSave() throws Exception {
         String badCollection = createSharingRecordCollection(standardUser);
         removeGroupIdFromCollection(badCollection);
