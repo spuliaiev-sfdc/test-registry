@@ -15,7 +15,9 @@ function defaultCallBacks() {
 
   callbacksContext.callbackFolder = (status, operation) => {
     console.log(`Folder ${status.foldersProcessed}, left:  ${status.foldersListToProcess.length}, operation: ${operation} for ${status.currentPath}`);
-    callbacksContext.foldersProcessed.push(status.currentPath);
+    if (operation === 'finish') {
+      callbacksContext.foldersProcessed.push(status.currentPath);
+    }
   };
   callbacksContext.callbackErr = (status, errorCode, path, ex) => {
     console.log(`Error ${errorCode} for ${path}`);
@@ -32,7 +34,7 @@ describe('filesIndexer', function() {
       let executionStatus = defaultCallBacks();
       filesIndexer.iterateFiles(path, executionStatus.callbackFile, executionStatus.callbackFolder, executionStatus.callbackErr, concurrency);
       assert.equal(executionStatus.filesProcessed.length, 5);
-      assert.equal(executionStatus.foldersProcessed.length, 10);
+      assert.equal(executionStatus.foldersProcessed.length, 4);
       assert.equal(executionStatus.errors.length, 0);
     });
   });
