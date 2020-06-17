@@ -88,8 +88,10 @@ const javaParser = {
     return annotationsInfo;
   },
 
-  extractClassInfo(firstClassDeclaration) {
+  extractClassInfo(firstClassDeclaration, typeDeclaration) {
     let classInfo = {};
+    classInfo.javadoc = this.getClassJavadoc(typeDeclaration, classInfo);
+
     classInfo.annotations = this.extractAnnotationsInfo(firstClassDeclaration, "classModifier");
     let classDeclaration = this.checkParticularChild(true, firstClassDeclaration, "extractClassInfo", "normalClassDeclaration");
 
@@ -128,11 +130,11 @@ const javaParser = {
     let classesInfo = {};
     classesInfo.classes = [];
 
-    let firstClassDeclaration = this.getFirstClassDeclaration(content)
-    let classInfo = this.extractClassInfo(firstClassDeclaration);
+    let ordinaryCompilationUnit = this.checkParticularChild(true, content, "getFirstClassDeclaration", "ordinaryCompilationUnit");
+    let typeDeclaration = this.checkParticularChild(true, ordinaryCompilationUnit, "getFirstClassDeclaration", "typeDeclaration");
+    let firstClassDeclaration = this.checkParticularChild(true, typeDeclaration, "getFirstClassDeclaration", "classDeclaration");
+    let classInfo = this.extractClassInfo(firstClassDeclaration, typeDeclaration);
     classesInfo.classes.push(classInfo);
-
-    let classJavaDoc = this.getClassJavadoc(textContent, classInfo, firstClassDeclaration);
 
     return classesInfo;
   },
@@ -240,15 +242,32 @@ const javaParser = {
     }
     return memberInfo;
   },
+
   extractFQNString(fqnDecl) {
     let first = this.getParticularChildValue(false, fqnDecl, "extractFQNString", "fqnOrRefTypePartFirst", "fqnOrRefTypePartCommon", "Identifier");
     let second = this.getParticularChildValue(false, fqnDecl, "extractFQNString", "fqnOrRefTypePartRest", "fqnOrRefTypePartCommon", "Identifier");
     return first + "."+second;
   },
 
-  getClassJavadoc(textContent, classInfo, firstClassDeclaration) {
-    let javaDoc = "";
-    return javaDoc;
+  getClassJavadoc(typeDeclaration, classInfo) {
+    let javadoc = {};
+    if (typeDeclaration && typeDeclaration.leadingComments && Array.isArray(typeDeclaration.leadingComments) && typeDeclaration.leadingComments.length > 0) {
+      let javaDoc = typeDeclaration.leadingComments[0].image;
+
+      let author = javaDoc.match(/@author\s+(.*)\s*\n/);
+      if (author && author.length > 1) {
+        javadoc.author = author["1"];
+      }
+      let since = javaDoc.match(/@since\s+(.*)\s*\n/);
+      if (since && since.length > 1) {
+        javadoc.since = since["1"];
+      }
+      let team = javaDoc.match(/@ScrumTeam\s+(.*)\s*\n/);
+      if (team && team.length > 1) {
+        javadoc.team = team["1"];
+      }
+    }
+    return javadoc;
   }
 };
 

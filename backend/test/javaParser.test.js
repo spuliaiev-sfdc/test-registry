@@ -119,6 +119,10 @@ describe('javaParser', function() {
               "annotations": null
             }
           ],
+          "javadoc": {
+            "author": "user.name",
+            "since": "2020.05.01"
+          },
           "methods": []
         }]
       });
@@ -133,6 +137,10 @@ describe('javaParser', function() {
           "superclass": "SharingRecordCollectionBaseTest",
           "className": "SharingRecordCollectionInsertFTest",
           "other": [],
+          "javadoc": {
+            "author": "alicia.ong",
+            "since": "228"
+          },
           "fields": [],
           "methods": [{
             "kind": "method",
