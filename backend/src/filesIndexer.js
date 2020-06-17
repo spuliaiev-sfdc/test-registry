@@ -1,13 +1,11 @@
 const
   fs = require('fs'),
   async = require('async'),
-  readline = require('readline'),
   utils = require('./corUtils.js'),
   resolve = require('path').resolve,
-  relative = require('path').relative,
-  SortedSet = require('js-sorted-set');
+  relative = require('path').relative;
 
-const filesProcessor = {
+const filesIndexer = {
 
   iterateFilesAsync(path, concurrency, collback) {
 
@@ -145,4 +143,4 @@ const filesProcessor = {
 };
 
 
-module.exports = filesProcessor;
+module.exports = filesIndexer;
