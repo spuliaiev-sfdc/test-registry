@@ -1,5 +1,5 @@
 const
-  jp = require('jsonpath'),
+  corUtil = require("../corUtils"),
   parser = require("java-parser");
 
 const javaParser = {
@@ -7,8 +7,8 @@ const javaParser = {
   checkParticularChildren(throwIfError, content, functionName, childName) {
     if (!content) {
       let errorText = `[${functionName}] object provided is UNDEFINED or NULL`;
-      console.log(errorText);
       if (throwIfError) {
+        corUtil.log(errorText);
         throw new Error(errorText);
       } else {
         return null;
@@ -16,8 +16,8 @@ const javaParser = {
     }
     if (!content.children || !content.children[childName] || !Array.isArray(content.children[childName])) {
       let errorText = `[${functionName}] child ${childName} not found or not an array`;
-      console.log(errorText);
       if (throwIfError) {
+        console.log(errorText);
         throw new Error(errorText);
       } else {
         return null;
@@ -25,8 +25,8 @@ const javaParser = {
     }
     if (content.children[childName].length === 0) {
       let errorText = `[${functionName}] child ${childName} is empty`;
-      console.log(errorText);
       if (throwIfError) {
+        console.log(errorText);
         throw new Error(errorText);
       } else {
         return null;

@@ -9,12 +9,12 @@ function defaultCallBacks() {
     errors: []
   }
   callbacksContext.callbackFile = (status, fullPath, fileName) => {
-    console.log(` File ${status.filesProcessed} ${fileName} in ${fullPath}`);
+    // console.log(` File ${status.filesProcessed} ${fileName} in ${fullPath}`);
     callbacksContext.filesProcessed.push(fileName);
   };
 
   callbacksContext.callbackFolder = (status, operation) => {
-    console.log(`Folder ${status.foldersProcessed}, left:  ${status.foldersListToProcess.length}, operation: ${operation} for ${status.currentPath}`);
+    // console.log(`Folder ${status.foldersProcessed}, left:  ${status.foldersListToProcess.length}, operation: ${operation} for ${status.currentPath}`);
     if (operation === 'finish') {
       callbacksContext.foldersProcessed.push(status.currentPath);
     }

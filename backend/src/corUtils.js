@@ -196,7 +196,55 @@ const corUtils = {
     } catch (e) {
       console.error(`   Failed to write content into file ${outFilePath}`, e);
     }
+  },
+
+  getFileExtension(fileName) {
+    return fileName.slice((Math.max(0, fileName.lastIndexOf(".")) || Infinity) + 1);
+  },
+
+  getFileNameNoExt(fileName) {
+    let ext = this.getFileExtension(fileName);
+    let fn = fileName.split("/").pop();
+    let name = ext.length === 0 ? fn : fn.substring(0, fn.length - ext.length - 1);
+    return name;
+  },
+
+  analyseFileLocation(rootFolder, relativeFileName) {
+    let parts = relativeFileName.split("/");
+    let info = {
+        root: rootFolder,
+        relative: relativeFileName,
+        module: parts[0],
+        modulePath: parts[0],
+        ext: this.getFileExtension(relativeFileName),
+        filename: this.getFileNameNoExt(relativeFileName)
+    };
+    info.testFolder = parts[1] === "test";
+    if (info.testFolder) {
+      if (parts[2] === "func") {
+        info.testKind = "func";
+      } else {
+        if (parts[2] === "unit") {
+          if (parts[5] === "unit") {
+            info.testKind = "unit";
+          } else {
+            if (parts[5] === "strictunit") {
+              info.testKind = "strictunit";
+            } else {
+              info.testKind = "unknown-unit-test";
+            }
+          }
+        } else {
+          info.testKind = "unknown";
+        }
+      }
+      info.modulePath = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+parts[3];
+    }
+    // calculate ownership file path
+    info.ownershipFilePath = info.modulePath + "/java/resources/ownership.yaml";
+    return info;
   }
+
 
 };
 
