@@ -20,7 +20,7 @@ import annotation.ScrumTeam;
 /**
  * Tests various insert scenarios for the sharing record collection entities
  *
- * @author alicia.ong
+ * @author developer.name
  * @since 228
  */
 @ScrumTeam("Team_01")
@@ -138,14 +138,16 @@ describe('javaParser', function() {
           "className": "SharingRecordCollectionInsertFTest",
           "other": [],
           "javadoc": {
-            "author": "alicia.ong",
+            "author": "developer.name",
             "since": "228"
           },
           "fields": [],
           "methods": [{
             "kind": "method",
             "name": "testNumEntriesCorrect",
-            "annotations": [{"name": "TestLabels", "value": "IgnoreFailureReason.IN_DEV"}]
+            "annotations": [
+              {"name": "TestLabels", "value": "IgnoreFailureReason.IN_DEV"}
+            ]
           }, {
             "kind": "method",
             "name": "testPartialSharingRecordCollectionItemSave",
