@@ -57,7 +57,7 @@ const javaParser = {
 
   parseJavaContent(fileContent) {
     let content = parser.parse(fileContent);
-    let info = this.extractClassesInfo(content);
+    let info = this.extractClassesInfo(content, fileContent);
     return { status: 'success', content, info };
   },
 
@@ -69,7 +69,10 @@ const javaParser = {
   },
 
   extractAnnotationsInfo(typeDeclaration, modifierNodeName) {
-    let modifiers = this.checkParticularChildren(true, typeDeclaration, "extractClassAnnotationsInfo", modifierNodeName);
+    let modifiers = this.checkParticularChildren(false, typeDeclaration, "extractClassAnnotationsInfo", modifierNodeName);
+    if (!modifiers) {
+      return null;
+    }
     let annotationsInfo = [];
     for( let i=0; i < modifiers.length; i++) {
       let annotations = this.checkParticularChildren(false, modifiers[i], "extractClassAnnotationsInfo", "annotation");
@@ -121,13 +124,15 @@ const javaParser = {
     return classInfo;
   },
 
-  extractClassesInfo(content) {
+  extractClassesInfo(content, textContent) {
     let classesInfo = {};
     classesInfo.classes = [];
 
     let firstClassDeclaration = this.getFirstClassDeclaration(content)
     let classInfo = this.extractClassInfo(firstClassDeclaration);
     classesInfo.classes.push(classInfo);
+
+    let classJavaDoc = this.getClassJavadoc(textContent, classInfo, firstClassDeclaration);
 
     return classesInfo;
   },
@@ -166,6 +171,7 @@ const javaParser = {
           value = value + this.extractExpressionValue(elements[ind]);
         }
         value = value+"]";
+        return value;
       }
     }
     if (!value) {
@@ -222,12 +228,27 @@ const javaParser = {
       memberInfo.name = this.getParticularChildValue(false, methodDeclaration, "extractClassBodyInfo", "methodHeader", "methodDeclarator", "Identifier");
       memberInfo.annotations = this.extractAnnotationsInfo(methodDeclaration, "methodModifier");
     }
+    let fieldDeclaration = this.checkParticularChild(false, memberDeclaration, "extractClassBodyInfo", "classMemberDeclaration", "fieldDeclaration");
+    if (fieldDeclaration) {
+      memberInfo.kind = "field";
+      let declarator = this.checkParticularChild(false, fieldDeclaration, "extractClassBodyInfo", "variableDeclaratorList", "variableDeclarator");
+      if (declarator) {
+        memberInfo.name = this.getParticularChildValue(false, declarator, "extractClassBodyInfo", "variableDeclaratorId", "Identifier");
+        memberInfo.value = this.getParticularChildValue(false, declarator, "extractClassBodyInfo", "variableInitializer");
+      }
+      memberInfo.annotations = this.extractAnnotationsInfo(fieldDeclaration, "methodModifier");
+    }
     return memberInfo;
   },
   extractFQNString(fqnDecl) {
     let first = this.getParticularChildValue(false, fqnDecl, "extractFQNString", "fqnOrRefTypePartFirst", "fqnOrRefTypePartCommon", "Identifier");
     let second = this.getParticularChildValue(false, fqnDecl, "extractFQNString", "fqnOrRefTypePartRest", "fqnOrRefTypePartCommon", "Identifier");
     return first + "."+second;
+  },
+
+  getClassJavadoc(textContent, classInfo, firstClassDeclaration) {
+    let javaDoc = "";
+    return javaDoc;
   }
 };
 
