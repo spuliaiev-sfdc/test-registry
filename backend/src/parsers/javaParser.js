@@ -153,6 +153,20 @@ const javaParser = {
       if (fqnDecl) {
         return this.extractFQNString(fqnDecl);
       }
+      let arrayDecl = this.checkParticularChild(false, content, "extractExpressionValue", "elementValueArrayInitializer", "elementValueList");
+      if (arrayDecl) {
+        let elements = this.checkParticularChildren(false, arrayDecl, "extractExpressionValue", "elementValue");
+        value = "";
+        for (let ind=0; ind < elements.length; ind ++) {
+          if (value.length === 0){
+            value = value + "[";
+          } else {
+            value = value + ", ";
+          }
+          value = value + this.extractExpressionValue(elements[ind]);
+        }
+        value = value+"]";
+      }
     }
     if (!value) {
       let props = [];

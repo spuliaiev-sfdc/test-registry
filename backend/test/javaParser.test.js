@@ -46,6 +46,7 @@ public class SharingRecordCollectionInsertFTest extends SharingRecordCollectionB
      * @throws Exception
      */
     @ScrumTeam("Team_02")
+    @TestLabelsArray({ IgnoreFailureReason.Label1, IgnoreFailureReason.Label2 })
     public void testPartialSharingRecordCollectionItemSave() throws Exception {
         String badCollection = createSharingRecordCollection(standardUser);
         removeGroupIdFromCollection(badCollection);
@@ -82,7 +83,10 @@ describe('javaParser', function() {
           }, {
             "kind": "method",
             "name": "testPartialSharingRecordCollectionItemSave",
-            "annotations": [{"name": "ScrumTeam", "value": '"Team_02"'}]
+            "annotations": [
+              {"name": "ScrumTeam", "value": '"Team_02"'},
+              {"name": "TestLabelsArray","value": "[IgnoreFailureReason.Label1, IgnoreFailureReason.Label2]"}
+            ]
           }]
         }]
       });
