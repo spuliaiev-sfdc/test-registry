@@ -67,6 +67,25 @@ describe('javaParser', function() {
     it('should successfully parse simple Test Java', function() {
       let parsingResult = javaParser.parseJavaContent(javaTestClass);
       assert.equal(parsingResult.status, 'success');
+      assert.deepEqual(parsingResult.info, {
+        "classes": [{
+          "annotations": [{"name": "ScrumTeam", "value": '"Team_01"'}],
+          "classType": "class",
+          "superclass": "SharingRecordCollectionBaseTest",
+          "className": "SharingRecordCollectionInsertFTest",
+          "other": [],
+          "fields": [],
+          "methods": [{
+            "kind": "method",
+            "name": "testNumEntriesCorrect",
+            "annotations": [{"name": "TestLabels", "value": "IgnoreFailureReason.IN_DEV"}]
+          }, {
+            "kind": "method",
+            "name": "testPartialSharingRecordCollectionItemSave",
+            "annotations": [{"name": "ScrumTeam", "value": '"Team_02"'}]
+          }]
+        }]
+      });
     });
   });
   describe('#checkParticularChildren() - Recursive params', function() {

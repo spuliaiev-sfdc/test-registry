@@ -57,8 +57,8 @@ const javaParser = {
 
   parseJavaContent(fileContent) {
     let content = parser.parse(fileContent);
-    let classes = this.extractClassesInfo(content);
-    return { status: 'success', content, classes };
+    let info = this.extractClassesInfo(content);
+    return { status: 'success', content, info };
   },
 
   getFirstClassDeclaration(content) {
@@ -68,8 +68,8 @@ const javaParser = {
     return classDeclaration;
   },
 
-  extractClassAnnotationsInfo(typeDeclaration) {
-    let modifiers = this.checkParticularChildren(true, typeDeclaration, "extractClassAnnotationsInfo", "classModifier");
+  extractAnnotationsInfo(typeDeclaration, modifierNodeName) {
+    let modifiers = this.checkParticularChildren(true, typeDeclaration, "extractClassAnnotationsInfo", modifierNodeName);
     let annotationsInfo = [];
     for( let i=0; i < modifiers.length; i++) {
       let annotations = this.checkParticularChildren(false, modifiers[i], "extractClassAnnotationsInfo", "annotation");
@@ -87,7 +87,7 @@ const javaParser = {
 
   extractClassInfo(firstClassDeclaration) {
     let classInfo = {};
-    classInfo.annotations = this.extractClassAnnotationsInfo(firstClassDeclaration);
+    classInfo.annotations = this.extractAnnotationsInfo(firstClassDeclaration, "classModifier");
     let classDeclaration = this.checkParticularChild(true, firstClassDeclaration, "extractClassInfo", "normalClassDeclaration");
 
     classInfo.classType = this.getParticularChildValue(false, classDeclaration, "extractClassInfo", "Class");
@@ -129,13 +129,10 @@ const javaParser = {
     let classInfo = this.extractClassInfo(firstClassDeclaration);
     classesInfo.classes.push(classInfo);
 
-    // let res = jp.query(content, '$..children.*[?(@.name=="typeIdentifier")]');
-
-
     return classesInfo;
   },
 
-  extractExpressionValue(content) {
+  extractExpressionValue: function (content) {
     if (!content) {
       return null;
     }
@@ -143,7 +140,7 @@ const javaParser = {
       return content.image;
     }
 
-    let value =      this.checkParticularChild(false, content, "extractExpressionValue", "expression");
+    let value = this.checkParticularChild(false, content, "extractExpressionValue", "expression");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "ternaryExpression");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "binaryExpression");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "unaryExpression");
@@ -151,6 +148,12 @@ const javaParser = {
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "primaryPrefix");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "literal");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "StringLiteral");
+    if (!value) {
+      let fqnDecl = this.checkParticularChild(false, content, "extractExpressionValue", "fqnOrRefType");
+      if (fqnDecl) {
+        return this.extractFQNString(fqnDecl);
+      }
+    }
     if (!value) {
       let props = [];
       for (var prop in content.children) {
@@ -199,8 +202,18 @@ const javaParser = {
     let memberInfo = {
       kind: "unknown"
     };
-
+    let methodDeclaration = this.checkParticularChild(false, memberDeclaration, "extractClassBodyInfo", "classMemberDeclaration", "methodDeclaration");
+    if (methodDeclaration) {
+      memberInfo.kind = "method";
+      memberInfo.name = this.getParticularChildValue(false, methodDeclaration, "extractClassBodyInfo", "methodHeader", "methodDeclarator", "Identifier");
+      memberInfo.annotations = this.extractAnnotationsInfo(methodDeclaration, "methodModifier");
+    }
     return memberInfo;
+  },
+  extractFQNString(fqnDecl) {
+    let first = this.getParticularChildValue(false, fqnDecl, "extractFQNString", "fqnOrRefTypePartFirst", "fqnOrRefTypePartCommon", "Identifier");
+    let second = this.getParticularChildValue(false, fqnDecl, "extractFQNString", "fqnOrRefTypePartRest", "fqnOrRefTypePartCommon", "Identifier");
+    return first + "."+second;
   }
 };
 
