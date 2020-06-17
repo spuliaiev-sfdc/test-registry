@@ -4,7 +4,16 @@ const
 
 const javaParser = {
 
-  checkParticularChildren(content, functionName, childName, throwIfError) {
+  checkParticularChildren(throwIfError, content, functionName, childName) {
+    if (!content) {
+      let errorText = `[${functionName}] object provided is UNDEFINED or NULL`;
+      console.log(errorText);
+      if (throwIfError) {
+        throw new Error(errorText);
+      } else {
+        return null;
+      }
+    }
     if (!content.children || !content.children[childName] || !Array.isArray(content.children[childName])) {
       let errorText = `[${functionName}] child ${childName} not found or not an array`;
       console.log(errorText);
@@ -23,13 +32,27 @@ const javaParser = {
         return null;
       }
     }
+    let result = content.children[childName];
 
-    return content.children[childName];
+    if (arguments.length > 4) {
+      // recursive calls to evaluate the rest of the arguments
+      let args = Array.from(arguments);
+      let restOfArgs = args.slice(4);
+      result = this.checkParticularChildren(throwIfError, result[0], functionName, ...restOfArgs);
+    }
+    return result;
   },
 
-  checkParticularChild(content, functionName, childName, throwIfError) {
-    let children = this.checkParticularChildren(content, functionName, childName, throwIfError);
+  checkParticularChild(throwIfError, content, functionName, childName) {
+    // let children = this.checkParticularChildren(throwIfError, content, functionName, childName);
+    let children = this.checkParticularChildren(...arguments);
     return children ? children[0] : null;
+  },
+
+  getParticularChildValue(throwIfError, content, functionName, childName) {
+    // let children = this.checkParticularChildren(throwIfError, content, functionName, childName);
+    let children = this.checkParticularChildren(...arguments);
+    return children ? this.extractExpressionValue(children[0]) : null;
   },
 
   parseJavaContent(fileContent) {
@@ -39,56 +62,17 @@ const javaParser = {
   },
 
   getFirstClassDeclaration(content) {
-    let ordinaryCompilationUnit = this.checkParticularChild(content, "getFirstClassDeclaration", "ordinaryCompilationUnit", true);
-    // if (! content.children || !content.children.ordinaryCompilationUnit) {
-    //   console.log('[getFirstClassDeclaration] Not a regular Java file: no ordinaryCompilationUnit');
-    //   return false;
-    // }
-    // if (! Array.isArray(content.children.ordinaryCompilationUnit)) {
-    //   console.log('[getFirstClassDeclaration] Not a regular Java file: ordinaryCompilationUnit is not an array');
-    //   return false;
-    // }
-    // if (content.children.ordinaryCompilationUnit.length > 1) {
-    //   console.warn('[getFirstClassDeclaration] Irregular Java file: ordinaryCompilationUnit size is greater than 1');
-    // }
-
-    let typeDeclaration = this.checkParticularChild(ordinaryCompilationUnit, "getFirstClassDeclaration", "typeDeclaration", true);
-    // if (!content.children.ordinaryCompilationUnit[0].children.typeDeclaration){
-    //   console.log('[getFirstClassDeclaration] Not a regular Java file: ordinaryCompilationUnit.typeDeclaration not found');
-    //   return false;
-    // }
-    // let typeDeclarations = content.children.ordinaryCompilationUnit[0].children.typeDeclaration;
-    // if (! Array.isArray(typeDeclarations)) {
-    //   console.log('[getFirstClassDeclaration] Not a regular Java file: typeDeclaration is not an array');
-    //   return false;
-    // }
-    // let typeDeclaration = typeDeclarations[0];
-    let classDeclaration = this.checkParticularChild(typeDeclaration, "getFirstClassDeclaration", "classDeclaration", true);
-    // if (!typeDeclaration || !typeDeclaration.children || !typeDeclaration.children.classDeclaration) {
-    //   console.log('[getFirstClassDeclaration] Not a regular Java file: classDeclaration not found');
-    //   return false;
-    // }
-    // if (! Array.isArray(typeDeclaration.children.classDeclaration)) {
-    //   console.log('[getFirstClassDeclaration] Not a regular Java file: classDeclaration is not an array');
-    //   return false;
-    // }
-    // if (typeDeclaration.children.classDeclaration.length === 0) {
-    //   console.log('[getFirstClassDeclaration] Not a regular Java file: classDeclaration is empty');
-    //   return false;
-    // }
+    let ordinaryCompilationUnit = this.checkParticularChild(true, content, "getFirstClassDeclaration", "ordinaryCompilationUnit");
+    let typeDeclaration = this.checkParticularChild(true, ordinaryCompilationUnit, "getFirstClassDeclaration", "typeDeclaration");
+    let classDeclaration = this.checkParticularChild(true, typeDeclaration, "getFirstClassDeclaration", "classDeclaration");
     return classDeclaration;
   },
 
   extractClassAnnotationsInfo(typeDeclaration) {
-    let modifiers = this.checkParticularChildren(typeDeclaration, "extractClassAnnotationsInfo", "classModifier", true);
-    // if (!typeDeclaration.children || !typeDeclaration.children.classModifier || !Array.isArray(typeDeclaration.children.classModifier)) {
-    //   console.log('[extractClassAnnotationsInfo] class modifiers not found');
-    //   return;
-    // }
+    let modifiers = this.checkParticularChildren(true, typeDeclaration, "extractClassAnnotationsInfo", "classModifier");
     let annotationsInfo = [];
-    // let modifiers = typeDeclaration.children.classModifier;
     for( let i=0; i < modifiers.length; i++) {
-      let annotations = this.checkParticularChildren(modifiers[i], "extractClassAnnotationsInfo", "annotation", false);
+      let annotations = this.checkParticularChildren(false, modifiers[i], "extractClassAnnotationsInfo", "annotation");
       if (annotations) {
         for (let annIndex=0; annIndex < annotations.length; annIndex++) {
           let annotation = annotations[annIndex];
@@ -104,6 +88,35 @@ const javaParser = {
   extractClassInfo(firstClassDeclaration) {
     let classInfo = {};
     classInfo.annotations = this.extractClassAnnotationsInfo(firstClassDeclaration);
+    let classDeclaration = this.checkParticularChild(true, firstClassDeclaration, "extractClassInfo", "normalClassDeclaration");
+
+    classInfo.classType = this.getParticularChildValue(false, classDeclaration, "extractClassInfo", "Class");
+    classInfo.superclass = this.getParticularChildValue(false, classDeclaration, "extractClassInfo", "superclass", "classType", "Identifier");
+    classInfo.className = this.getIdentifier(classDeclaration, "typeIdentifier");
+
+    let classBody = this.checkParticularChildren(true, classDeclaration, "extractClassInfo", "classBody", "classBodyDeclaration");
+
+    classInfo.other = [];
+    classInfo.fields = [];
+    classInfo.methods = [];
+    for (let memberIndex=0; memberIndex < classBody.length; memberIndex++) {
+      let memberDeclaration = classBody[memberIndex];
+      let memberInfo = this.extractClassBodyInfo(classInfo, memberDeclaration);
+      if (!memberInfo) {
+        continue;
+      }
+      if (memberInfo.kind === 'field') {
+        classInfo.fields.push(memberInfo);
+      } else {
+        if (memberInfo.kind === 'method') {
+          classInfo.methods.push(memberInfo);
+        } else {
+          classInfo.other.push(memberInfo);
+        }
+      }
+
+    }
+
 
     return classInfo;
   },
@@ -121,31 +134,73 @@ const javaParser = {
 
     return classesInfo;
   },
-  extractAnnotationInfo(annotation) {
-    let typeName = this.checkParticularChild(annotation, "extractAnnotationInfo", "typeName", true);
-    // if (!annotation || !annotation.children || !annotation.children.typeName || !Array.isArray(annotation.children.typeName)) {
-    //   console.log('[extractAnnotationInfo] Annotation typeName not valid');
-    //   return false;
-    // }
-    // if (! Array.isArray(typeDeclaration.children.classDeclaration)) {
-    //   console.log('[getFirstClassDeclaration] Not a regular Java file: classDeclaration is not an array');
-    //   return false;
-    // }
-    // let typeName = annotation.children.typeName[0];
-    let identifier = this.checkParticularChild(typeName, "extractAnnotationInfo", "Identifier", true);
-    // if (!typeName || !typeName.children || !typeName.children.Identifier || !Array.isArray(annotation.children.Identifier)) {
-    //   console.log('[extractAnnotationInfo] Annotation typeName not valid');
-    //   return false;
-    // }
-    let annotationInfo = {
-      name: identifier.image
+
+  extractExpressionValue(content) {
+    if (!content) {
+      return null;
+    }
+    if (Object.prototype.hasOwnProperty.call(content, "image")) {
+      return content.image;
     }
 
-    // let name = annotation.children && annotation.children.Identifier && Array.isArray(annotation.children.Identifier) && annotation.children.Identifier.length > 0
-    //   ? annotation.children.Identifier[0].image : null;
+    let value =      this.checkParticularChild(false, content, "extractExpressionValue", "expression");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "ternaryExpression");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "binaryExpression");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "unaryExpression");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "primary");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "primaryPrefix");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "literal");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "StringLiteral");
+    if (!value) {
+      let props = [];
+      for (var prop in content.children) {
+        if (Object.prototype.hasOwnProperty.call(content.children, prop)) {
+          props.push(prop);
+        }
+      }
+      console.log(`[extractExpressionValue] failed to find expression value. Existing nodes:`, props);
+      return null;
+    } else {
+      if (value["children"]) {
+        value = this.extractExpressionValue(value);
+      } else {
+        if (Object.prototype.hasOwnProperty.call(value, "image")) {
+          return value.image;
+        } else {
+          console.log(`[extractExpressionValue] failed to extract expression value. Current value node:`, value);
+        }
+      }
+      return value;
+    }
+  },
+
+  getIdentifier(identifierContainer, containerName) {
+    if (containerName) {
+      identifierContainer = this.checkParticularChild(false, identifierContainer, "getIdentifier", containerName);
+    }
+    if (!identifierContainer) {
+      return null;
+    }
+    let identifier = this.checkParticularChild(true, identifierContainer, "getIdentifier", "Identifier");
+    return identifier ? identifier.image : null;
+  },
+
+  extractAnnotationInfo(annotation) {
+    let annotationInfo = {
+      name: this.getIdentifier(annotation, "typeName")
+    };
+
+    annotationInfo.value = this.getParticularChildValue(false, annotation, "extractAnnotationInfo", "elementValue");
+
     return annotationInfo;
+  },
 
+  extractClassBodyInfo(classInfo, memberDeclaration) {
+    let memberInfo = {
+      kind: "unknown"
+    };
 
+    return memberInfo;
   }
 };
 

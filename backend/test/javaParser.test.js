@@ -69,4 +69,46 @@ describe('javaParser', function() {
       assert.equal(parsingResult.status, 'success');
     });
   });
+  describe('#checkParticularChildren() - Recursive params', function() {
+    it('basic evaluation', function() {
+      let content = {
+        children: {
+          child1: [{
+            image: 'result'
+          }]
+        }
+      };
+      let parsingResult = javaParser.checkParticularChildren(false, content, "test_01", "child1");
+      assert.equal(!parsingResult, false);
+      assert.equal(Array.isArray(parsingResult), true);
+      assert.equal(typeof parsingResult[0], 'object');
+      assert.equal(parsingResult[0].image, 'result');
+    });
+    it('should successfully recursively call itself', function() {
+      let content = {
+        children: {
+          child1: [{
+            children: {
+              child2: [{
+                children: {
+                  child3: [{
+                    children: {
+                      child4: [{
+                        image: 'result'
+                      }]
+                    }
+                  }]
+                }
+              }]
+            }
+          }]
+        }
+      };
+      let parsingResult = javaParser.checkParticularChildren(false, content, "test_01", "child1", "child2", "child3", "child4");
+      assert.equal(!parsingResult, false);
+      assert.equal(Array.isArray(parsingResult), true);
+      assert.equal(typeof parsingResult[0], 'object');
+      assert.equal(parsingResult[0].image, 'result');
+    });
+  });
 });
