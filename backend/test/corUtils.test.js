@@ -1,6 +1,8 @@
 var
   assert = require('assert'),
-  utils = require('../src/corUtils');
+  utils = require('../src/corUtils.js')
+    // This is just to set logging to warnings level
+    .warningsOnly();
 
 
 describe('corUtils', function() {

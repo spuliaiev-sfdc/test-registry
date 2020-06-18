@@ -1,5 +1,8 @@
 var
   assert = require('assert'),
+  utils = require('../src/corUtils.js')
+    // This is just to set logging to warnings level
+    .warningsOnly(),
   filesIndexer = require('../src/filesIndexer');
 
 function defaultCallBacks() {
@@ -8,19 +11,20 @@ function defaultCallBacks() {
     foldersProcessed: [],
     errors: []
   }
-  callbacksContext.callbackFile = (status, fullPath, fileName) => {
-    // console.log(` File ${status.filesProcessed} ${fileName} in ${fullPath}`);
-    callbacksContext.filesProcessed.push(fileName);
+  callbacksContext.callbackFile = (status, relativePath, fileName) => {
+    utils.info(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);
+    callbacksContext.filesProcessed.push(relativePath);
   };
 
   callbacksContext.callbackFolder = (status, operation) => {
-    // console.log(`Folder ${status.foldersProcessed}, left:  ${status.foldersListToProcess.length}, operation: ${operation} for ${status.currentPath}`);
+    utils.info(`Folder ${status.foldersProcessed}, left:  ${status.foldersListToProcess.length}, operation: ${operation} for ${status.currentPath}`);
     if (operation === 'finish') {
       callbacksContext.foldersProcessed.push(status.currentPath);
     }
+    return true;
   };
   callbacksContext.callbackErr = (status, errorCode, path, ex) => {
-    console.log(`Error ${errorCode} for ${path}`);
+    utils.error(`Error ${errorCode} for ${path}`);
     callbacksContext.errors.push(`Error ${errorCode} for ${path}`);
   };
   return callbacksContext;

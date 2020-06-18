@@ -1,6 +1,8 @@
 var
   assert = require('assert'),
-  utils = require('../src/corUtils.js').warningsOnly(),
+  utils = require('../src/corUtils.js')
+    // This is just to set logging to warnings level
+    .warningsOnly(),
   projectIndexer = require('../src/projectIndexer');
 
 
@@ -11,7 +13,7 @@ describe('projectIndexer', function() {
       let result = projectIndexer.iterateProject(rootFolder);
       assert.deepEqual(result, {
         "foldersProcessedAlready": new Set([]),
-        "foldersToProcess": new Set([]),
+        "foldersProcessed": [],
         "rootFolder": "./test-projects/empty",
         "rootFoldersDetected": 0,
         "rootFilesDetected": 0
@@ -22,10 +24,11 @@ describe('projectIndexer', function() {
       let result = projectIndexer.iterateProject(rootFolder);
       assert.deepEqual(result, {
         "foldersProcessedAlready": new Set([]),
-        "foldersToProcess": new Set([
-          "folder_01",
-          "folder_02"
-        ]),
+        "foldersProcessed": [
+          "folder_02",
+          "folder_02/folder_02_01",
+          "folder_01"
+        ],
         "rootFolder": "./test-projects/small",
         "rootFoldersDetected": 2,
         "rootFilesDetected": 0
@@ -36,7 +39,10 @@ describe('projectIndexer', function() {
       let result = projectIndexer.iterateProject(rootFolder);
       assert.deepEqual(result, {
         "foldersProcessedAlready": new Set(["folder_01"]),
-        "foldersToProcess"       : new Set(["folder_02"]),
+        "foldersProcessed": [
+          "folder_02",
+          "folder_02/folder_02_01"
+        ],
         "lastScanFound": true,
         "rootFolder": "./test-projects/smallPartial",
         "rootFoldersDetected": 2,
@@ -51,7 +57,7 @@ describe('projectIndexer', function() {
         "rootFoldersDetected": 0,
         "rootFilesDetected": 0,
         "foldersProcessedAlready": new Set([]),
-        "foldersToProcess": new Set([])
+        "foldersProcessed": [],
       });
     });
   });

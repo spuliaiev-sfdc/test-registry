@@ -5,7 +5,7 @@ const
 
 const testAnalyser = {
 
-  verifyFileIsTest(rootFolder, relativeFileName, fileContent) {
+  verifyFileIsTest(rootFolder, relativeFileName) {
     let fileInfo = corUtil.analyseFileLocation(rootFolder, relativeFileName);
     fileInfo.testFile = false;
     fileInfo.lang = "unknown";

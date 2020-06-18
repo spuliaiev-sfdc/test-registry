@@ -70,34 +70,36 @@ const filesIndexer = {
           }
         }
         if (stats.isDirectory()) {
-          let files;
-          try {
-            files = fs.readdirSync(path);
-          } catch (ex) {
-            callbackErr(status, "read_dir", path, ex);
-          }
-          for (let i = 0; i < files.length; i++) {
-            let foundFilePath = resolve(path, files[i]);
-            let statFile;
+          if (!callbackFolder || callbackFolder(status, "start")) {
+            let files;
             try {
-              statFile = fs.statSync(foundFilePath);
+              files = fs.readdirSync(path);
             } catch (ex) {
-              if (ex.code === 'ENOENT') {
-                return callbackErr(status, "not_found", foundFilePath);
+              callbackErr(status, "read_dir", path, ex);
+            }
+            for (let i = 0; i < files.length; i++) {
+              let foundFilePath = resolve(path, files[i]);
+              let statFile;
+              try {
+                statFile = fs.statSync(foundFilePath);
+              } catch (ex) {
+                if (ex.code === 'ENOENT') {
+                  return callbackErr(status, "not_found", foundFilePath);
+                } else {
+                  return callbackErr(status, "other", foundFilePath, ex);
+                }
+              }
+              let relativePath = relative(status.root, foundFilePath);
+              if (statFile.isDirectory()) {
+                status.foldersListToProcess.push(relativePath);
               } else {
-                return callbackErr(status, "other", foundFilePath, ex);
+                callbackFile(status, relativePath, files[i]);
+                status.filesProcessed++;
               }
             }
-            let relativePath = relative(status.root, foundFilePath);
-            if (statFile.isDirectory()) {
-              status.foldersListToProcess.push(relativePath);
-            } else {
-              callbackFile(status, relativePath, files[i]);
-              status.filesProcessed++;
-            }
+            status.foldersProcessed++;
+            callbackFolder(status, "finish");
           }
-          status.foldersProcessed++;
-          callbackFolder(status, "finish");
         } else {
           let foundFilePath = resolve(path, files[i]);
           callbackFile(status, foundFilePath, files[i]);
@@ -108,8 +110,9 @@ const filesIndexer = {
       let currentPath = status.foldersListToProcess.pop();
       status.currentPath = currentPath;
       status.currentFullPath = resolve(status.root, currentPath);
-      callbackFolder(status, "start");
-      scanFolder(status.currentFullPath, callbackFile, callbackFolder, callbackErr);
+      if (!callbackFolder || callbackFolder(status, "start")) {
+        scanFolder(status.currentFullPath, callbackFile, callbackFolder, callbackErr);
+      }
     }
     callbackFolder(status, "finish_all");
   },

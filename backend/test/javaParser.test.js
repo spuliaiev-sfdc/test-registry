@@ -1,5 +1,8 @@
 var
   assert = require('assert'),
+  utils = require('../src/corUtils.js')
+    // This is just to set logging to warnings level
+    .warningsOnly(),
   javaParser = require('../src/parsers/javaParser');
 
 const javaSimpleClass = `

@@ -14,6 +14,8 @@ const projectIndexer = {
     this.prepareRootFolderInfo(runInfo);
     utils.info("Execution information", runInfo);
 
+    this.iterateRootFolder(runInfo);
+
     return runInfo;
   },
 
@@ -26,7 +28,7 @@ const projectIndexer = {
     runInfo.rootFoldersDetected = 0;
     runInfo.rootFilesDetected = 0;
     runInfo.foldersProcessedAlready = new Set();
-    runInfo.foldersToProcess = new Set();
+    runInfo.foldersProcessed = [];
 
     let lastScanFile = resolve(runInfo.rootFolder, "lastScan.log");
     if (fs.existsSync(lastScanFile)) {
@@ -52,9 +54,7 @@ const projectIndexer = {
       }
       if (stats.isDirectory()) {
         runInfo.rootFoldersDetected++;
-        if (!runInfo.foldersProcessedAlready.has(entries[i])) {
-          runInfo.foldersToProcess.add(entries[i]);
-        } else {
+        if (runInfo.foldersProcessedAlready.has(entries[i])) {
           utils.trace(`  folder ${entries[i]} is skipped as already processed`);
         }
       } else {
@@ -62,6 +62,50 @@ const projectIndexer = {
       }
     }
     utils.trace(` Root folder scan done`);
+  },
+
+  iterateRootFolder(runInfo) {
+    utils.trace(` Root folder iteration start`);
+
+    this.callbackOnFile = (status, relativePath, fileName) => {
+      utils.trace(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);
+      // callbacksContext.filesProcessed.push(fileName);
+      if (testAnalyser.verifyFileIsTest(runInfo.rootFolder, relativePath)) {
+        status.filesProcessed++;
+        utils.info(` File ${status.filesProcessed} ${relativePath} is Test`);
+      } else {
+        utils.trace(` File ${status.filesProcessed} ${relativePath} is skipped as not Test`);
+      }
+    };
+
+    this.callbackOnFolder = (status, operation) => {
+      if (operation === 'start') {
+        // verify that this folder has not yet been processed
+        let needsToBeProcessed = !runInfo.foldersProcessedAlready.has(status.currentPath);
+        if (needsToBeProcessed) {
+          utils.info(`Folder processing ${status.foldersProcessed} / ${status.foldersListToProcess} : ${status.currentPath}`);
+        } else {
+          utils.trace(`Folder skipped    ${status.foldersProcessed} / ${status.foldersListToProcess} : ${status.currentPath}`);
+        }
+        return needsToBeProcessed;
+      }
+      if (operation === 'finish') {
+        utils.info(`Folder ${status.foldersProcessed} processed, left:  ${status.foldersListToProcess.length}, operation: ${operation} for ${status.currentPath}`);
+        if(status.currentPath !== ".") {
+          // Do not store the current folder in the list of processed folders
+          runInfo.foldersProcessed.push(status.currentPath);
+        }
+      }
+    };
+
+    this.callbackOnError = (status, errorCode, path, ex) => {
+      console.error(`Error ${errorCode} for ${path}`, ex);
+      status.errors.push(`Error ${errorCode} for ${path}`);
+    };
+
+    filesIndexer.iterateFiles(runInfo.rootFolder, this.callbackOnFile, this.callbackOnFolder, this.callbackOnError, 1);
+
+    utils.trace(` Root folder iteration done`);
   }
 };
 
