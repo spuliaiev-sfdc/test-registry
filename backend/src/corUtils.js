@@ -8,38 +8,43 @@ const corUtils = {
   defaultLogPrefix: "",
   logLevelThreshold: 6,
   logColored: false,
-  WARN: 1,
   ERROR: 0,
+  WARN: 1,
   IMPORTANT: 3,
   INFO: 6,
   TRACE: 7,
 
-  warn(message) {
-    corUtils.log(this.WARN, colors.bgYellow.black(message));
+  warningsOnly() {
+    this.logLevelThreshold = corUtils.WARN;
+    return this;
   },
 
-  error(message) {
-    corUtils.log(this.ERROR, colors.bgRed.white(message));
+  warn(message, entity) {
+    corUtils.log(this.WARN, colors.bgYellow.black(message), entity);
   },
 
-  impt(message) {
-    corUtils.log(this.IMPORTANT, colors.bgCyan.black(message));
+  error(message, entity) {
+    corUtils.log(this.ERROR, colors.bgRed.white(message), entity);
+  },
+
+  impt(message, entity) {
+    corUtils.log(this.IMPORTANT, colors.bgCyan.black(message), entity);
   },
 
   imptWithPrefix(prefix, message) {
     corUtils.logWithPrefix(prefix, this.IMPORTANT, colors.bgCyan.black(message));
   },
 
-  info(message) {
-    corUtils.log(this.INFO, message);
+  info(message, entity) {
+    corUtils.log(this.INFO, message, entity);
   },
 
   trace(message, entity) {
     corUtils.log(this.TRACE, message, entity);
   },
 
-  clean(message) {
-    corUtils.log(5, message);
+  clean(message, entity) {
+    corUtils.log(5, message, entity);
   },
 
   log(level, message, entity) {
