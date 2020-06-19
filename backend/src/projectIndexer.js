@@ -29,12 +29,15 @@ const projectIndexer = {
     runInfo.rootFilesDetected = 0;
     runInfo.foldersProcessedAlready = new Set();
     runInfo.foldersProcessed = [];
+    runInfo.errors = [];
 
-    let lastScanFile = resolve(runInfo.rootFolder, "lastScan.log");
-    if (fs.existsSync(lastScanFile)) {
+
+    runInfo.lastScanFile = "lastScan.log";
+    let lastScanFileFullPath = resolve(runInfo.rootFolder, runInfo.lastScanFile);
+    if (fs.existsSync(lastScanFileFullPath)) {
       utils.info(` lastScan.log file is found in the folder will be excluded from reindex. remove the file if full scan needed`);
       runInfo.lastScanFound = true;
-      fs.readFileSync(lastScanFile, "UTF-8").toString().split("\n").map(line => {
+      fs.readFileSync(lastScanFileFullPath, "UTF-8").toString().split("\n").map(line => {
         let trimmed = line.trim();
         if (trimmed.length > 0) {
           runInfo.foldersProcessedAlready.add(trimmed);
@@ -69,10 +72,12 @@ const projectIndexer = {
 
     this.callbackOnFile = (status, relativePath, fileName) => {
       utils.trace(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);
-      // callbacksContext.filesProcessed.push(fileName);
-      if (testAnalyser.verifyFileIsTest(runInfo.rootFolder, relativePath)) {
+
+      let fileInfo = testAnalyser.verifyFileIsTest(runInfo.rootFolder, relativePath);
+      if (fileInfo.testFile) {
+        utils.info(` File ${status.filesProcessed+1} ${relativePath} is Test`);
+        this.runFileAnalysis(runInfo, status, relativePath, fileName, fileInfo);
         status.filesProcessed++;
-        utils.info(` File ${status.filesProcessed} ${relativePath} is Test`);
       } else {
         utils.trace(` File ${status.filesProcessed} ${relativePath} is skipped as not Test`);
       }
@@ -94,18 +99,34 @@ const projectIndexer = {
         if(status.currentPath !== ".") {
           // Do not store the current folder in the list of processed folders
           runInfo.foldersProcessed.push(status.currentPath);
+          // Append the current processed ROOT folder into the list of processed folders in last sync file
+          if (!status.currentPath.includes("/")) {
+            this.addProcessedFolderToScanFile(status.currentPath);
+          }
         }
       }
     };
 
     this.callbackOnError = (status, errorCode, path, ex) => {
       console.error(`Error ${errorCode} for ${path}`, ex);
-      status.errors.push(`Error ${errorCode} for ${path}`);
+      runInfo.errors.push(`Error ${errorCode} for ${path}`);
     };
 
     filesIndexer.iterateFiles(runInfo.rootFolder, this.callbackOnFile, this.callbackOnFolder, this.callbackOnError, 1);
 
     utils.trace(` Root folder iteration done`);
+  },
+  runFileAnalysis(runInfo, status, relativePath, fileName, fileInfo) {
+    utils.trace(` File analysis start ${relativePath}`);
+    if (fileInfo.lang === "java") {
+      testAnalyser.analyseJavaTestFile(fileInfo);
+    }
+
+    utils.trace(` File analysis end ${relativePath}`);
+  },
+  addProcessedFolderToScanFile(currentPath) {
+    let lastScanFileFullPath = resolve(runInfo.rootFolder, runInfo.lastScanFile);
+    fs.appendFileSync(lastScanFileFullPath, status.currentPath+"\n");
   }
 };
 

@@ -1,5 +1,5 @@
 const
-  jp = require('jsonpath'),
+  resolve = require('path').resolve,
   corUtil = require("../corUtils"),
   javaParser = require("./javaParser");
 
@@ -25,9 +25,22 @@ const testAnalyser = {
       fileInfo.testFile = true;
     }
 
-    return fileInfo.testFile;
-  }
+    return fileInfo;
+  },
 
+  analyseJavaTestFile(fileInfo) {
+    corUtil.info(`[analyseJavaTestFile] started file analysis ${fileInfo.relative}`);
+    let fileFullPath = resolve(fileInfo.rootFolder, fileInfo.relative);
+    let javaClassContent = fs.readFileSync(fileFullPath, "UTF-8").toString();
+    let parsingResult = javaParser.parseJavaContent(javaClassContent);
+    if(parsingResult.status === 'success') {
+      corUtil.info(`[analyseJavaTestFile] succeeded file analysis ${fileInfo.relative} Error: ${parsingResult.status}`);
+    } else {
+      corUtil.error(`[analyseJavaTestFile] failed file analysis ${fileInfo.relative} Error: ${parsingResult.status}`);
+    }
+
+    corUtil.info(`[analyseJavaTestFile] finished file analysis ${fileInfo.relative}`);
+  }
 };
 
 
