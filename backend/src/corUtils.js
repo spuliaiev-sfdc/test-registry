@@ -261,6 +261,11 @@ const corUtils = {
     info.relativeToModuleSrc = info.relative.substring(info.moduleSrcPath.length+1);
     info.relativeToModuleRoot = info.relative.substring(info.moduleRoot.length+1);
 
+    // calculate java class FQN if it is java
+    if (info.ext.toLowerCase() === 'java') {
+      info.javaClassFQN = info.relativeToModuleSrc.replace(/\//g,'.').replace(/\.java$/, "");
+    }
+
     // calculate ownership file path
     info.ownershipFilePath = info.modulePath + "/java/resources/ownership.yaml";
     return info;

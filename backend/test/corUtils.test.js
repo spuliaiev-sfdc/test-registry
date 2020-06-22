@@ -57,6 +57,7 @@ describe('corUtils', function() {
         relative: 'moduleName/java/src/ui/mod/impl/overrides/lists/ClassWithLogic.java',
         relativeToModuleRoot: 'java/src/ui/mod/impl/overrides/lists/ClassWithLogic.java',
         relativeToModuleSrc: 'ui/mod/impl/overrides/lists/ClassWithLogic.java',
+        javaClassFQN: 'ui.mod.impl.overrides.lists.ClassWithLogic',
         root: '~/blt/app/main/core',
         testFolder: false,
         ownershipFilePath: 'moduleName/java/resources/ownership.yaml'
@@ -75,6 +76,7 @@ describe('corUtils', function() {
         relative: 'moduleName/test/func/java/src/pk1/pk2/ClassWithOtherLogicTest.java',
         relativeToModuleRoot: 'java/src/pk1/pk2/ClassWithOtherLogicTest.java',
         relativeToModuleSrc: 'pk1/pk2/ClassWithOtherLogicTest.java',
+        javaClassFQN: 'pk1.pk2.ClassWithOtherLogicTest',
         root: '~/blt/app/main/core',
         testFolder: true,
         testKind: 'func'
@@ -94,6 +96,7 @@ describe('corUtils', function() {
         relative: 'moduleName/test/unit/java/src/unit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
         relativeToModuleRoot: 'java/src/unit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
         relativeToModuleSrc: 'pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
+        javaClassFQN: 'pk1.pk2.StrinctUnitClassWithOtherLogicTest',
         root: '~/blt/app/main/core',
         testFolder: true,
         testKind: 'unit'
@@ -113,6 +116,7 @@ describe('corUtils', function() {
           relative: 'moduleName/test/unit/java/src/strictunit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
           relativeToModuleRoot: 'java/src/strictunit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
           relativeToModuleSrc: 'pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
+          javaClassFQN: 'pk1.pk2.StrinctUnitClassWithOtherLogicTest',
           root: '~/blt/app/main/core',
           testFolder: true,
           testKind: 'strictunit'
