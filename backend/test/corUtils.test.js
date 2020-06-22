@@ -28,27 +28,38 @@ describe('corUtils', function() {
     it('Check for xml file', function () {
       let result = utils.analyseFileLocation('~/blt/app/main/core', 'moduleName/java/src/data/report.xml');
       assert.deepEqual(result , {
-        'root': '~/blt/app/main/core',
-        'relative': 'moduleName/java/src/data/report.xml',
-        'module': 'moduleName',
-        'modulePath': 'moduleName',
-        'ext': 'xml',
-        'filename': 'report',
-        'testFolder': false,
-        'ownershipFilePath': 'moduleName/java/resources/ownership.yaml'
+        root: '~/blt/app/main/core',
+        relative: 'moduleName/java/src/data/report.xml',
+        module: 'moduleName',
+        modulePath: 'moduleName',
+        moduleRoot: 'moduleName',
+        moduleSrcPath: 'moduleName/java/src',
+        ownershipFilePath: 'moduleName/java/resources/ownership.yaml',
+        relative: 'moduleName/java/src/data/report.xml',
+        relativeToModuleRoot: 'java/src/data/report.xml',
+        relativeToModuleSrc: 'data/report.xml',
+        ext: 'xml',
+        filename: 'report',
+        testFolder: false,
+        ownershipFilePath: 'moduleName/java/resources/ownership.yaml'
       });
     });
     it('Check for java prod file', function () {
       let result = utils.analyseFileLocation('~/blt/app/main/core', 'moduleName/java/src/ui/mod/impl/overrides/lists/ClassWithLogic.java');
       assert.deepEqual(result , {
-        'root': '~/blt/app/main/core',
-        'relative': 'moduleName/java/src/ui/mod/impl/overrides/lists/ClassWithLogic.java',
-        'module': 'moduleName',
-        'modulePath': 'moduleName',
-        'ext': 'java',
-        'filename': 'ClassWithLogic',
-        'testFolder': false,
-        'ownershipFilePath': 'moduleName/java/resources/ownership.yaml'
+        ext: 'java',
+        filename: 'ClassWithLogic',
+        module: 'moduleName',
+        modulePath: 'moduleName',
+        moduleRoot: 'moduleName',
+        moduleSrcPath: 'moduleName/java/src',
+        ownershipFilePath: 'moduleName/java/resources/ownership.yaml',
+        relative: 'moduleName/java/src/ui/mod/impl/overrides/lists/ClassWithLogic.java',
+        relativeToModuleRoot: 'java/src/ui/mod/impl/overrides/lists/ClassWithLogic.java',
+        relativeToModuleSrc: 'ui/mod/impl/overrides/lists/ClassWithLogic.java',
+        root: '~/blt/app/main/core',
+        testFolder: false,
+        ownershipFilePath: 'moduleName/java/resources/ownership.yaml'
       });
     });
     it('Check for java func test file', function () {
@@ -78,11 +89,11 @@ describe('corUtils', function() {
         module: 'moduleName',
         modulePath: 'moduleName',
         moduleRoot: 'moduleName/test/unit',
-        moduleSrcPath: 'moduleName/test/unit/java/src',
+        moduleSrcPath: 'moduleName/test/unit/java/src/unit',
         ownershipFilePath: 'moduleName/java/resources/ownership.yaml',
         relative: 'moduleName/test/unit/java/src/unit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
         relativeToModuleRoot: 'java/src/unit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
-        relativeToModuleSrc: 'unit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
+        relativeToModuleSrc: 'pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
         root: '~/blt/app/main/core',
         testFolder: true,
         testKind: 'unit'
@@ -97,11 +108,11 @@ describe('corUtils', function() {
           module: 'moduleName',
           modulePath: 'moduleName',
           moduleRoot: 'moduleName/test/unit',
-          moduleSrcPath: 'moduleName/test/unit/java/src',
+          moduleSrcPath: 'moduleName/test/unit/java/src/strictunit',
           ownershipFilePath: 'moduleName/java/resources/ownership.yaml',
           relative: 'moduleName/test/unit/java/src/strictunit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
           relativeToModuleRoot: 'java/src/strictunit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
-          relativeToModuleSrc: 'strictunit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
+          relativeToModuleSrc: 'pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
           root: '~/blt/app/main/core',
           testFolder: true,
           testKind: 'strictunit'

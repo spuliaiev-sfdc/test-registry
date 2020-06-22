@@ -222,15 +222,22 @@ const corUtils = {
         relative: relativeFileName,
         module: parts[0],
         modulePath: parts[0],
+        moduleRoot: parts[0],
         ext: this.getFileExtension(relativeFileName),
         filename: this.getFileNameNoExt(relativeFileName)
     };
+
     info.testFolder = parts[1] === "test";
     if (info.testFolder) {
+      info.moduleSrcPath = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+parts[3]+"/"+parts[4];
+      info.moduleRoot = parts[0]+"/"+parts[1]+"/"+parts[2];
+
       if (parts[2] === "func") {
         info.testKind = "func";
       } else {
+        // check if this is unit test
         if (parts[2] === "unit") {
+          // clarify the kind of unit test - generic or strict
           if (parts[5] === "unit") {
             info.testKind = "unit";
           } else {
@@ -240,16 +247,20 @@ const corUtils = {
               info.testKind = "unknown-unit-test";
             }
           }
+          // add the kind of unit test
+          info.moduleSrcPath = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+parts[3]+"/"+parts[4]+"/"+parts[5];
         } else {
           info.testKind = "unknown";
         }
       }
-      info.moduleSrcPath = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+parts[3]+"/"+parts[4];
-      info.moduleRoot = parts[0]+"/"+parts[1]+"/"+parts[2];
-      // remove the module path and following slash
-      info.relativeToModuleSrc = info.relative.substring(info.moduleSrcPath.length+1);
-      info.relativeToModuleRoot = info.relative.substring(info.moduleRoot.length+1);
+    } else {
+      info.moduleSrcPath = parts[0]+"/"+parts[1]+"/"+parts[2];
+      info.moduleRoot = parts[0];
     }
+    // remove the module path and following slash
+    info.relativeToModuleSrc = info.relative.substring(info.moduleSrcPath.length+1);
+    info.relativeToModuleRoot = info.relative.substring(info.moduleRoot.length+1);
+
     // calculate ownership file path
     info.ownershipFilePath = info.modulePath + "/java/resources/ownership.yaml";
     return info;

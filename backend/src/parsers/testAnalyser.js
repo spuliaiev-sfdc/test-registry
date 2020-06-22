@@ -2,7 +2,8 @@ const
   resolve = require('path').resolve,
   fs = require('fs'),
   corUtil = require("../corUtils"),
-  javaParser = require("./javaParser");
+  javaParser = require("./javaParser"),
+  ownersFileUtil = require("../utils/ownersFileUtil");
 
 const testAnalyser = {
 
@@ -46,11 +47,8 @@ const testAnalyser = {
   analyseOwnershipFile(fileInfo) {
     corUtil.info(`[analyseJavaTestFile] started Ownership file analysis for ${fileInfo.relative}`);
     corUtil.trace(`[analyseJavaTestFile]  Ownership file ${fileInfo.ownershipFilePath}`);
-    if (!fs.existsSync(fileInfo.ownershipFilePath)) {
-      corUtil.error(`[analyseJavaTestFile]  Ownership file not found ${fileInfo.ownershipFilePath}`);
-      return false;
-    }
-
+    let result = ownersFileUtil.getFileOwningTeam(fileInfo);
+    fileInfo.ownershipInfo = result;
   }
 };
 
