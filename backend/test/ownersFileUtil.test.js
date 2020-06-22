@@ -34,7 +34,8 @@ describe('ownersFileUtil', function() {
       });
     });
     it('One team ownership file - otherFile', function () {
-      let realFileInfo = utils.analyseFileLocation('./test-projects/small', 'folder_02/java/src/package_02_01/file_02_01-01.java');
+      let fileName = 'folder_02/java/src/package_02_01/file_02_01-01.java';
+      let realFileInfo = utils.analyseFileLocation('./test-projects/small', fileName);
       // change the ownership file info to the testing one
       realFileInfo.ownershipFilePath = '../ownershipFileSamples/oneTeam.yaml';
       let result = ownersFileUtil.getFileOwningTeam(realFileInfo);
@@ -44,32 +45,29 @@ describe('ownersFileUtil', function() {
         success: true
       });
     });
-  });
-  it('One team ownership file - fullPath', function () {
-    let fileName = 'oneTeam.yaml';
-    let result = ownersFileUtil.readAndVerifyOwnershipFile(rootFolder, fileName);
-    assert.deepEqual(result,{
-      'content': {
-        'module': {
-          'groupId': 'my.projects',
-          'artifactId': 'folder_02',
-          'isTest': false
-        },
-        'ownership': [
-          {
-            'team': 'Main Team 01 Name'
-          },
-          {
-            'team': 'Other Team 02 Name',
-            'paths': [
-              'java/src/package_02_01/file_02_01-02.java'
-            ]
-          }
-        ]
-      },
-      errors: [],
-      success: true,
-      defaultOwningTeam: 'Main Team 01 Name'
+    it('Two teams ownership file - Wild - Team 02', function () {
+      let fileName = 'folder_02/java/src/file_02-01.java';
+      let realFileInfo = utils.analyseFileLocation('./test-projects/small', fileName);
+      // change the ownership file info to the testing one
+      realFileInfo.ownershipFilePath = '../ownershipFileSamples/twoTeams.yaml';
+      let result = ownersFileUtil.getFileOwningTeam(realFileInfo);
+      assert.deepEqual(result, {
+        errors: [],
+        owningTeam: 'Another Team 02 Name',
+        success: true
+      }, "Should be Team 02 as it has more precise path");
+    });
+    it('Two teams ownership file - Wild - Team 03', function () {
+      let fileName = 'folder_02/java/src/package_02_01/file_02_01-02.java';
+      let realFileInfo = utils.analyseFileLocation('./test-projects/small', fileName);
+      // change the ownership file info to the testing one
+      realFileInfo.ownershipFilePath = '../ownershipFileSamples/twoTeams.yaml';
+      let result = ownersFileUtil.getFileOwningTeam(realFileInfo);
+      assert.deepEqual(result, {
+        errors: [],
+        owningTeam: 'The Other Team 03 Name',
+        success: true
+      }, "Should be Team 03 as it has more precise path");
     });
   });
   describe('#readAndVerifyOwnershipFile()', function() {
@@ -116,32 +114,32 @@ describe('ownersFileUtil', function() {
         defaultOwningTeam: 'Team 01 Name'
       });
     });
-  });
-  it('One team ownership file - fullPath', function () {
-    let fileName = 'oneTeam.yaml';
-    let result = ownersFileUtil.readAndVerifyOwnershipFile(rootFolder, fileName);
-    assert.deepEqual(result,{
-      content: {
-        module: {
-          groupId: 'my.projects',
-          artifactId: 'folder_02',
-          isTest: false
-        },
-        ownership: [
-          {
-            team: 'Main Team 01 Name'
+    it('One team ownership file - fullPath', function () {
+      let fileName = 'oneTeam.yaml';
+      let result = ownersFileUtil.readAndVerifyOwnershipFile(rootFolder, fileName);
+      assert.deepEqual(result,{
+        content: {
+          module: {
+            groupId: 'my.projects',
+            artifactId: 'folder_02',
+            isTest: false
           },
-          {
-            team: 'Other Team 02 Name',
-            paths: [
-              'java/src/package_02_01/file_02_01-02.java'
-            ]
-          }
-        ]
-      },
-      errors: [],
-      success: true,
-      defaultOwningTeam: 'Main Team 01 Name'
+          ownership: [
+            {
+              team: 'Main Team 01 Name'
+            },
+            {
+              team: 'Other Team 02 Name',
+              paths: [
+                'java/src/package_02_01/file_02_01-02.java'
+              ]
+            }
+          ]
+        },
+        errors: [],
+        success: true,
+        defaultOwningTeam: 'Main Team 01 Name'
+      });
     });
   });
 });
