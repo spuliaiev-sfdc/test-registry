@@ -41,41 +41,44 @@ const ownersFileUtil = {
       utils.log(`      Default team: ${owningTeam}`);
       result.content = currentOwnersFileContent;
       result.success = true;
-      result.owningTeam = owningTeam;
+      result.defaultOwningTeam = owningTeam;
     }
     return result;
   },
 
-  getFileOwningTeam(param, fileInfo) {
-    utils.log("");
-    utils.log("runOwnersFileCheck step");
-    utils.log("");
+  getFileOwningTeam(fileInfo) {
+    let result = {
+      owningTeam: null,
+      errors: [],
+      success: null
+    };
+    utils.trace("[getFileOwningTeam] step");
 
     let currentOwnersFile = fileInfo.ownershipFilePath;
-    let currentModuleRoot;
+    let currentModuleRoot = fileInfo.modulePath;
 
     // TODO compare with fileInfo.moduleRoot
-    currentModuleRoot = currentOwnersFile.replace("java/resources/ownership.yaml", "");
-    utils.log("");
-    utils.log(`   Ownership file:\t${currentOwnersFile}`);
+    utils.trace(`[getFileOwningTeam] Ownership file:\t${currentOwnersFile}`);
 
     // load the Ownership file
-    let ownerFileInfo = this.readAndVerifyOwnershipFile(fileInfo.rootFolder, fileInfo.relatedPath);
+    let ownerFileInfo = this.readAndVerifyOwnershipFile(fileInfo.root, fileInfo.ownershipFilePath);
     if (!ownerFileInfo.success) {
       utils.log(`   Ownership file is wrong:\t${ownerFileInfo.errors}`);
-      return false;
+      result.errors.push(`Ownership file is wrong:\t${ownerFileInfo.errors}`);
+      result.errors.push(ownerFileInfo.errors);
+      result.success = false;
+      return result;
     }
     let currentOwnersFileContent = ownerFileInfo.content;
-
-    utils.log(10, "        > " + line);
-    let fileRelativeToCore = fileInfo.relative;
-    let fileRelativeToModule = fileInfo.relative;
     if (!currentOwnersFileContent) {
       utils.error(`       Ownership file is missing for ${fileRelativeToCore}`)
       return;
     }
-    if (fileRelativeToCore.startsWith(currentModuleRoot)) {
-      fileRelativeToModule = fileRelativeToCore.substring(currentModuleRoot.length);
+
+    let fileRelativeToCore = fileInfo.relative;
+    let fileRelativeToModule = fileInfo.relative;
+    if (fileRelativeToCore.startsWith(fileInfo.modulePath)) {
+      fileRelativeToModule = fileRelativeToCore.substring(fileInfo.modulePath.length+1);
     } else {
       utils.error(`     File is not in the current ownership module! Module: ${currentModuleRoot} , file ${fileRelativeToCore}`)
     }
@@ -83,13 +86,15 @@ const ownersFileUtil = {
     let owningTeam = ownersFileUtil.evaluateOwnerFileRules(currentOwnersFile, currentOwnersFileContent, currentModuleRoot, fileRelativeToModule);
 
     if (owningTeam) {
-      utils.imptWithPrefix("" , `     ${owningTeam} \t ${fileRelativeToModule} \t ${fileOperation} \t ${changeOwner} ${suffixColumns} \t ${fileRelativeToCore}`);
+      utils.imptWithPrefix("" , `     ${owningTeam} \t ${fileRelativeToModule}\t ${fileRelativeToCore}`);
     } else {
-      utils.warn(`     Owning team not defined for operation \t ${fileOperation} \t ${changeOwner} ${suffixColumns} \t ${fileRelativeToCore}`)
+      utils.warn(`     Owning team not defined for operation \t ${fileRelativeToCore}`)
       owningTeam = "UNASSIGNED";
     }
+    result.owningTeam = owningTeam;
+    result.success = true;
 
-    return owningTeam;
+    return result;
   },
 
   evaluateOwnerFileRules(currentOwnersFile, currentOwnersFileContent, currentModuleRoot, fileRelativeToModule) {

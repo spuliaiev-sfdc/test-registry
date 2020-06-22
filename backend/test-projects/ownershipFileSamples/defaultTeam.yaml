@@ -9,7 +9,7 @@
 
 module:
   groupId: my.projects
-  artifactId: module_01
+  artifactId: folder_02
   isTest: false
 
 ownership:

@@ -38,7 +38,7 @@ describe('filesIndexer', function() {
       let executionStatus = defaultCallBacks();
       filesIndexer.iterateFiles(path, executionStatus.callbackFile, executionStatus.callbackFolder, executionStatus.callbackErr, concurrency);
       assert.equal(executionStatus.filesProcessed.length, 5);
-      assert.equal(executionStatus.foldersProcessed.length, 4);
+      assert.equal(executionStatus.foldersProcessed.length, 8);
       assert.equal(executionStatus.errors.length, 0);
     });
   });

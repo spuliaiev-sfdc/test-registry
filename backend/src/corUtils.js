@@ -244,7 +244,11 @@ const corUtils = {
           info.testKind = "unknown";
         }
       }
-      info.modulePath = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+parts[3];
+      info.moduleSrcPath = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+parts[3]+"/"+parts[4];
+      info.moduleRoot = parts[0]+"/"+parts[1]+"/"+parts[2];
+      // remove the module path and following slash
+      info.relativeToModuleSrc = info.relative.substring(info.moduleSrcPath.length+1);
+      info.relativeToModuleRoot = info.relative.substring(info.moduleRoot.length+1);
     }
     // calculate ownership file path
     info.ownershipFilePath = info.modulePath + "/java/resources/ownership.yaml";
