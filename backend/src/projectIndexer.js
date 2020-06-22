@@ -120,6 +120,7 @@ const projectIndexer = {
     utils.trace(` File analysis start ${relativePath}`);
     if (fileInfo.lang === "java") {
       testAnalyser.analyseJavaTestFile(fileInfo);
+      testAnalyser.analyseOwnershipFile(fileInfo);
     }
 
     utils.trace(` File analysis end ${relativePath}`);

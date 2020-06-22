@@ -1,0 +1,20 @@
+#
+# This file describes which scrum team(s) own this module.  More info at:
+#
+# https://sfdc.co/ownershipYaml
+#
+# IMPORTANT: This file may occasionally get reprocessed in a manner that
+# is not guaranteed to preserve formatting or yaml comments.
+#
+
+module:
+  groupId: my.projects
+  artifactId: module_01
+  isTest: false
+
+ownership:
+- team: Main Team 01 Name
+
+- team: Other Team 02 Name
+  paths:
+    - java/src/pack1/subpack1/File01.java

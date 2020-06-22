@@ -13,6 +13,7 @@ const corUtils = {
   IMPORTANT: 3,
   INFO: 6,
   TRACE: 7,
+  LOWEST:10,
 
   warningsOnly() {
     this.logLevelThreshold = corUtils.WARN;

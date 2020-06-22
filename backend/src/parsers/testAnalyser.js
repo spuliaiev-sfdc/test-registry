@@ -1,5 +1,6 @@
 const
   resolve = require('path').resolve,
+  fs = require('fs'),
   corUtil = require("../corUtils"),
   javaParser = require("./javaParser");
 
@@ -29,7 +30,7 @@ const testAnalyser = {
   },
 
   analyseJavaTestFile(fileInfo) {
-    corUtil.info(`[analyseJavaTestFile] started file analysis ${fileInfo.relative}`);
+    corUtil.info(`[analyseJavaTestFile] started Java file analysis ${fileInfo.relative}`);
     let fileFullPath = resolve(fileInfo.rootFolder, fileInfo.relative);
     let javaClassContent = fs.readFileSync(fileFullPath, "UTF-8").toString();
     let parsingResult = javaParser.parseJavaContent(javaClassContent);
@@ -40,6 +41,16 @@ const testAnalyser = {
     }
 
     corUtil.info(`[analyseJavaTestFile] finished file analysis ${fileInfo.relative}`);
+  },
+
+  analyseOwnershipFile(fileInfo) {
+    corUtil.info(`[analyseJavaTestFile] started Ownership file analysis for ${fileInfo.relative}`);
+    corUtil.trace(`[analyseJavaTestFile]  Ownership file ${fileInfo.ownershipFilePath}`);
+    if (!fs.existsSync(fileInfo.ownershipFilePath)) {
+      corUtil.error(`[analyseJavaTestFile]  Ownership file not found ${fileInfo.ownershipFilePath}`);
+      return false;
+    }
+
   }
 };
 
