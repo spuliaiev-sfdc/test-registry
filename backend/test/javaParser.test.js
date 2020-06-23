@@ -14,46 +14,36 @@ public class HelloWorldExample{
 `;
 
 const javaTestClass = `
-package conversation.library;
+package some.production.folder;
 
 import java.sql.PreparedStatement;
 import java.util.List;
 import annotation.ScrumTeam;
 
 /**
- * Tests various insert scenarios for the sharing record collection entities
+ * Tests various insert scenarios for the some production java class
  *
  * @author developer.name
- * @since 228
+ * @since version.01
  */
 @ScrumTeam("Team_01")
-public class SharingRecordCollectionInsertFTest extends SharingRecordCollectionBaseTest{
+public class SimpleJavaTest extends JavaBaseTest {
 
     /**
-     * Tests that the number of entries field on sharing record collection
-     * is reflected correctly.
-     * @expectedResults The sharing record collection with 2 items reports there are 2 items
+     * Tests some initial method 01 in the prod class
      */
     @TestLabels(IgnoreFailureReason.IN_DEV)
-    public void testNumEntriesCorrect() throws Exception{
-        String srcId = createSharingRecordCollection(standardUser);
-        String voiceCallId = conversationEnablementTestService.createVoiceCallAndVoiceCallRecordingAsUser(standardUser);
-        String voiceCallId2 = conversationEnablementTestService.createVoiceCallAndVoiceCallRecordingAsUser(standardUser);
-        createSharingRecordCollectionItem(srcId, voiceCallId);
+    public void testFirstMethod_01() throws Exception{
+        // Do some testing 01
     }
 
     /**
-     * Tests that bad data on sharing record collection does not prevent the save of the other
-     * sharing record collection item on bulk save
-     * @expectedResults other item saved successfully
-     * @throws Exception
+     * Tests some initial method 02 in the prod class
      */
     @ScrumTeam("Team_02")
     @TestLabelsArray({ IgnoreFailureReason.Label1, IgnoreFailureReason.Label2 })
-    public void testPartialSharingRecordCollectionItemSave() throws Exception {
-        String badCollection = createSharingRecordCollection(standardUser);
-        removeGroupIdFromCollection(badCollection);
-        String goodCollection = createSharingRecordCollection(standardUser);
+    public void testSecondMethod_02() throws Exception {
+        // Do some other testing 02
     }
 
 }
@@ -91,18 +81,18 @@ describe('javaParser', function() {
   describe('#parseJavaContent() - Simple Class', function() {
     it('should successfully parse simple Java', function() {
       let parsingResult = javaParser.parseJavaContent(javaSimpleClass);
-      assert.equal(parsingResult.status, 'success');
+      assert.equal(parsingResult.success, true);
     });
   });
   describe('#parseJavaContent() - Simple Test Class', function() {
     it('should successfully parse simple Java with JavaDoc', function() {
       let parsingResult = javaParser.parseJavaContent(javaDocClass);
-      assert.equal(parsingResult.status, 'success');
+      assert.equal(parsingResult.success, true);
       assert.deepEqual(parsingResult.info, {
         "classes": [{
           "annotations": [{
             "name": "Annotation",
-            "value": '"Value01"'
+            "value": 'Value01'
           }],
           "classType": "class",
           "superclass": "SuperClass",
@@ -132,34 +122,25 @@ describe('javaParser', function() {
     });
     it('should successfully parse simple Test Java', function() {
       let parsingResult = javaParser.parseJavaContent(javaTestClass);
-      assert.equal(parsingResult.status, 'success');
-      assert.deepEqual(parsingResult.info, {
-        "classes": [{
-          "annotations": [{"name": "ScrumTeam", "value": '"Team_01"'}],
-          "classType": "class",
-          "superclass": "SharingRecordCollectionBaseTest",
-          "className": "SharingRecordCollectionInsertFTest",
-          "other": [],
-          "javadoc": {
-            "author": "developer.name",
-            "since": "228"
+      assert.equal(parsingResult.success, true);
+      assert.deepEqual(parsingResult.javaOwnershipInfo, {
+        classInfo: {
+          owners: {
+            "Team_01": ["ScrumTeam annotation"]
+          }
+        },
+        methodsInfo: {
+          "testFirstMethod_01": {
+            name: "testFirstMethod_01",
+            owners: {}
           },
-          "fields": [],
-          "methods": [{
-            "kind": "method",
-            "name": "testNumEntriesCorrect",
-            "annotations": [
-              {"name": "TestLabels", "value": "IgnoreFailureReason.IN_DEV"}
-            ]
-          }, {
-            "kind": "method",
-            "name": "testPartialSharingRecordCollectionItemSave",
-            "annotations": [
-              {"name": "ScrumTeam", "value": '"Team_02"'},
-              {"name": "TestLabelsArray","value": "[IgnoreFailureReason.Label1, IgnoreFailureReason.Label2]"}
-            ]
-          }]
-        }]
+          "testSecondMethod_02": {
+            name: "testSecondMethod_02",
+            owners: {
+              "Team_02": ["ScrumTeam annotation"]
+            }
+          }
+        }
       });
     });
   });

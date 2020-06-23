@@ -76,7 +76,7 @@ const projectIndexer = {
       let fileInfo = testAnalyser.verifyFileIsTest(runInfo.rootFolder, relativePath);
       if (fileInfo.testFile) {
         utils.info(` File ${status.filesProcessed+1} ${relativePath} is Test`);
-        this.runFileAnalysis(runInfo, status, relativePath, fileName, fileInfo);
+        this.runFileAnalysis(runInfo, status, fileInfo);
         status.filesProcessed++;
       } else {
         utils.trace(` File ${status.filesProcessed} ${relativePath} is skipped as not Test`);
@@ -116,15 +116,18 @@ const projectIndexer = {
 
     utils.trace(` Root folder iteration done`);
   },
-  runFileAnalysis(runInfo, status, relativePath, fileName, fileInfo) {
-    utils.trace(` File analysis start ${relativePath}`);
+
+  runFileAnalysis(runInfo, status, fileInfo) {
+    utils.trace(` File analysis start ${fileInfo.relative}`);
     if (fileInfo.lang === "java") {
       testAnalyser.analyseJavaTestFile(fileInfo);
       testAnalyser.analyseOwnershipFile(fileInfo);
     }
 
-    utils.trace(` File analysis end ${relativePath}`);
+    utils.trace(` File analysis end ${fileInfo.relative}`);
+    return fileInfo;
   },
+
   addProcessedFolderToScanFile(currentPath) {
     let lastScanFileFullPath = resolve(runInfo.rootFolder, runInfo.lastScanFile);
     fs.appendFileSync(lastScanFileFullPath, status.currentPath+"\n");

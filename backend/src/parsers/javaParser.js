@@ -58,7 +58,10 @@ const javaParser = {
   parseJavaContent(fileContent) {
     let content = parser.parse(fileContent);
     let info = this.extractClassesInfo(content, fileContent);
-    return { status: 'success', content, info };
+
+    let javaOwnershipInfo = this.extractOwnershipInfo(info, content);
+
+    return { success: true, content, info, javaOwnershipInfo };
   },
 
   getFirstClassDeclaration(content) {
@@ -216,6 +219,7 @@ const javaParser = {
     };
 
     annotationInfo.value = this.getParticularChildValue(false, annotation, "extractAnnotationInfo", "elementValue");
+    annotationInfo.value = annotationInfo.value.replace(/"/g,'');
 
     return annotationInfo;
   },
@@ -268,6 +272,54 @@ const javaParser = {
       }
     }
     return javadoc;
+  },
+
+  addOwnersInfo(ownersCollection, teamName, sourceDescription) {
+    let existingTeam = ownersCollection[teamName];
+    if (!existingTeam) {
+      ownersCollection[teamName] = [sourceDescription];
+    } else {
+      ownersCollection[teamName].push(sourceDescription);
+    }
+  },
+  checkForAnnotations(annotations, ownersInfo){
+    if (annotations && annotations.length > 0){
+      for(let i = 0; i < annotations.length; i++) {
+        let annotation = annotations[i];
+        if (annotation.name.endsWith("ScrumTeam")) {
+          this.addOwnersInfo(ownersInfo, annotation.value, "ScrumTeam annotation");
+        }
+      }
+    }
+  },
+
+  extractOwnershipInfo(info, content) {
+    let javaOwn = {
+      classInfo: {
+        owners: {}
+      },
+      methodsInfo: {}
+    };
+    if (info.classes && info.classes.length > 0) {
+      let classInfo = info.classes[0];
+      this.checkForAnnotations(classInfo.annotations, javaOwn.classInfo.owners);
+
+      if (classInfo.javadoc && classInfo.javadoc.team) {
+        this.addOwnersInfo(javaOwn.classInfo.owners, classInfo.javadoc.team, "ScrumTeam javadoc");
+      }
+      if (classInfo.methods && classInfo.methods.length > 0) {
+        for(let i=0; i < classInfo.methods.length; i++) {
+          let method = classInfo.methods[i];
+          let methodInfo = {
+            name: method.name,
+            owners: {}
+          };
+          javaOwn.methodsInfo[method.name] = methodInfo;
+          this.checkForAnnotations(method.annotations, methodInfo.owners);
+        }
+      }
+    }
+    return javaOwn;
   }
 };
 

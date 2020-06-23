@@ -267,7 +267,7 @@ const corUtils = {
     }
 
     // calculate ownership file path
-    info.ownershipFilePath = info.modulePath + "/java/resources/ownership.yaml";
+    info.ownershipFilePath = info.moduleRoot + "/java/resources/ownership.yaml";
     return info;
   }
 

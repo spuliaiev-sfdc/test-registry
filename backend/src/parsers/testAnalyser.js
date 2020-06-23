@@ -32,23 +32,24 @@ const testAnalyser = {
 
   analyseJavaTestFile(fileInfo) {
     corUtil.info(`[analyseJavaTestFile] started Java file analysis ${fileInfo.relative}`);
-    let fileFullPath = resolve(fileInfo.rootFolder, fileInfo.relative);
+    let fileFullPath = resolve(fileInfo.root, fileInfo.relative);
     let javaClassContent = fs.readFileSync(fileFullPath, "UTF-8").toString();
     let parsingResult = javaParser.parseJavaContent(javaClassContent);
-    if(parsingResult.status === 'success') {
-      corUtil.info(`[analyseJavaTestFile] succeeded file analysis ${fileInfo.relative} Error: ${parsingResult.status}`);
+    if(parsingResult.success === true) {
+      corUtil.info(`[analyseJavaTestFile] succeeded file analysis ${fileInfo.relative} Error: ${parsingResult.success}`);
     } else {
-      corUtil.error(`[analyseJavaTestFile] failed file analysis ${fileInfo.relative} Error: ${parsingResult.status}`);
+      corUtil.error(`[analyseJavaTestFile] failed file analysis ${fileInfo.relative} Error: ${parsingResult.success}`);
     }
+    fileInfo.javaInfo = parsingResult;
 
     corUtil.info(`[analyseJavaTestFile] finished file analysis ${fileInfo.relative}`);
+    return parsingResult;
   },
 
   analyseOwnershipFile(fileInfo) {
     corUtil.info(`[analyseJavaTestFile] started Ownership file analysis for ${fileInfo.relative}`);
     corUtil.trace(`[analyseJavaTestFile]  Ownership file ${fileInfo.ownershipFilePath}`);
-    let result = ownersFileUtil.getFileOwningTeam(fileInfo);
-    fileInfo.ownershipInfo = result;
+    return ownersFileUtil.getFileOwningTeam(fileInfo);
   }
 };
 
