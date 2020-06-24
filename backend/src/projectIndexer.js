@@ -7,9 +7,10 @@ const
 
 const projectIndexer = {
 
-  iterateProject(rootFolder) {
+  iterateProject(rootFolder, reportFolder) {
     let runInfo = {
-      rootFolder
+      rootFolder,
+      reportFolder: reportFolder
     };
     this.prepareRootFolderInfo(runInfo);
     utils.info("Execution information", runInfo);
@@ -122,6 +123,8 @@ const projectIndexer = {
     if (fileInfo.lang === "java") {
       testAnalyser.analyseJavaTestFile(fileInfo);
       testAnalyser.analyseOwnershipFile(fileInfo);
+      testAnalyser.analyseFTestInventoryFile(fileInfo);
+      fileInfo.report = testAnalyser.writeReport(fileInfo, runInfo.reportFolder);
     }
 
     utils.trace(` File analysis end ${fileInfo.relative}`);

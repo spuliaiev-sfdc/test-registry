@@ -275,6 +275,30 @@ const javaParser = {
   },
 
   addOwnersInfo(ownersCollection, teamName, sourceDescription) {
+    if (Array.isArray(sourceDescription)) {
+      // If array - process one by one
+      sourceDescription.forEach( description => this.addOwnersInfo(ownersCollection, teamName, description) );
+      return;
+    }
+    if (typeof teamName === "object") {
+      let ownersMap = teamName;
+      // If object - process one by one as it is a map of owners
+      for (const teamOwner in ownersMap) {
+        let descriptions = ownersMap[teamOwner];
+        this.addOwnersInfo(javaOwn.classInfo.ownersPartial, teamOwner, descriptions);
+      }
+      return;
+    }
+    if (typeof teamName === "object") {
+      let ownersMap = teamName;
+      // If object - process one by one as it is a map of owners
+      for (const teamOwner in ownersMap) {
+        let descriptions = ownersMap[teamOwner];
+        this.addOwnersInfo(javaOwn.classInfo.ownersPartial, teamOwner, descriptions);
+      }
+      return;
+    }
+    // If one - process the addition
     let existingTeam = ownersCollection[teamName];
     if (!existingTeam) {
       ownersCollection[teamName] = [sourceDescription];
@@ -282,12 +306,12 @@ const javaParser = {
       ownersCollection[teamName].push(sourceDescription);
     }
   },
-  checkForAnnotations(annotations, ownersInfo){
+  checkForAnnotations(annotations, ownersInfo, description){
     if (annotations && annotations.length > 0){
       for(let i = 0; i < annotations.length; i++) {
         let annotation = annotations[i];
         if (annotation.name.endsWith("ScrumTeam")) {
-          this.addOwnersInfo(ownersInfo, annotation.value, "ScrumTeam annotation");
+          this.addOwnersInfo(ownersInfo, annotation.value, description);
         }
       }
     }
@@ -296,13 +320,14 @@ const javaParser = {
   extractOwnershipInfo(info, content) {
     let javaOwn = {
       classInfo: {
-        owners: {}
+        owners: {},
+        ownersPartial: {} // for example some of the methods are owned by a different team
       },
       methodsInfo: {}
     };
     if (info.classes && info.classes.length > 0) {
       let classInfo = info.classes[0];
-      this.checkForAnnotations(classInfo.annotations, javaOwn.classInfo.owners);
+      this.checkForAnnotations(classInfo.annotations, javaOwn.classInfo.owners, "ScrumTeam class annotation");
 
       if (classInfo.javadoc && classInfo.javadoc.team) {
         this.addOwnersInfo(javaOwn.classInfo.owners, classInfo.javadoc.team, "ScrumTeam javadoc");
@@ -315,9 +340,17 @@ const javaParser = {
             owners: {}
           };
           javaOwn.methodsInfo[method.name] = methodInfo;
-          this.checkForAnnotations(method.annotations, methodInfo.owners);
+          this.checkForAnnotations(method.annotations, methodInfo.owners, "ScrumTeam method annotation");
         }
       }
+      for (const methodName in javaOwn.methodsInfo) {
+        let owners = javaOwn.methodsInfo[methodName].owners;
+        for (const methodOwner in owners) {
+          let descriptions = owners[methodOwner];
+          this.addOwnersInfo(javaOwn.classInfo.ownersPartial, methodOwner, descriptions);
+        }
+      }
+
     }
     return javaOwn;
   }

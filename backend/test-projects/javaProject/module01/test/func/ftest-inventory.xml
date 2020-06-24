@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ftests xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" name="All functional tests" xsi:noNamespaceSchemaLocation="../../../sfdc-test/func/ftest.xsd">
+    <category name="Example Tests">
+        <category name="TestsCategory01" scrumteam="OtherTeam">
+            <test class="some.production.folder.SimpleJavaTest"/>
+            <test class="some.production.folder.SecondJavaTest"/>
+            <test class="some.production.folder.ThirdJavaTest"/>
+        </category>
+    </category>
+</ftests>

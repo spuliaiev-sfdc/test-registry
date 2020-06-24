@@ -15,6 +15,7 @@
     "colors": "^1.4.0",
     "dateformat": "^3.0.3",
     "express": "^4.16.3",
+    "fast-xml-parser": "^3.17.4",
     "java-parser": "^0.8.0",
     "js-sorted-set": "^0.6.0",
     "jsonpath": "^1.0.2",

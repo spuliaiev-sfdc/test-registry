@@ -19,7 +19,7 @@ describe('projectIndexer', function() {
       let rootFolder = './test-projects/javaProject/';
       let fileName = 'module01/test/func/java/src/some/production/folder/SimpleJavaTest.java';
       let fileInfo = testAnalyser.verifyFileIsTest(rootFolder, fileName);
-      let runInfo = {};
+      let runInfo = { reportFolder: null }; // do not write reports
       let status = {};
       projectIndexer.runFileAnalysis(runInfo, status, fileInfo);
       assert.equal(fileInfo.hasOwnProperty("javaInfo"), true);
@@ -29,12 +29,12 @@ describe('projectIndexer', function() {
       assert.deepEqual(fileInfo.javaInfo.javaOwnershipInfo, {
         classInfo: {
           owners: {
-            'Team_01': [
-              'ScrumTeam annotation'
-            ],
-            'Team_01_Sub': [
-              'ScrumTeam javadoc'
-            ]
+            'Team_01'     : ['ScrumTeam class annotation'],
+            'Team_01_Sub' : ['ScrumTeam javadoc'],
+            "The Other Team 03 Name": ['Ownership.yaml']
+          },
+          ownersPartial: {
+            'Team_02': ['ScrumTeam method annotation']
           }
         },
         methodsInfo: {
@@ -45,9 +45,7 @@ describe('projectIndexer', function() {
           'testSecondMethod_02': {
             name: 'testSecondMethod_02',
             owners: {
-              'Team_02': [
-                'ScrumTeam annotation'
-              ]
+              'Team_02': ['ScrumTeam method annotation']
             }
           }
         }
@@ -56,6 +54,34 @@ describe('projectIndexer', function() {
       assert.equal(fileInfo.hasOwnProperty("ownershipFile"), true);
       assert.equal(fileInfo.ownershipFile.success, true);
       assert.equal(fileInfo.ownershipFile.owningTeam, 'The Other Team 03 Name');
+
+      // Verify Report
+      assert.deepEqual(fileInfo.report, {
+        class: 'some.production.folder.SimpleJavaTest',
+        module: 'module01/test/func',
+        classInfo: {
+          owners: {
+            'Team_01': ['ScrumTeam class annotation'],
+            'Team_01_Sub': ['ScrumTeam javadoc'],
+            'The Other Team 03 Name': ['Ownership.yaml']
+          },
+          ownersPartial: {
+            'Team_02': ['ScrumTeam method annotation']
+          }
+        },
+        methodsInfo: {
+          'testFirstMethod_01': {
+            name: 'testFirstMethod_01',
+            owners: {}
+          },
+          'testSecondMethod_02': {
+            name: 'testSecondMethod_02',
+            owners: {
+              'Team_02': ['ScrumTeam method annotation']
+            }
+          }
+        }
+      });
     });
   });
   describe('#iterateProject()', function() {
