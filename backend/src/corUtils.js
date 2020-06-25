@@ -286,12 +286,16 @@ const corUtils = {
       }
       return;
     }
-    // If one - process the addition
-    let existingTeam = ownersCollection[teamName];
-    if (!existingTeam) {
-      ownersCollection[teamName] = [sourceDescription];
+    if (teamName) {
+      // If one - process the addition
+      let existingTeam = ownersCollection[teamName];
+      if (!existingTeam) {
+        ownersCollection[teamName] = [sourceDescription];
+      } else {
+        ownersCollection[teamName].push(sourceDescription);
+      }
     } else {
-      ownersCollection[teamName].push(sourceDescription);
+      corUtils.warn(`Attempt to add undefined team`);
     }
   },
 };

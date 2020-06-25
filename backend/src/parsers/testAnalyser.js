@@ -78,7 +78,7 @@ const testAnalyser = {
 
     if (fileInfo.fTestInventoryInfo.found) {
       // copy information into target owners
-      corUtil.addOwnersInfo(report.classInfo.owners, fileInfo.fTestInventoryInfo.owners);
+      corUtil.addOwnersInfo(report.classInfo.owners, fileInfo.fTestInventoryInfo.testInfo.owners);
     }
 
     return report;
@@ -94,8 +94,8 @@ const testAnalyser = {
         found: false
       };
       let inventoryInfo = fTestInventoryFileUtil.findTheTestClassCategory(fileInfo.fTestInventoryInfo.inventoryFile, fileInfo.javaClassFQN);
-      fileInfo.fTestInventoryInfo.category = inventoryInfo;
-      fileInfo.fTestInventoryInfo.found = inventoryInfo.success;
+      fileInfo.fTestInventoryInfo.testInfo = inventoryInfo;
+      fileInfo.fTestInventoryInfo.found = inventoryInfo.success && inventoryInfo.found;
     } else {
       corUtil.error(`[analyseJavaTestFile] failed file analysis ${fileInfo.relative} Error: ${inventoryFile.success}`);
       fileInfo.fTestInventoryInfo = {

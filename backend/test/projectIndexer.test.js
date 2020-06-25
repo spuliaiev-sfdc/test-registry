@@ -29,6 +29,7 @@ describe('projectIndexer', function() {
       assert.deepEqual(fileInfo.javaInfo.javaOwnershipInfo, {
         classInfo: {
           owners: {
+            'FTEnvTeam_Main': ['FTestInventory category scrumteam'],
             'Team_01'     : ['ScrumTeam class annotation'],
             'Team_01_Sub' : ['ScrumTeam javadoc'],
             "The Other Team 03 Name": ['Ownership.yaml']
@@ -61,6 +62,7 @@ describe('projectIndexer', function() {
         module: 'module01/test/func',
         classInfo: {
           owners: {
+            'FTEnvTeam_Main': ['FTestInventory category scrumteam'],
             'Team_01': ['ScrumTeam class annotation'],
             'Team_01_Sub': ['ScrumTeam javadoc'],
             'The Other Team 03 Name': ['Ownership.yaml']
