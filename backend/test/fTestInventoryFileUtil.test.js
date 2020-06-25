@@ -9,10 +9,28 @@ var
 describe('fTestInventory', function() {
   describe('#readAndVerifyInventoryFile()', function() {
     it('Simple Inventory file', function () {
-      let rootFolder = './test-projects/';
-      let fileName = 'ftest-inventory-sample.xml';
-      let result = fTestInventory.readAndVerifyInventoryFile(rootFolder, fileName);
-      assert.equal(result.success, true);
+      let rootFolder = './test-projects/javaProject/';
+      let fileName = 'module01/test/func/java/src/some/production/folder/SimpleJavaTest.java';
+      let realFileInfo = utils.analyseFileLocation(rootFolder, fileName);
+      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile(realFileInfo);
+      assert.equal(inventoryInfo.success, true);
+      assert.equal(inventoryInfo.filename, 'ftest-inventory.xml');
+    });
+  });
+  describe('#findTheTestClassCategory()', function() {
+    it('Find a class', function () {
+      let rootFolder = './test-projects/javaProject/';
+      let fileName = 'module01/test/func/java/src/some/production/folder/SimpleJavaTest.java';
+      let realFileInfo = utils.analyseFileLocation(rootFolder, fileName);
+      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile(realFileInfo);
+      assert.equal(inventoryInfo.success, true);
+      assert.equal(inventoryInfo.filename, 'ftest-inventory.xml');
+
+      let testClassName = 'some.production.folder.SimpleJavaTest';
+      let classInventoryInfo = fTestInventory.findTheTestClassCategory(inventoryInfo, testClassName);
+      assert.equal(classInventoryInfo.success, true);
+      assert.equal(classInventoryInfo.categoryPath, "");
+      assert.deepStrictEqual(classInventoryInfo.categoryElements, [""]);
     });
   });
 });

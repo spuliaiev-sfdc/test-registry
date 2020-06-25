@@ -70,7 +70,7 @@ public class SampleClass extends SuperClass {
 describe('javaParserSample', function() {
   describe('#parseJavaContent()', function () {
     it('should successfully parse simple Java', function () {
-      let parser = require("java-parser");
+      let parser = require('java-parser');
       let content = parser.parse(javaDocClass);
       assert.equal(content != null, true);
     });
@@ -89,34 +89,34 @@ describe('javaParser', function() {
       let parsingResult = javaParser.parseJavaContent(javaDocClass);
       assert.equal(parsingResult.success, true);
       assert.deepEqual(parsingResult.info, {
-        "classes": [{
-          "annotations": [{
-            "name": "Annotation",
-            "value": 'Value01'
+        'classes': [{
+          'annotations': [{
+            'name': 'Annotation',
+            'value': 'Value01'
           }],
-          "classType": "class",
-          "superclass": "SuperClass",
-          "className": "SampleClass",
-          "other": [],
-          "fields": [
+          'classType': 'class',
+          'superclass': 'SuperClass',
+          'className': 'SampleClass',
+          'other': [],
+          'fields': [
             {
-              "kind": "field",
-              "name": "field01",
-              "value": null,
-              "annotations": null
+              'kind': 'field',
+              'name': 'field01',
+              'value': null,
+              'annotations': null
             },
             {
-              "kind": "field",
-              "name": "field02",
-              "value": '"TextValue_01"',
-              "annotations": null
+              'kind': 'field',
+              'name': 'field02',
+              'value': 'TextValue_01',
+              'annotations': null
             }
           ],
-          "javadoc": {
-            "author": "user.name",
-            "since": "2020.05.01"
+          'javadoc': {
+            'author': 'user.name',
+            'since': '2020.05.01'
           },
-          "methods": []
+          'methods': []
         }]
       });
     });
@@ -126,18 +126,21 @@ describe('javaParser', function() {
       assert.deepEqual(parsingResult.javaOwnershipInfo, {
         classInfo: {
           owners: {
-            "Team_01": ["ScrumTeam annotation"]
+            'Team_01': ['ScrumTeam class annotation']
+          },
+          ownersPartial: {
+            'Team_02': ['ScrumTeam method annotation']
           }
         },
         methodsInfo: {
-          "testFirstMethod_01": {
-            name: "testFirstMethod_01",
+          'testFirstMethod_01': {
+            name: 'testFirstMethod_01',
             owners: {}
           },
-          "testSecondMethod_02": {
-            name: "testSecondMethod_02",
+          'testSecondMethod_02': {
+            name: 'testSecondMethod_02',
             owners: {
-              "Team_02": ["ScrumTeam annotation"]
+              'Team_02': ['ScrumTeam method annotation']
             }
           }
         }
@@ -153,7 +156,7 @@ describe('javaParser', function() {
           }]
         }
       };
-      let parsingResult = javaParser.checkParticularChildren(false, content, "test_01", "child1");
+      let parsingResult = javaParser.checkParticularChildren(false, content, 'test_01', 'child1');
       assert.equal(!parsingResult, false);
       assert.equal(Array.isArray(parsingResult), true);
       assert.equal(typeof parsingResult[0], 'object');
@@ -179,7 +182,7 @@ describe('javaParser', function() {
           }]
         }
       };
-      let parsingResult = javaParser.checkParticularChildren(false, content, "test_01", "child1", "child2", "child3", "child4");
+      let parsingResult = javaParser.checkParticularChildren(false, content, 'test_01', 'child1', 'child2', 'child3', 'child4');
       assert.equal(!parsingResult, false);
       assert.equal(Array.isArray(parsingResult), true);
       assert.equal(typeof parsingResult[0], 'object');

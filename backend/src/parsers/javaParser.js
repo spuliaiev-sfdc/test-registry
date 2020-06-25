@@ -219,7 +219,9 @@ const javaParser = {
     };
 
     annotationInfo.value = this.getParticularChildValue(false, annotation, "extractAnnotationInfo", "elementValue");
-    annotationInfo.value = annotationInfo.value.replace(/"/g,'');
+    if (annotationInfo.value) {
+      annotationInfo.value = annotationInfo.value.replace(/(^\"|\"$)/g,'');
+    }
 
     return annotationInfo;
   },
@@ -241,6 +243,9 @@ const javaParser = {
       if (declarator) {
         memberInfo.name = this.getParticularChildValue(false, declarator, "extractClassBodyInfo", "variableDeclaratorId", "Identifier");
         memberInfo.value = this.getParticularChildValue(false, declarator, "extractClassBodyInfo", "variableInitializer");
+        if (memberInfo.value) {
+          memberInfo.value = memberInfo.value.replace(/(^\"|\"$)/g,'');
+        }
       }
       memberInfo.annotations = this.extractAnnotationsInfo(fieldDeclaration, "methodModifier");
     }

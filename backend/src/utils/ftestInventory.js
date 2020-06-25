@@ -2,6 +2,7 @@ const
   fs = require('fs'),
   readline = require('readline'),
   resolve = require('path').resolve,
+  relative = require('path').relative,
   xmlParser = require('fast-xml-parser'),
   he = require('he'),
   utils = require('../corUtils.js');
@@ -43,7 +44,7 @@ const fTestInventoryFileUtil = {
         let foundFilePath = resolve(moduleRootFolder, files[i]);
         const fileContent = fs.readFileSync(foundFilePath, 'utf8');
         if (fileContent.includes("<ftests ")){
-          return {fileName: foundFilePath, fileContent};
+          return { fileName: relative(moduleRootFolder, foundFilePath), fileContent};
         }
       }
     }
@@ -51,8 +52,6 @@ const fTestInventoryFileUtil = {
   },
 
   readAndVerifyInventoryFile: function (fileInfo) {
-    let rootFolder = fileInfo.root;
-    let relativePath = fileInfo.relative;
     let inventoryFile = this.findInventoryFile(resolve(fileInfo.root, fileInfo.moduleRoot));
     if (!inventoryFile) {
       utils.error(`     FTestInventory file not found ${fileInfo.moduleRoot}`)
@@ -67,21 +66,22 @@ const fTestInventoryFileUtil = {
     }
     const fileContent = inventoryFile.fileContent;
     if (!fileContent || fileContent.trim().length === 0) {
-      utils.error(`     FTestInventory file is empty ${relativePath}`)
-      result.errors.push(`FTestInventory file is empty: ${relativePath}`);
+      utils.error(`     FTestInventory file is empty ${inventoryFile.fileName}`)
+      result.errors.push(`FTestInventory file is empty: ${inventoryFile.fileName}`);
       result.success = false;
       return result;
     }
+    result.filename = inventoryFile.fileName;
     if( !xmlParser.validate(fileContent)) { //optional (it'll return an object in case it's not valid)
-      utils.error(`     FTestInventory file is wrong ${relativePath}`)
-      result.errors.push(`FTestInventory file is wrong: ${relativePath}`);
+      utils.error(`     FTestInventory file is wrong ${inventoryFile.fileName}`)
+      result.errors.push(`FTestInventory file is wrong: ${inventoryFile.fileName}`);
       result.success = false;
       return result;
     }
     let currentOwnersFileContent = xmlParser.parse(fileContent,options);
     if (!currentOwnersFileContent.ftests) {
-      utils.error(`     FTestInventory file doesn't have any ftest inventory definitions!  ${relativePath}`)
-      result.errors.push(`FTestInventory file doesn't have any ftest inventory definitions:  ${relativePath}`);
+      utils.error(`     FTestInventory file doesn't have any ftest inventory definitions!  ${inventoryFile.fileName}`)
+      result.errors.push(`FTestInventory file doesn't have any ftest inventory definitions:  ${inventoryFile.fileName}`);
       result.success = false;
       return result;
     } else {
@@ -92,7 +92,7 @@ const fTestInventoryFileUtil = {
     return result;
   },
 
-  findTheTestClassCategory(inventoryInfo, testClass) {
+  findTheTestClassCategory(inventoryInfo, testClassName) {
     let result = {
       owners: {},
       categoryPath: "",

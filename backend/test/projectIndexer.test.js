@@ -90,12 +90,13 @@ describe('projectIndexer', function() {
       addedFoldersIntoScanFile = [];
       let result = projectIndexer.iterateProject(rootFolder);
       assert.deepEqual(result, {
-        'foldersProcessedAlready': new Set([]),
-        'foldersProcessed': [],
-        'rootFolder': './test-projects/empty',
-        'rootFoldersDetected': 0,
-        'rootFilesDetected': 0,
-        'lastScanFile': 'lastScan.log',
+        foldersProcessedAlready: new Set([]),
+        foldersProcessed: [],
+        rootFolder: './test-projects/empty',
+        rootFoldersDetected: 0,
+        rootFilesDetected: 0,
+        lastScanFile: 'lastScan.log',
+        reportFolder: undefined,
         errors: [],
       });
       assert.deepEqual(addedFoldersIntoScanFile, []);
@@ -105,8 +106,8 @@ describe('projectIndexer', function() {
       addedFoldersIntoScanFile = [];
       let result = projectIndexer.iterateProject(rootFolder);
       assert.deepEqual(result, {
-        'foldersProcessedAlready': new Set([]),
-        'foldersProcessed': [
+        foldersProcessedAlready: new Set([]),
+        foldersProcessed: [
           'folder_02',
           'folder_02/java',
           'folder_02/java/src',
@@ -115,10 +116,11 @@ describe('projectIndexer', function() {
           'folder_01/java',
           'folder_01/java/src'
         ],
-        'rootFolder': './test-projects/small',
-        'rootFoldersDetected': 2,
-        'rootFilesDetected': 0,
-        'lastScanFile': 'lastScan.log',
+        rootFolder: './test-projects/small',
+        rootFoldersDetected: 2,
+        rootFilesDetected: 0,
+        lastScanFile: 'lastScan.log',
+        reportFolder: undefined,
         errors: [],
       });
       assert.deepEqual(addedFoldersIntoScanFile, ['folder_02', 'folder_01']);
@@ -128,18 +130,19 @@ describe('projectIndexer', function() {
       addedFoldersIntoScanFile = [];
       let result = projectIndexer.iterateProject(rootFolder);
       assert.deepEqual(result, {
-        'foldersProcessedAlready': new Set(['folder_01']),
-        'foldersProcessed': [
+        foldersProcessedAlready: new Set(['folder_01']),
+        foldersProcessed: [
           'folder_02',
           'folder_02/java',
           'folder_02/java/src',
           'folder_02/java/src/package_02_01'
         ],
-        'lastScanFound': true,
-        'rootFolder': './test-projects/smallPartial',
-        'rootFoldersDetected': 2,
-        'rootFilesDetected': 1,
-        'lastScanFile': 'lastScan.log',
+        lastScanFound: true,
+        rootFolder: './test-projects/smallPartial',
+        rootFoldersDetected: 2,
+        rootFilesDetected: 1,
+        lastScanFile: 'lastScan.log',
+        reportFolder: undefined,
         errors: [],
       });
       assert.deepEqual(addedFoldersIntoScanFile, ['folder_02']);
@@ -149,12 +152,13 @@ describe('projectIndexer', function() {
       addedFoldersIntoScanFile = [];
       let result = projectIndexer.iterateProject(rootFolder);
       assert.deepEqual(result, {
-        'rootFolder': './test-projects/big',
-        'rootFoldersDetected': 0,
-        'rootFilesDetected': 0,
-        'foldersProcessedAlready': new Set([]),
-        'foldersProcessed': [],
-        'lastScanFile': 'lastScan.log',
+        rootFolder: './test-projects/big',
+        rootFoldersDetected: 0,
+        rootFilesDetected: 0,
+        foldersProcessedAlready: new Set([]),
+        foldersProcessed: [],
+        lastScanFile: 'lastScan.log',
+        reportFolder: undefined,
         errors: [],
       });
       assert.deepEqual(addedFoldersIntoScanFile, []);
