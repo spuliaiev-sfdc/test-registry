@@ -29,8 +29,30 @@ describe('fTestInventory', function() {
       let testClassName = 'some.production.folder.SimpleJavaTest';
       let classInventoryInfo = fTestInventory.findTheTestClassCategory(inventoryInfo, testClassName);
       assert.equal(classInventoryInfo.success, true);
-      assert.equal(classInventoryInfo.categoryPath, "");
-      assert.deepStrictEqual(classInventoryInfo.categoryElements, [""]);
+      assert.equal(classInventoryInfo.found, true);
+      assert.deepEqual(classInventoryInfo.owners, {
+        'FTEnvTeam_Main': [ 'FTestInventory category scrumteam' ]
+      });
+      assert.equal(classInventoryInfo.categoryPath, "Example Tests/TestsCategory01");
+      assert.deepStrictEqual(classInventoryInfo.categoryElements, ['Example Tests', 'TestsCategory01']);
+    });
+    it('Find a class with overrides in categories', function () {
+      let rootFolder = './test-projects/javaProject/';
+      let fileName = 'module01/test/func/java/src/some/production/folder/SecondJavaTest.java';
+      let realFileInfo = utils.analyseFileLocation(rootFolder, fileName);
+      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile(realFileInfo);
+      assert.equal(inventoryInfo.success, true);
+      assert.equal(inventoryInfo.filename, 'ftest-inventory.xml');
+
+      let testClassName = 'some.production.folder.SecondJavaTest';
+      let classInventoryInfo = fTestInventory.findTheTestClassCategory(inventoryInfo, testClassName);
+      assert.equal(classInventoryInfo.success, true);
+      assert.equal(classInventoryInfo.found, true);
+      assert.deepEqual(classInventoryInfo.owners, {
+        'FTEnvTeam_Second': [ 'FTestInventory test scrumteam' ]
+      });
+      assert.equal(classInventoryInfo.categoryPath, "Example Tests/TestsCategory01");
+      assert.deepStrictEqual(classInventoryInfo.categoryElements, ['Example Tests', 'TestsCategory01']);
     });
   });
 });

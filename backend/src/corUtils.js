@@ -269,9 +269,31 @@ const corUtils = {
     // calculate ownership file path
     info.ownershipFilePath = info.moduleRoot + "/java/resources/ownership.yaml";
     return info;
-  }
+  },
 
-
+  addOwnersInfo(ownersCollection, teamName, sourceDescription) {
+    if (Array.isArray(sourceDescription)) {
+      // If array - process one by one
+      sourceDescription.forEach( description => this.addOwnersInfo(ownersCollection, teamName, description) );
+      return;
+    }
+    if (typeof teamName === "object") {
+      let ownersMap = teamName;
+      // If object - process one by one as it is a map of owners
+      for (const teamOwner in ownersMap) {
+        let descriptions = ownersMap[teamOwner];
+        this.addOwnersInfo(ownersCollection, teamOwner, descriptions);
+      }
+      return;
+    }
+    // If one - process the addition
+    let existingTeam = ownersCollection[teamName];
+    if (!existingTeam) {
+      ownersCollection[teamName] = [sourceDescription];
+    } else {
+      ownersCollection[teamName].push(sourceDescription);
+    }
+  },
 };
 
 

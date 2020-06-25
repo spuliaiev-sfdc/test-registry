@@ -64,21 +64,6 @@ const testAnalyser = {
     return reportObject;
   },
 
-  addOwnersInfo(ownersCollection, teamName, sourceDescription) {
-    if (Array.isArray(sourceDescription)) {
-      // If array - process one by one
-      sourceDescription.each( description => this.addOwnersInfo(ownersCollection, teamName, description) );
-      return;
-    }
-    // If one - process the addition
-    let existingTeam = ownersCollection[teamName];
-    if (!existingTeam) {
-      ownersCollection[teamName] = [sourceDescription];
-    } else {
-      ownersCollection[teamName].push(sourceDescription);
-    }
-  },
-
   renderReport(fileInfo) {
     let report = {};
     Object.assign(report, fileInfo.javaInfo.javaOwnershipInfo);
@@ -88,12 +73,12 @@ const testAnalyser = {
 
     if (fileInfo.ownershipFile.owningTeam) {
       // copy information into target owners
-      this.addOwnersInfo(report.classInfo.owners, fileInfo.ownershipFile.owningTeam, "Ownership.yaml");
+      corUtil.addOwnersInfo(report.classInfo.owners, fileInfo.ownershipFile.owningTeam, "Ownership.yaml");
     }
 
     if (fileInfo.fTestInventoryInfo.found) {
       // copy information into target owners
-      this.addOwnersInfo(report.classInfo.owners, fileInfo.fTestInventoryInfo.owners);
+      corUtil.addOwnersInfo(report.classInfo.owners, fileInfo.fTestInventoryInfo.owners);
     }
 
     return report;
