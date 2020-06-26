@@ -39,6 +39,16 @@ describe('fTestInventory', function() {
       assert.equal(classInventoryInfo.categoryPath, "Example Tests/TestsCategory01");
       assert.deepStrictEqual(classInventoryInfo.categoryElements, ['Example Tests', 'TestsCategory01']);
     });
+    it('Wrong inventory object', function () {
+      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile({moduleRoot: "module_00"}, undefined);
+      assert.equal(inventoryInfo.success, false);
+      assert.deepEqual(inventoryInfo.errors, ['FTestInventory file not found for module module_00']);
+    });
+    it('Wrong inventory content', function () {
+      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile({moduleRoot: "module_00"}, {content: ''});
+      assert.equal(inventoryInfo.success, false);
+      assert.deepEqual(inventoryInfo.errors, ['FTestInventory file is empty for module undefined']);
+    });
     it('Find a class with overrides in categories', function () {
       let rootFolder = './test-projects/javaProject/';
       let fileName = 'module01/test/func/java/src/some/production/folder/SecondJavaTest.java';

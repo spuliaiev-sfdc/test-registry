@@ -59,15 +59,15 @@ const fTestInventoryFileUtil = {
       success: null
     }
     if (!inventoryFile) {
-      corUtils.error(`     FTestInventory file not found ${fileInfo.moduleRoot}`)
-      result.errors.push(`FTestInventory file not found: ${fileInfo.moduleRoot}`);
+      corUtils.error(`     FTestInventory file not found for module ${fileInfo.moduleRoot}`)
+      result.errors.push(`FTestInventory file not found for module ${fileInfo.moduleRoot}`);
       result.success = false;
       return result;
     }
     const fileContent = inventoryFile.content;
     if (!fileContent || fileContent.trim().length === 0) {
-      corUtils.error(`     FTestInventory file is empty ${inventoryFile.fileName}`)
-      result.errors.push(`FTestInventory file is empty: ${inventoryFile.fileName}`);
+      corUtils.error(`     FTestInventory file is empty for module ${inventoryFile.moduleRoot}`)
+      result.errors.push(`FTestInventory file is empty for module ${inventoryFile.moduleRoot}`);
       result.success = false;
       return result;
     }
