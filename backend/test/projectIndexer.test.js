@@ -99,6 +99,7 @@ describe('projectIndexer', function() {
         rootFilesDetected: 0,
         lastScanFile: 'lastScan.log',
         reportFolder: undefined,
+        onReportGenerated: undefined,
         errors: [],
       });
       assert.deepEqual(addedFoldersIntoScanFile, []);
@@ -123,6 +124,7 @@ describe('projectIndexer', function() {
         rootFilesDetected: 0,
         lastScanFile: 'lastScan.log',
         reportFolder: undefined,
+        onReportGenerated: undefined,
         errors: [],
       });
       assert.deepEqual(addedFoldersIntoScanFile, ['folder_02', 'folder_01']);
@@ -145,6 +147,7 @@ describe('projectIndexer', function() {
         rootFilesDetected: 1,
         lastScanFile: 'lastScan.log',
         reportFolder: undefined,
+        onReportGenerated: undefined,
         errors: [],
       });
       assert.deepEqual(addedFoldersIntoScanFile, ['folder_02']);
@@ -161,6 +164,7 @@ describe('projectIndexer', function() {
         foldersProcessed: [],
         lastScanFile: 'lastScan.log',
         reportFolder: undefined,
+        onReportGenerated: undefined,
         errors: [],
       });
       assert.deepEqual(addedFoldersIntoScanFile, []);

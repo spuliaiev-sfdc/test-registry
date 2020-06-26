@@ -34,14 +34,12 @@ describe('corUtils', function() {
         modulePath: 'moduleName',
         moduleRoot: 'moduleName',
         moduleSrcPath: 'moduleName/java/src',
-        ownershipFilePath: 'moduleName/java/resources/ownership.yaml',
         relative: 'moduleName/java/src/data/report.xml',
         relativeToModuleRoot: 'java/src/data/report.xml',
         relativeToModuleSrc: 'data/report.xml',
         ext: 'xml',
         filename: 'report',
-        testFolder: false,
-        ownershipFilePath: 'moduleName/java/resources/ownership.yaml'
+        testFolder: false
       });
     });
     it('Check for java prod file', function () {
@@ -53,14 +51,12 @@ describe('corUtils', function() {
         modulePath: 'moduleName',
         moduleRoot: 'moduleName',
         moduleSrcPath: 'moduleName/java/src',
-        ownershipFilePath: 'moduleName/java/resources/ownership.yaml',
         relative: 'moduleName/java/src/ui/mod/impl/overrides/lists/ClassWithLogic.java',
         relativeToModuleRoot: 'java/src/ui/mod/impl/overrides/lists/ClassWithLogic.java',
         relativeToModuleSrc: 'ui/mod/impl/overrides/lists/ClassWithLogic.java',
         javaClassFQN: 'ui.mod.impl.overrides.lists.ClassWithLogic',
         root: '~/blt/app/main/core',
         testFolder: false,
-        ownershipFilePath: 'moduleName/java/resources/ownership.yaml'
       });
     });
     it('Check for java func test file', function () {
@@ -72,7 +68,6 @@ describe('corUtils', function() {
         modulePath: 'moduleName',
         moduleRoot: 'moduleName/test/func',
         moduleSrcPath: 'moduleName/test/func/java/src',
-        ownershipFilePath: 'moduleName/test/func/java/resources/ownership.yaml',
         relative: 'moduleName/test/func/java/src/pk1/pk2/ClassWithOtherLogicTest.java',
         relativeToModuleRoot: 'java/src/pk1/pk2/ClassWithOtherLogicTest.java',
         relativeToModuleSrc: 'pk1/pk2/ClassWithOtherLogicTest.java',
@@ -92,7 +87,6 @@ describe('corUtils', function() {
         modulePath: 'moduleName',
         moduleRoot: 'moduleName/test/unit',
         moduleSrcPath: 'moduleName/test/unit/java/src/unit',
-        ownershipFilePath: 'moduleName/test/unit/java/resources/ownership.yaml',
         relative: 'moduleName/test/unit/java/src/unit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
         relativeToModuleRoot: 'java/src/unit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
         relativeToModuleSrc: 'pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
@@ -112,7 +106,6 @@ describe('corUtils', function() {
           modulePath: 'moduleName',
           moduleRoot: 'moduleName/test/unit',
           moduleSrcPath: 'moduleName/test/unit/java/src/strictunit',
-          ownershipFilePath: 'moduleName/test/unit/java/resources/ownership.yaml',
           relative: 'moduleName/test/unit/java/src/strictunit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
           relativeToModuleRoot: 'java/src/strictunit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
           relativeToModuleSrc: 'pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
@@ -121,6 +114,91 @@ describe('corUtils', function() {
           testFolder: true,
           testKind: 'strictunit'
       });
+    });
+  });
+  describe('#addOwnersInfo()', function() {
+    it('Add to empty owners', function () {
+      assert.deepEqual(utils.addOwnersInfo({}, 'Team_01', 'Desc_01'), {
+        'Team_01': ['Desc_01']
+      });
+    });
+    it('Add undefined team to empty owners', function () {
+      assert.deepEqual(utils.addOwnersInfo(
+        {
+          'Team_01': ['Desc_01']
+        }
+        , undefined, 'Desc_02'),
+        {
+          'Team_01': ['Desc_01']
+        });
+    });
+    it('Add new Team to owners', function () {
+      assert.deepEqual(utils.addOwnersInfo(
+      {
+        'Team_01': ['Desc_01']
+      }
+      , 'Team_02', 'Desc_02'),
+      {
+        'Team_01': ['Desc_01'],
+        'Team_02': ['Desc_02']
+      });
+    });
+    it('Add same Team to owners with new description', function () {
+      assert.deepEqual(utils.addOwnersInfo(
+      {
+        'Team_01': ['Desc_01']
+      }
+      , 'Team_01', 'Desc_02'),
+      {
+        'Team_01': ['Desc_01', 'Desc_02']
+      });
+    });
+    it('Add same Team to owners with new multiple descriptions', function () {
+      assert.deepEqual(utils.addOwnersInfo(
+        {
+          'Team_01': ['Desc_01']
+        }
+        , 'Team_01', ['Desc_02', 'Desc_03']),
+        {
+          'Team_01': ['Desc_01', 'Desc_02', 'Desc_03']
+        });
+    });
+    it('Add a map of Teams to owners', function () {
+      assert.deepEqual(utils.addOwnersInfo(
+          // Existing team
+        {
+          'Team_01': ['Desc_01']
+        }
+        , // Adding team
+        {
+          'Team_02': ['Desc_02'],
+          'Team_03': ['Desc_03']
+        }
+        ), // Result team
+        {
+          'Team_01': ['Desc_01'],
+          'Team_02': ['Desc_02'],
+          'Team_03': ['Desc_03']
+        });
+    });
+    it('Add a map of Teams to owners, with one preexisting', function () {
+      assert.deepEqual(utils.addOwnersInfo(
+          // Existing team
+        {
+          'Team_01': ['Desc_01']
+        }
+        , // Adding team
+        {
+          'Team_01': ['Desc_01_02'],
+          'Team_02': ['Desc_02'],
+          'Team_03': ['Desc_03']
+        }
+        ), // Result team
+        {
+          'Team_01': ['Desc_01', 'Desc_01_02'],
+          'Team_02': ['Desc_02'],
+          'Team_03': ['Desc_03']
+        });
     });
   });
   describe('#isPathMoreSpecific()', function() {

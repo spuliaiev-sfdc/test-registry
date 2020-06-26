@@ -1,6 +1,7 @@
 const
   fs = require('fs'),
   readline = require('readline'),
+  path = require('path'),
   resolve = require('path').resolve,
   relative = require('path').relative,
   xmlParser = require('fast-xml-parser'),
@@ -44,27 +45,26 @@ const fTestInventoryFileUtil = {
         let foundFilePath = resolve(moduleRootFolder, files[i]);
         const fileContent = fs.readFileSync(foundFilePath, 'utf8');
         if (fileContent.includes("<ftests ")) {
-          return {fileName: relative(moduleRootFolder, foundFilePath), fileContent};
+          return {fileName: relative(moduleRootFolder, foundFilePath), content: fileContent};
         }
       }
     }
     return null;
   },
 
-  readAndVerifyInventoryFile: function (fileInfo) {
-    let inventoryFile = this.findInventoryFile(resolve(fileInfo.root, fileInfo.moduleRoot));
+  readAndVerifyInventoryFile: function (fileInfo, inventoryFile) {
+    let result = {
+      content: null,
+      errors: [],
+      success: null
+    }
     if (!inventoryFile) {
       corUtils.error(`     FTestInventory file not found ${fileInfo.moduleRoot}`)
       result.errors.push(`FTestInventory file not found: ${fileInfo.moduleRoot}`);
       result.success = false;
       return result;
     }
-    let result = {
-      content: null,
-      errors: [],
-      success: null
-    }
-    const fileContent = inventoryFile.fileContent;
+    const fileContent = inventoryFile.content;
     if (!fileContent || fileContent.trim().length === 0) {
       corUtils.error(`     FTestInventory file is empty ${inventoryFile.fileName}`)
       result.errors.push(`FTestInventory file is empty: ${inventoryFile.fileName}`);
@@ -85,14 +85,13 @@ const fTestInventoryFileUtil = {
       result.success = false;
       return result;
     } else {
-      let ownerInfo = currentOwnersFileContent.ftests;
       result.content = currentOwnersFileContent;
       result.success = true;
     }
     return result;
   },
 
-  findTheTestClassCategory(inventoryInfo, testClassName) {
+  findTestOwnershipInfo(inventoryInfo, testClassName) {
     let result = {
       owners: {},
       categoryPath: "",
@@ -101,9 +100,9 @@ const fTestInventoryFileUtil = {
       found: false,
       success: false
     }
-    if (!inventoryInfo || !inventoryInfo.content.ftests) {
-      corUtils.error(`     FTestInventory content is wrong ${inventoryInfo.fileName}`)
-      result.errors.push(`FTestInventory content is wrong: ${inventoryInfo.fileName}`);
+    if (!inventoryInfo || !inventoryInfo.ftests) {
+      corUtils.error(`     FTestInventory content is wrong`)
+      result.errors.push(`FTestInventory content is wrong:`);
       result.success = false;
       return result;
     }
@@ -168,10 +167,58 @@ const fTestInventoryFileUtil = {
       return false;
     }
 
-    findTestInCategory(inventoryInfo.content.ftests);
-
+    result.found = findTestInCategory(inventoryInfo.ftests);
+    // not failed, so always success
     result.success = true;
     return result;
+  },
+
+  getTestOwningTeam(fileInfo, cachedInventoryFile) {
+    let result = {
+      owningTeam: null,
+      errors: [],
+      success: null
+    };
+    corUtils.info(`[analyseFTestInventoryFile] started FTestInventory file analysis ${fileInfo.relative}`);
+    let inventoryFile = this.findInventoryFile(resolve(fileInfo.root, fileInfo.moduleRoot));
+    let rootRelativePath = path.join(fileInfo.moduleRoot, inventoryFile.fileName);
+
+    let currentInventoryFileContent;
+    if (cachedInventoryFile) {
+      if (cachedInventoryFile.cachedFilePath === rootRelativePath) {
+        // read the cached file from memory
+        currentInventoryFileContent = cachedInventoryFile.content;
+      }
+    }
+
+    if (!currentInventoryFileContent) {
+      // load the Ownership file as in memory is either wrong or absent
+      let inventoryFileData = this.readAndVerifyInventoryFile(fileInfo, inventoryFile);
+      if (!inventoryFileData.success) {
+        corUtils.log(`   Ownership file is wrong:\t${inventoryFileData.errors}`);
+        result.errors.push(`Ownership file is wrong:\t${inventoryFileData.errors}`);
+        result.errors.push(inventoryFileData.errors);
+        result.success = true;
+        return result;
+      }
+      currentInventoryFileContent = inventoryFileData.content;
+      if (cachedInventoryFile) {
+        cachedInventoryFile.cachedFilePath = rootRelativePath;
+        cachedInventoryFile.content = currentInventoryFileContent;
+      }
+      corUtils.info(`[analyseFTestInventoryFile] succeeded file load ${fileInfo.relative} Success:${inventoryFileData.success}`);
+    }
+
+    fileInfo.fTestInventoryInfo = {
+      inventoryFile,
+      found: false
+    };
+    let inventoryInfo = this.findTestOwnershipInfo(currentInventoryFileContent, fileInfo.javaClassFQN);
+    fileInfo.fTestInventoryInfo.testInfo = inventoryInfo;
+    fileInfo.fTestInventoryInfo.found = inventoryInfo.success && inventoryInfo.found;
+
+    corUtils.info(`[analyseFTestInventoryFile] finished FTestInventory file analysis ${fileInfo.relative}`);
+    return fileInfo.fTestInventoryInfo;
   }
 };
 

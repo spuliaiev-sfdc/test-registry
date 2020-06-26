@@ -48,12 +48,6 @@ const testAnalyser = {
     return parsingResult;
   },
 
-  analyseOwnershipFile(fileInfo) {
-    corUtil.info(`[analyseJavaTestFile] started Ownership file analysis for ${fileInfo.relative}`);
-    corUtil.trace(`[analyseJavaTestFile]  Ownership file ${fileInfo.ownershipFilePath}`);
-    return ownersFileUtil.getFileOwningTeam(fileInfo);
-  },
-
   writeReport(fileInfo, reportFolder) {
     let reportObject = this.renderReport(fileInfo);
     if (reportFolder) {
@@ -71,39 +65,27 @@ const testAnalyser = {
     report.class = fileInfo.javaClassFQN;
     report.module = fileInfo.moduleRoot;
 
-    if (fileInfo.ownershipFile.owningTeam) {
+    if (fileInfo.ownershipFile && fileInfo.ownershipFile.owningTeam) {
       // copy information into target owners
       corUtil.addOwnersInfo(report.classInfo.owners, fileInfo.ownershipFile.owningTeam, "Ownership.yaml");
     }
 
-    if (fileInfo.fTestInventoryInfo.found) {
+    if (fileInfo.fTestInventoryInfo && fileInfo.fTestInventoryInfo.found) {
       // copy information into target owners
       corUtil.addOwnersInfo(report.classInfo.owners, fileInfo.fTestInventoryInfo.testInfo.owners);
     }
 
     return report;
   },
-  analyseFTestInventoryFile(fileInfo) {
-    corUtil.info(`[analyseJavaTestFile] started FTestInventory file analysis ${fileInfo.relative}`);
 
-    let inventoryFile = fTestInventoryFileUtil.readAndVerifyInventoryFile(fileInfo);
-    if(inventoryFile.success === true) {
-      corUtil.info(`[analyseJavaTestFile] succeeded file analysis ${fileInfo.relative} Error: ${inventoryFile.success}`);
-      fileInfo.fTestInventoryInfo = {
-        inventoryFile,
-        found: false
-      };
-      let inventoryInfo = fTestInventoryFileUtil.findTheTestClassCategory(fileInfo.fTestInventoryInfo.inventoryFile, fileInfo.javaClassFQN);
-      fileInfo.fTestInventoryInfo.testInfo = inventoryInfo;
-      fileInfo.fTestInventoryInfo.found = inventoryInfo.success && inventoryInfo.found;
-    } else {
-      corUtil.error(`[analyseJavaTestFile] failed file analysis ${fileInfo.relative} Error: ${inventoryFile.success}`);
-      fileInfo.fTestInventoryInfo = {
-        found: false
-      };
-    }
+  analyseOwnershipFile(fileInfo, cachedOwnershipFile) {
+    corUtil.info(`[analyseJavaTestFile] started Ownership file analysis for ${fileInfo.relative}`);
+    return ownersFileUtil.getFileOwningTeam(fileInfo, cachedOwnershipFile);
+  },
 
-    corUtil.info(`[analyseJavaTestFile] finished FTestInventory file analysis ${fileInfo.relative}`);
+  analyseFTestInventoryFile(fileInfo, cachedInventoryFile) {
+    corUtil.info(`[analyseJavaTestFile] FTestInventory file analysis for ${fileInfo.relative}`);
+    fTestInventoryFileUtil.getTestOwningTeam(fileInfo, cachedInventoryFile);
     return fileInfo.fTestInventoryInfo;
   }
 };

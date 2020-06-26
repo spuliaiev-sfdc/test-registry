@@ -6,7 +6,7 @@ const express = require('express'),
   bodyParser = require('body-parser'),
   resolve = require('path').resolve,
   utils = require('./corUtils.js'),
-  filesIndexer = require('./filesIndexer.js'),
+  projectIndexer = require('./projectIndexer'),
   dateFormat = require('dateformat');
 
 const homedir = require('os').homedir();
@@ -111,12 +111,6 @@ if (args.s) {
   }
 
   // TEST VALUES
-  // users = "spuliaiev";
-  // dateFrom = "2020/01/10";
-  // dateTo = "2020/04/20";
-  // dateFrom = "2020/02/10";
-  // dateTo = "2020/02/11";
-
   if (!outputFolder.startsWith("/")) {
     outputFolder = resolve(outputFolder);
   }
@@ -156,12 +150,10 @@ if (args.s) {
     fs.mkdirSync(outputFolder, { recursive: true });
   }
 
+
   if (args._.includes("index")) {
-    filesIndexer.indexFiles({
-      dataFolder, inputFile,
-      coreFolder, outputFolder,
-      users, dateFrom, dateTo, module
-    }, true);
+    let runInfo = projectIndexer.iterateProject(coreFolder, outputFolder);
+    console.info(`Run finished`, runInfo);
     return;
   }
 

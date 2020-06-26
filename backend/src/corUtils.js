@@ -266,8 +266,6 @@ const corUtils = {
       info.javaClassFQN = info.relativeToModuleSrc.replace(/\//g,'.').replace(/\.java$/, "");
     }
 
-    // calculate ownership file path
-    info.ownershipFilePath = info.moduleRoot + "/java/resources/ownership.yaml";
     return info;
   },
 
@@ -275,7 +273,7 @@ const corUtils = {
     if (Array.isArray(sourceDescription)) {
       // If array - process one by one
       sourceDescription.forEach( description => this.addOwnersInfo(ownersCollection, teamName, description) );
-      return;
+      return ownersCollection;
     }
     if (typeof teamName === "object") {
       let ownersMap = teamName;
@@ -284,7 +282,7 @@ const corUtils = {
         let descriptions = ownersMap[teamOwner];
         this.addOwnersInfo(ownersCollection, teamOwner, descriptions);
       }
-      return;
+      return ownersCollection;
     }
     if (teamName) {
       // If one - process the addition
@@ -297,6 +295,7 @@ const corUtils = {
     } else {
       corUtils.warn(`Attempt to add undefined team`);
     }
+    return ownersCollection;
   },
 };
 

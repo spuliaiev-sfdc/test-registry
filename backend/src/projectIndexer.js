@@ -7,10 +7,13 @@ const
 
 const projectIndexer = {
 
-  iterateProject(rootFolder, reportFolder) {
+  iterateProject(rootFolder, reportFolder, onReportGenerated) {
     let runInfo = {
       rootFolder,
-      reportFolder: reportFolder
+      // place to store report files
+      reportFolder: reportFolder,
+      // handler to react on report created for file
+      onReportGenerated: onReportGenerated
     };
     this.prepareRootFolderInfo(runInfo);
     utils.info("Execution information", runInfo);
@@ -31,7 +34,6 @@ const projectIndexer = {
     runInfo.foldersProcessedAlready = new Set();
     runInfo.foldersProcessed = [];
     runInfo.errors = [];
-
 
     runInfo.lastScanFile = "lastScan.log";
     let lastScanFileFullPath = resolve(runInfo.rootFolder, runInfo.lastScanFile);
@@ -122,9 +124,22 @@ const projectIndexer = {
     utils.trace(` File analysis start ${fileInfo.relative}`);
     if (fileInfo.lang === "java") {
       testAnalyser.analyseJavaTestFile(fileInfo);
-      testAnalyser.analyseOwnershipFile(fileInfo);
-      testAnalyser.analyseFTestInventoryFile(fileInfo);
+      if (!runInfo.cachedOwnershipFile) {
+        // init the caching for ownership file
+        runInfo.cachedOwnershipFile = {};
+      }
+      testAnalyser.analyseOwnershipFile(fileInfo, runInfo.cachedOwnershipFile);
+
+      if (!runInfo.cachedInventoryFile) {
+        // init the caching for ownership file
+        runInfo.cachedInventoryFile = {};
+      }
+      testAnalyser.analyseFTestInventoryFile(fileInfo, runInfo.cachedInventoryFile);
+
       fileInfo.report = testAnalyser.writeReport(fileInfo, runInfo.reportFolder);
+      if (runInfo.onReportGenerated) {
+        runInfo.onReportGenerated(fileInfo);
+      }
     }
 
     utils.trace(` File analysis end ${fileInfo.relative}`);

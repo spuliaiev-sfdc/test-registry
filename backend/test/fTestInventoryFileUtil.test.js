@@ -3,7 +3,8 @@ var
   utils = require('../src/corUtils.js')
     // This is just to set logging to warnings level
     .warningsOnly(),
-    fTestInventory = require('../src/utils/ftestInventory');
+  path = require('path'),
+  fTestInventory = require('../src/utils/ftestInventory');
 
 // Test Suites
 describe('fTestInventory', function() {
@@ -12,22 +13,24 @@ describe('fTestInventory', function() {
       let rootFolder = './test-projects/javaProject/';
       let fileName = 'module01/test/func/java/src/some/production/folder/SimpleJavaTest.java';
       let realFileInfo = utils.analyseFileLocation(rootFolder, fileName);
-      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile(realFileInfo);
+      let inventoryFile = fTestInventory.findInventoryFile(path.resolve(realFileInfo.root, realFileInfo.moduleRoot));
+      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile(realFileInfo, inventoryFile);
       assert.equal(inventoryInfo.success, true);
       assert.equal(inventoryInfo.filename, 'ftest-inventory.xml');
     });
   });
-  describe('#findTheTestClassCategory()', function() {
+  describe('#findTestOwnershipInfo()', function() {
     it('Find a class', function () {
       let rootFolder = './test-projects/javaProject/';
       let fileName = 'module01/test/func/java/src/some/production/folder/SimpleJavaTest.java';
       let realFileInfo = utils.analyseFileLocation(rootFolder, fileName);
-      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile(realFileInfo);
+      let inventoryFile = fTestInventory.findInventoryFile(path.resolve(realFileInfo.root, realFileInfo.moduleRoot));
+      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile(realFileInfo, inventoryFile);
       assert.equal(inventoryInfo.success, true);
       assert.equal(inventoryInfo.filename, 'ftest-inventory.xml');
 
       let testClassName = 'some.production.folder.SimpleJavaTest';
-      let classInventoryInfo = fTestInventory.findTheTestClassCategory(inventoryInfo, testClassName);
+      let classInventoryInfo = fTestInventory.findTestOwnershipInfo(inventoryInfo.content, testClassName);
       assert.equal(classInventoryInfo.success, true);
       assert.equal(classInventoryInfo.found, true);
       assert.deepEqual(classInventoryInfo.owners, {
@@ -40,12 +43,13 @@ describe('fTestInventory', function() {
       let rootFolder = './test-projects/javaProject/';
       let fileName = 'module01/test/func/java/src/some/production/folder/SecondJavaTest.java';
       let realFileInfo = utils.analyseFileLocation(rootFolder, fileName);
-      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile(realFileInfo);
+      let inventoryFile = fTestInventory.findInventoryFile(path.resolve(realFileInfo.root, realFileInfo.moduleRoot));
+      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile(realFileInfo, inventoryFile);
       assert.equal(inventoryInfo.success, true);
       assert.equal(inventoryInfo.filename, 'ftest-inventory.xml');
 
       let testClassName = 'some.production.folder.SecondJavaTest';
-      let classInventoryInfo = fTestInventory.findTheTestClassCategory(inventoryInfo, testClassName);
+      let classInventoryInfo = fTestInventory.findTestOwnershipInfo(inventoryInfo.content, testClassName);
       assert.equal(classInventoryInfo.success, true);
       assert.equal(classInventoryInfo.found, true);
       assert.deepEqual(classInventoryInfo.owners, {
