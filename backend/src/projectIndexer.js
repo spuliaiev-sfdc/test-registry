@@ -104,7 +104,7 @@ const projectIndexer = {
           runInfo.foldersProcessed.push(status.currentPath);
           // Append the current processed ROOT folder into the list of processed folders in last sync file
           if (!status.currentPath.includes("/")) {
-            this.addProcessedFolderToScanFile(status.currentPath);
+            this.addProcessedFolderToScanFile(runInfo, status.currentPath);
           }
         }
       }
@@ -146,9 +146,9 @@ const projectIndexer = {
     return fileInfo;
   },
 
-  addProcessedFolderToScanFile(currentPath) {
+  addProcessedFolderToScanFile(runInfo, currentPath) {
     let lastScanFileFullPath = resolve(runInfo.rootFolder, runInfo.lastScanFile);
-    fs.appendFileSync(lastScanFileFullPath, status.currentPath+"\n");
+    fs.appendFileSync(lastScanFileFullPath, currentPath+"\n");
   }
 };
 
