@@ -51,7 +51,7 @@ const testAnalyser = {
   writeReport(fileInfo, reportFolder) {
     let reportObject = this.renderReport(fileInfo);
     if (reportFolder) {
-      let reportFile = resolve(reportFolder, fileInfo.filename + ".json");
+      let reportFile = resolve(reportFolder, fileInfo.filename + ".yaml");
       let reportText = yaml.stringify(reportObject);
       fs.writeFileSync(reportFile, reportText);
     }
