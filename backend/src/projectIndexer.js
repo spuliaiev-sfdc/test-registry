@@ -7,13 +7,14 @@ const
 
 const projectIndexer = {
 
-  iterateProject(rootFolder, reportFolder, onReportGenerated) {
+  iterateProject(rootFolder, reportFolder, rescan, onReportGenerated) {
     let runInfo = {
       rootFolder,
       // place to store report files
       reportFolder: reportFolder,
       // handler to react on report created for file
-      onReportGenerated: onReportGenerated
+      onReportGenerated: onReportGenerated,
+      rescan: rescan
     };
     this.prepareRootFolderInfo(runInfo);
     utils.info("Execution information", runInfo);
@@ -39,13 +40,17 @@ const projectIndexer = {
     let lastScanFileFullPath = resolve(runInfo.rootFolder, runInfo.lastScanFile);
     if (fs.existsSync(lastScanFileFullPath)) {
       utils.info(` lastScan.log file is found in the folder will be excluded from reindex. remove the file if full scan needed`);
-      runInfo.lastScanFound = true;
-      fs.readFileSync(lastScanFileFullPath, "UTF-8").toString().split("\n").map(line => {
-        let trimmed = line.trim();
-        if (trimmed.length > 0) {
-          runInfo.foldersProcessedAlready.add(trimmed);
-        }
-      });
+      if (runInfo.rescan) {
+        utils.info(` lastScan.log file is ignored because of rescan option`);
+      } else {
+        runInfo.lastScanFound = true;
+        fs.readFileSync(lastScanFileFullPath, "UTF-8").toString().split("\n").map(line => {
+          let trimmed = line.trim();
+          if (trimmed.length > 0) {
+            runInfo.foldersProcessedAlready.add(trimmed);
+          }
+        });
+      }
     } else {
       utils.trace(` lastScan.log file is not found in the folder`);
     }

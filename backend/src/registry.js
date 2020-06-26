@@ -27,6 +27,8 @@ let args = require('minimist')(process.argv.slice(2), {
     a: 'app-folder',   // Root folder for the core app
     d: 'data-folder',   // Root folder for the data
 
+    r: 'rescan',        // Ignore last scan file and do the full scan again
+
     f: 'from-date',     // From Date for analysis
     t: 'to-date',       // From Date for analysis
     u: 'users',         // Users to analyse
@@ -49,6 +51,7 @@ function printHelp() {
   utils.clean(`       -h print help`);
   utils.clean(`       -v verbose execution`);
   utils.clean(`       -c colored output`);
+  utils.clean(`       -r ignore last scan file and do the full scan again`);
   utils.clean(`       -g print report with additional columns for google sheet`);
   utils.clean(`       -m <modulePath> print report filtering out all not related to provided module name. Example: core/conversation-impl`);
   utils.clean(`       -i <fileName> input file for execution`);
@@ -97,7 +100,7 @@ if (args.s) {
   let dataFolder = args.d || defaultDataPath;
   let outputFolder = args.o || dataFolder;
   let inputFile = args.i;
-  let users = args.u;
+  let rescan = args.r;
   let dateFrom = args.f;
   let dateTo = args.t;
   let module = args.m;
@@ -152,7 +155,7 @@ if (args.s) {
 
 
   if (args._.includes("index")) {
-    let runInfo = projectIndexer.iterateProject(coreFolder, outputFolder);
+    let runInfo = projectIndexer.iterateProject(coreFolder, outputFolder, rescan);
     console.info(`Run finished`, runInfo);
     return;
   }

@@ -116,14 +116,14 @@ describe('corUtils', function() {
       });
     });
   });
-  describe('#addOwnersInfo()', function() {
+  describe('#addTagInfo()', function() {
     it('Add to empty owners', function () {
-      assert.deepEqual(utils.addOwnersInfo({}, 'Team_01', 'Desc_01'), {
+      assert.deepEqual(utils.addTagInfo({}, 'Team_01', 'Desc_01'), {
         'Team_01': ['Desc_01']
       });
     });
-    it('Add undefined team to empty owners', function () {
-      assert.deepEqual(utils.addOwnersInfo(
+    it('Add undefined Tag to empty owners', function () {
+      assert.deepEqual(utils.addTagInfo(
         {
           'Team_01': ['Desc_01']
         }
@@ -132,8 +132,8 @@ describe('corUtils', function() {
           'Team_01': ['Desc_01']
         });
     });
-    it('Add new Team to owners', function () {
-      assert.deepEqual(utils.addOwnersInfo(
+    it('Add new Tag to owners', function () {
+      assert.deepEqual(utils.addTagInfo(
       {
         'Team_01': ['Desc_01']
       }
@@ -143,8 +143,8 @@ describe('corUtils', function() {
         'Team_02': ['Desc_02']
       });
     });
-    it('Add same Team to owners with new description', function () {
-      assert.deepEqual(utils.addOwnersInfo(
+    it('Add same Tag to owners with new description', function () {
+      assert.deepEqual(utils.addTagInfo(
       {
         'Team_01': ['Desc_01']
       }
@@ -153,8 +153,19 @@ describe('corUtils', function() {
         'Team_01': ['Desc_01', 'Desc_02']
       });
     });
-    it('Add same Team to owners with new multiple descriptions', function () {
-      assert.deepEqual(utils.addOwnersInfo(
+    it('Add same multi Tags to owners with new description', function () {
+      assert.deepEqual(utils.addTagInfo(
+      {
+        'Team_01': ['Desc_01']
+      }
+      , ['Team_01', 'Team_02'] , 'Desc_02'),
+      {
+        'Team_01': ['Desc_01', 'Desc_02'],
+        'Team_02': ['Desc_02']
+      });
+    });
+    it('Add same Tag to owners with new multiple descriptions', function () {
+      assert.deepEqual(utils.addTagInfo(
         {
           'Team_01': ['Desc_01']
         }
@@ -163,8 +174,8 @@ describe('corUtils', function() {
           'Team_01': ['Desc_01', 'Desc_02', 'Desc_03']
         });
     });
-    it('Add a map of Teams to owners', function () {
-      assert.deepEqual(utils.addOwnersInfo(
+    it('Add a map of Tags to owners', function () {
+      assert.deepEqual(utils.addTagInfo(
           // Existing team
         {
           'Team_01': ['Desc_01']
@@ -181,8 +192,8 @@ describe('corUtils', function() {
           'Team_03': ['Desc_03']
         });
     });
-    it('Add a map of Teams to owners, with one preexisting', function () {
-      assert.deepEqual(utils.addOwnersInfo(
+    it('Add a map of Tags to owners, with one preexisting', function () {
+      assert.deepEqual(utils.addTagInfo(
           // Existing team
         {
           'Team_01': ['Desc_01']

@@ -67,12 +67,12 @@ const testAnalyser = {
 
     if (fileInfo.ownershipFile && fileInfo.ownershipFile.owningTeam) {
       // copy information into target owners
-      corUtil.addOwnersInfo(report.classInfo.owners, fileInfo.ownershipFile.owningTeam, "Ownership.yaml");
+      corUtil.addTagInfo(report.classInfo.owners, fileInfo.ownershipFile.owningTeam, "Ownership.yaml");
     }
 
     if (fileInfo.fTestInventoryInfo && fileInfo.fTestInventoryInfo.found) {
       // copy information into target owners
-      corUtil.addOwnersInfo(report.classInfo.owners, fileInfo.fTestInventoryInfo.testInfo.owners);
+      corUtil.addTagInfo(report.classInfo.owners, fileInfo.fTestInventoryInfo.testInfo.owners);
     }
 
     return report;

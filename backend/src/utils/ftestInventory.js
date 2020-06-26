@@ -118,7 +118,7 @@ const fTestInventoryFileUtil = {
       // only if it was not marked as owned by some other team in more precise level - on the test or underlaying category
       if (Object.keys(result.owners).length === 0 && category.attr.scrumteam) {
 
-        corUtils.addOwnersInfo(result.owners, category.attr.scrumteam, ['FTestInventory category scrumteam']);
+        corUtils.addTagInfo(result.owners, category.attr.scrumteam, ['FTestInventory category scrumteam']);
       }
     }
 
@@ -136,7 +136,7 @@ const fTestInventoryFileUtil = {
       function checkClassMatching(test) {
         if (test.attr && test.attr.class === testClassName) {
           if (test.attr.scrumteam) {
-            corUtils.addOwnersInfo(result.owners, test.attr.scrumteam, ['FTestInventory test scrumteam']);
+            corUtils.addTagInfo(result.owners, test.attr.scrumteam, ['FTestInventory test scrumteam']);
           }
           return true;
         }

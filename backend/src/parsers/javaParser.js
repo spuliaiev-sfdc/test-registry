@@ -166,16 +166,10 @@ const javaParser = {
       let arrayDecl = this.checkParticularChild(false, content, "extractExpressionValue", "elementValueArrayInitializer", "elementValueList");
       if (arrayDecl) {
         let elements = this.checkParticularChildren(false, arrayDecl, "extractExpressionValue", "elementValue");
-        value = "";
+        value = [];
         for (let ind=0; ind < elements.length; ind ++) {
-          if (value.length === 0){
-            value = value + "[";
-          } else {
-            value = value + ", ";
-          }
-          value = value + this.extractExpressionValue(elements[ind]);
+          value.push(this.extractExpressionValue(elements[ind]));
         }
-        value = value+"]";
         return value;
       }
     }
@@ -219,7 +213,7 @@ const javaParser = {
     };
 
     annotationInfo.value = this.getParticularChildValue(false, annotation, "extractAnnotationInfo", "elementValue");
-    if (annotationInfo.value) {
+    if (annotationInfo.value &&  typeof annotationInfo.value === "string") {
       annotationInfo.value = annotationInfo.value.replace(/(^\"|\"$)/g,'');
     }
 
@@ -280,12 +274,15 @@ const javaParser = {
   },
 
 
-  checkForAnnotations(annotations, ownersInfo, description){
+  checkForAnnotations(annotations, elementInfo, description){
     if (annotations && annotations.length > 0){
       for(let i = 0; i < annotations.length; i++) {
         let annotation = annotations[i];
         if (annotation.name.endsWith("ScrumTeam")) {
-          corUtil.addOwnersInfo(ownersInfo, annotation.value, description);
+          corUtil.addTagInfo(elementInfo.owners, annotation.value, 'ScrumTeam' + description);
+        }
+        if (annotation.name.endsWith("TestLabels")) {
+          corUtil.addTagInfo(elementInfo.labels, annotation.value, 'TestLabel ' + description);
         }
       }
     }
@@ -295,33 +292,35 @@ const javaParser = {
     let javaOwn = {
       classInfo: {
         owners: {},
+        labels: {},
         ownersPartial: {} // for example some of the methods are owned by a different team
       },
       methodsInfo: {}
     };
     if (info.classes && info.classes.length > 0) {
       let classInfo = info.classes[0];
-      this.checkForAnnotations(classInfo.annotations, javaOwn.classInfo.owners, "ScrumTeam class annotation");
+      this.checkForAnnotations(classInfo.annotations, javaOwn.classInfo, "class annotation");
 
       if (classInfo.javadoc && classInfo.javadoc.team) {
-        corUtil.addOwnersInfo(javaOwn.classInfo.owners, classInfo.javadoc.team, "ScrumTeam javadoc");
+        corUtil.addTagInfo(javaOwn.classInfo.owners, classInfo.javadoc.team, "ScrumTeam javadoc");
       }
       if (classInfo.methods && classInfo.methods.length > 0) {
         for(let i=0; i < classInfo.methods.length; i++) {
           let method = classInfo.methods[i];
           let methodInfo = {
             name: method.name,
-            owners: {}
+            owners: {},
+            labels: {}
           };
           javaOwn.methodsInfo[method.name] = methodInfo;
-          this.checkForAnnotations(method.annotations, methodInfo.owners, "ScrumTeam method annotation");
+          this.checkForAnnotations(method.annotations, methodInfo, "method annotation");
         }
       }
-      for (const methodName in javaOwn.methodsInfo) {
+      for (let methodName in javaOwn.methodsInfo) {
         let owners = javaOwn.methodsInfo[methodName].owners;
         for (const methodOwner in owners) {
           let descriptions = owners[methodOwner];
-          corUtil.addOwnersInfo(javaOwn.classInfo.ownersPartial, methodOwner, descriptions);
+          corUtil.addTagInfo(javaOwn.classInfo.ownersPartial, methodOwner, descriptions);
         }
       }
 

@@ -269,31 +269,36 @@ const corUtils = {
     return info;
   },
 
-  addOwnersInfo(ownersCollection, teamName, sourceDescription) {
-    if (Array.isArray(sourceDescription)) {
-      // If array - process one by one
-      sourceDescription.forEach( description => this.addOwnersInfo(ownersCollection, teamName, description) );
+  addTagInfo(ownersCollection, tagName, sourceDescription) {
+    if (Array.isArray(tagName)) {
+      // If array - process tags one by one
+      tagName.forEach( tagName => this.addTagInfo(ownersCollection, tagName, sourceDescription) );
       return ownersCollection;
     }
-    if (typeof teamName === "object") {
-      let ownersMap = teamName;
+    if (Array.isArray(sourceDescription)) {
+      // If array - process descriptions one by one
+      sourceDescription.forEach( description => this.addTagInfo(ownersCollection, tagName, description) );
+      return ownersCollection;
+    }
+    if (typeof tagName === "object") {
+      let ownersMap = tagName;
       // If object - process one by one as it is a map of owners
       for (const teamOwner in ownersMap) {
         let descriptions = ownersMap[teamOwner];
-        this.addOwnersInfo(ownersCollection, teamOwner, descriptions);
+        this.addTagInfo(ownersCollection, teamOwner, descriptions);
       }
       return ownersCollection;
     }
-    if (teamName) {
+    if (tagName) {
       // If one - process the addition
-      let existingTeam = ownersCollection[teamName];
+      let existingTeam = ownersCollection[tagName];
       if (!existingTeam) {
-        ownersCollection[teamName] = [sourceDescription];
+        ownersCollection[tagName] = [sourceDescription];
       } else {
-        ownersCollection[teamName].push(sourceDescription);
+        ownersCollection[tagName].push(sourceDescription);
       }
     } else {
-      corUtils.warn(`Attempt to add undefined team`);
+      corUtils.warn(`Attempt to add undefined tag`);
     }
     return ownersCollection;
   },
