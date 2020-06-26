@@ -229,6 +229,7 @@ const javaParser = {
       memberInfo.kind = "method";
       memberInfo.name = this.getParticularChildValue(false, methodDeclaration, "extractClassBodyInfo", "methodHeader", "methodDeclarator", "Identifier");
       memberInfo.annotations = this.extractAnnotationsInfo(methodDeclaration, "methodModifier");
+      return memberInfo;
     }
     let fieldDeclaration = this.checkParticularChild(false, memberDeclaration, "extractClassBodyInfo", "classMemberDeclaration", "fieldDeclaration");
     if (fieldDeclaration) {
@@ -242,7 +243,9 @@ const javaParser = {
         }
       }
       memberInfo.annotations = this.extractAnnotationsInfo(fieldDeclaration, "methodModifier");
+      return memberInfo;
     }
+    corUtil.warn(`Unknown kind of entity member ${classInfo.className}`);
     return memberInfo;
   },
 

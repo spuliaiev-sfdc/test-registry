@@ -181,6 +181,12 @@ const fTestInventoryFileUtil = {
     };
     corUtils.info(`[analyseFTestInventoryFile] started FTestInventory file analysis ${fileInfo.relative}`);
     let inventoryFile = this.findInventoryFile(resolve(fileInfo.root, fileInfo.moduleRoot));
+    if (!inventoryFile) {
+      corUtils.log(`   Ownership file not found:\t${fileInfo.moduleRoot}`);
+      result.errors.push(`Ownership file not found:\t${fileInfo.moduleRoot}`);
+      result.success = false;
+      return result;
+    }
     let rootRelativePath = path.join(fileInfo.moduleRoot, inventoryFile.fileName);
 
     let currentInventoryFileContent;
@@ -198,7 +204,7 @@ const fTestInventoryFileUtil = {
         corUtils.log(`   Ownership file is wrong:\t${inventoryFileData.errors}`);
         result.errors.push(`Ownership file is wrong:\t${inventoryFileData.errors}`);
         result.errors.push(inventoryFileData.errors);
-        result.success = true;
+        result.success = false;
         return result;
       }
       currentInventoryFileContent = inventoryFileData.content;

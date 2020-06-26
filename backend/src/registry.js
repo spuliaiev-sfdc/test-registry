@@ -13,7 +13,7 @@ const homedir = require('os').homedir();
 
 let defaultPort = 8072;
 const VERSION = '1.0.0';
-let defaultCorePath = `${homedir}/blt/app/main`;
+let defaultCorePath = `${homedir}/blt/app/main/core`;
 let defaultDataPath = `./tmp`;
 
 let args = require('minimist')(process.argv.slice(2), {

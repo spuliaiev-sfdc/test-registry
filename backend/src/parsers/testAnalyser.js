@@ -51,9 +51,13 @@ const testAnalyser = {
   writeReport(fileInfo, reportFolder) {
     let reportObject = this.renderReport(fileInfo);
     if (reportFolder) {
-      let reportFile = resolve(reportFolder, fileInfo.filename + ".yaml");
-      let reportText = yaml.stringify(reportObject);
-      fs.writeFileSync(reportFile, reportText);
+      let reportFileYaml = resolve(reportFolder, fileInfo.filename + ".yaml");
+      let reportTextYaml = yaml.stringify(reportObject);
+      fs.writeFileSync(reportFileYaml, reportTextYaml);
+
+      // let reportFileJson = resolve(reportFolder, fileInfo.filename + ".json");
+      // let reportTextJson = JSON.stringify(reportObject, null, 2);
+      // fs.writeFileSync(reportFileJson, reportTextJson);
     }
     return reportObject;
   },
