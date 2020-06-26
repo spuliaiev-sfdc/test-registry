@@ -125,19 +125,28 @@ describe('javaParser', function() {
       assert.equal(parsingResult.success, true);
       assert.deepEqual(parsingResult.javaOwnershipInfo, {
         classInfo: {
+          labels: {},
           owners: {
             'Team_01': ['ScrumTeam class annotation']
           },
           ownersPartial: {
             'Team_02': ['ScrumTeam method annotation']
-          }
+          },
+          partialIN_DEV: [
+            "testFirstMethod_01"
+          ]
         },
         methodsInfo: {
           'testFirstMethod_01': {
+            IN_DEV: true,
+            labels: {
+              'IgnoreFailureReason.IN_DEV': ['TestLabel method annotation']
+            },
             name: 'testFirstMethod_01',
             owners: {}
           },
           'testSecondMethod_02': {
+            labels: {},
             name: 'testSecondMethod_02',
             owners: {
               'Team_02': ['ScrumTeam method annotation']

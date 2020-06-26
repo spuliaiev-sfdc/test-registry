@@ -279,7 +279,7 @@ const javaParser = {
       for(let i = 0; i < annotations.length; i++) {
         let annotation = annotations[i];
         if (annotation.name.endsWith("ScrumTeam")) {
-          corUtil.addTagInfo(elementInfo.owners, annotation.value, 'ScrumTeam' + description);
+          corUtil.addTagInfo(elementInfo.owners, annotation.value, 'ScrumTeam ' + description);
         }
         if (annotation.name.endsWith("TestLabels")) {
           corUtil.addTagInfo(elementInfo.labels, annotation.value, 'TestLabel ' + description);
@@ -316,16 +316,38 @@ const javaParser = {
           this.checkForAnnotations(method.annotations, methodInfo, "method annotation");
         }
       }
-      for (let methodName in javaOwn.methodsInfo) {
-        let owners = javaOwn.methodsInfo[methodName].owners;
-        for (const methodOwner in owners) {
-          let descriptions = owners[methodOwner];
-          corUtil.addTagInfo(javaOwn.classInfo.ownersPartial, methodOwner, descriptions);
-        }
-      }
 
+      this.classInfoPostprocessing(info, classInfo, javaOwn);
     }
     return javaOwn;
+  },
+  classInfoPostprocessing(info, classInfo, javaOwn) {
+    // Copy method owners to the class.ownersPartial
+    for (let methodName in javaOwn.methodsInfo) {
+      let owners = javaOwn.methodsInfo[methodName].owners;
+      for (const methodOwner in owners) {
+        let descriptions = owners[methodOwner];
+        corUtil.addTagInfo(javaOwn.classInfo.ownersPartial, methodOwner, descriptions);
+      }
+    }
+    // check for IN_DEV labels in class or methods
+    for (let labelName in javaOwn.classInfo.labels) {
+      if (labelName.endsWith("IN_DEV")) {
+        javaOwn.classInfo.IN_DEV = true;
+      }
+    }
+    for (let methodName in javaOwn.methodsInfo) {
+      let labels = javaOwn.methodsInfo[methodName].labels;
+      for (let labelName in labels) {
+        if (labelName.endsWith("IN_DEV")) {
+          javaOwn.methodsInfo[methodName].IN_DEV = true;
+          if (!classInfo.partialIN_DEV) {
+            javaOwn.classInfo.partialIN_DEV = [];
+          }
+          javaOwn.classInfo.partialIN_DEV.push(methodName);
+        }
+      }
+    }
   }
 };
 

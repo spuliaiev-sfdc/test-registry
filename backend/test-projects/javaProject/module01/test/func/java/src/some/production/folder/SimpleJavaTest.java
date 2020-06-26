@@ -12,6 +12,7 @@ import annotation.ScrumTeam;
  * @since version.01
  */
 @ScrumTeam("Team_01")
+@TestLabels(SomeLabel.ClassLabel01)
 public class SimpleJavaTest extends JavaBaseTest {
 
     /**

@@ -8,7 +8,7 @@ var
 
 // Override the ScanFile updates to save into array to do not break the testing folder structure and content
 let addedFoldersIntoScanFile = [];
-projectIndexer.addProcessedFolderToScanFile = (processedFolderName) => {
+projectIndexer.addProcessedFolderToScanFile = (runInfo, processedFolderName) => {
   addedFoldersIntoScanFile.push(processedFolderName);
 }
 
@@ -28,6 +28,9 @@ describe('projectIndexer', function() {
       assert.equal(fileInfo.javaInfo.info.classes[0].className, "SimpleJavaTest");
       assert.deepEqual(fileInfo.javaInfo.javaOwnershipInfo, {
         classInfo: {
+          labels: {
+            'SomeLabel.ClassLabel01': ['TestLabel class annotation']
+          },
           owners: {
             'FTEnvTeam_Main': ['FTestInventory category scrumteam'],
             'Team_01'     : ['ScrumTeam class annotation'],
@@ -36,14 +39,25 @@ describe('projectIndexer', function() {
           },
           ownersPartial: {
             'Team_02': ['ScrumTeam method annotation']
-          }
+          },
+          partialIN_DEV: [
+            'testFirstMethod_01'
+          ]
         },
         methodsInfo: {
           'testFirstMethod_01': {
+            IN_DEV: true,
+            labels: {
+              'IgnoreFailureReason.IN_DEV': ['TestLabel method annotation']
+            },
             name: 'testFirstMethod_01',
             owners: {}
           },
           'testSecondMethod_02': {
+            labels: {
+              'IgnoreFailureReason.Label1': ['TestLabel method annotation'],
+              'IgnoreFailureReason.Label2': ['TestLabel method annotation']
+            },
             name: 'testSecondMethod_02',
             owners: {
               'Team_02': ['ScrumTeam method annotation']
@@ -61,6 +75,9 @@ describe('projectIndexer', function() {
         class: 'some.production.folder.SimpleJavaTest',
         module: 'module01/test/func',
         classInfo: {
+          labels: {
+            'SomeLabel.ClassLabel01': ['TestLabel class annotation']
+          },
           owners: {
             'FTEnvTeam_Main': ['FTestInventory category scrumteam'],
             'Team_01': ['ScrumTeam class annotation'],
@@ -69,14 +86,25 @@ describe('projectIndexer', function() {
           },
           ownersPartial: {
             'Team_02': ['ScrumTeam method annotation']
-          }
+          },
+          partialIN_DEV: [
+            "testFirstMethod_01"
+          ]
         },
         methodsInfo: {
           'testFirstMethod_01': {
+            IN_DEV: true,
+            labels: {
+              'IgnoreFailureReason.IN_DEV': ['TestLabel method annotation']
+            },
             name: 'testFirstMethod_01',
             owners: {}
           },
           'testSecondMethod_02': {
+            labels: {
+              'IgnoreFailureReason.Label1': ['TestLabel method annotation'],
+              'IgnoreFailureReason.Label2': ['TestLabel method annotation']
+            },
             name: 'testSecondMethod_02',
             owners: {
               'Team_02': ['ScrumTeam method annotation']
@@ -99,6 +127,7 @@ describe('projectIndexer', function() {
         rootFilesDetected: 0,
         lastScanFile: 'lastScan.log',
         reportFolder: undefined,
+        rescan: undefined,
         onReportGenerated: undefined,
         errors: [],
       });
@@ -124,6 +153,7 @@ describe('projectIndexer', function() {
         rootFilesDetected: 0,
         lastScanFile: 'lastScan.log',
         reportFolder: undefined,
+        rescan: undefined,
         onReportGenerated: undefined,
         errors: [],
       });
@@ -147,6 +177,7 @@ describe('projectIndexer', function() {
         rootFilesDetected: 1,
         lastScanFile: 'lastScan.log',
         reportFolder: undefined,
+        rescan: undefined,
         onReportGenerated: undefined,
         errors: [],
       });
@@ -164,6 +195,7 @@ describe('projectIndexer', function() {
         foldersProcessed: [],
         lastScanFile: 'lastScan.log',
         reportFolder: undefined,
+        rescan: undefined,
         onReportGenerated: undefined,
         errors: [],
       });
