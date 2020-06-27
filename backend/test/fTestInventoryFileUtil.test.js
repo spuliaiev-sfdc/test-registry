@@ -12,11 +12,23 @@ describe('fTestInventory', function() {
     it('Simple Inventory file', function () {
       let rootFolder = './test-projects/javaProject/';
       let fileName = 'module01/test/func/java/src/some/production/folder/SimpleJavaTest.java';
+      // let rootFolder = '/Users/spuliaiev/blt/app/main/core/';
+      // let fileName = 'industries-mfg-rebates/test/func/java/src/industries/mfg/rebates/entities/rebatemember/RebateProgramMemberUpdateTest.java';
       let realFileInfo = utils.analyseFileLocation(rootFolder, fileName);
       let inventoryFile = fTestInventory.findInventoryFile(path.resolve(realFileInfo.root, realFileInfo.moduleRoot));
       let inventoryInfo = fTestInventory.readAndVerifyInventoryFile(realFileInfo, inventoryFile);
       assert.equal(inventoryInfo.success, true);
       assert.equal(inventoryInfo.filename, 'ftest-inventory.xml');
+      assert.equal(!inventoryInfo.content, false);
+    });
+    it('Absent Inventory file for unit or strictunit tests', function () {
+      let rootFolder = './test-projects/javaProject/';
+      let fileName = 'module01/test/unit/java/src/unit/some/production/folder/SimpleJavaTest.java';
+      let realFileInfo = utils.analyseFileLocation(rootFolder, fileName);
+      let inventoryFile = fTestInventory.findInventoryFile(path.resolve(realFileInfo.root, realFileInfo.moduleRoot));
+      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile(realFileInfo, inventoryFile);
+      assert.equal(inventoryInfo.success, true);
+      assert.equal(inventoryInfo.content, null);
     });
   });
   describe('#findTestOwnershipInfo()', function() {
@@ -39,8 +51,13 @@ describe('fTestInventory', function() {
       assert.equal(classInventoryInfo.categoryPath, "Example Tests/TestsCategory01");
       assert.deepStrictEqual(classInventoryInfo.categoryElements, ['Example Tests', 'TestsCategory01']);
     });
-    it('Wrong inventory object', function () {
-      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile({moduleRoot: "module_00"}, undefined);
+    it('Wrong inventory object in regular project', function () {
+      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile({moduleRoot: "module_00", testKind: undefined}, undefined);
+      assert.equal(inventoryInfo.success, true);
+      assert.deepEqual(inventoryInfo.errors, []);
+    });
+    it('Wrong inventory object in regular project', function () {
+      let inventoryInfo = fTestInventory.readAndVerifyInventoryFile({moduleRoot: "module_00", testKind: 'func'}, undefined);
       assert.equal(inventoryInfo.success, false);
       assert.deepEqual(inventoryInfo.errors, ['FTestInventory file not found for module module_00']);
     });

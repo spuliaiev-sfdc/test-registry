@@ -59,9 +59,14 @@ const fTestInventoryFileUtil = {
       success: null
     }
     if (!inventoryFile) {
-      corUtils.error(`     FTestInventory file not found for module ${fileInfo.moduleRoot}`)
-      result.errors.push(`FTestInventory file not found for module ${fileInfo.moduleRoot}`);
-      result.success = false;
+      if (fileInfo.testKind === 'func') {
+        corUtils.error(`   FTestInventory file not found for module ${fileInfo.moduleRoot}`);
+        result.errors.push(`FTestInventory file not found for module ${fileInfo.moduleRoot}`);
+        result.success = false;
+        return result;
+      }
+      corUtils.trace(`   FTestInventory file not found for non-func test module ${fileInfo.moduleRoot}`);
+      result.success = true;
       return result;
     }
     const fileContent = inventoryFile.content;
@@ -179,30 +184,35 @@ const fTestInventoryFileUtil = {
       errors: [],
       success: null
     };
-    corUtils.info(`[analyseFTestInventoryFile] started FTestInventory file analysis ${fileInfo.relative}`);
+    corUtils.trace(`[analyseFTestInventoryFile] started FTestInventory file analysis ${fileInfo.relative}`);
     let inventoryFile = this.findInventoryFile(resolve(fileInfo.root, fileInfo.moduleRoot));
     if (!inventoryFile) {
-      corUtils.log(`   Ownership file not found:\t${fileInfo.moduleRoot}`);
-      result.errors.push(`Ownership file not found:\t${fileInfo.moduleRoot}`);
-      result.success = false;
+      if (fileInfo.testKind === 'func') {
+        corUtils.error(`   FTestInventory file not found for module ${fileInfo.moduleRoot}`);
+        result.errors.push(`FTestInventory file not found for module ${fileInfo.moduleRoot}`);
+        result.success = false;
+        return result;
+      }
+      corUtils.trace(`   FTestInventory file not found for non-func test module ${fileInfo.moduleRoot}`);
+      result.success = true;
       return result;
     }
     let rootRelativePath = path.join(fileInfo.moduleRoot, inventoryFile.fileName);
 
     let currentInventoryFileContent;
-    if (cachedInventoryFile) {
-      if (cachedInventoryFile.cachedFilePath === rootRelativePath) {
-        // read the cached file from memory
-        currentInventoryFileContent = cachedInventoryFile.content;
-      }
+    let currentInventoryFileAbsent = false;
+    if (cachedInventoryFile && cachedInventoryFile.cachedFilePath === rootRelativePath) {
+      // read the cached file from memory
+      currentInventoryFileContent = cachedInventoryFile.content;
+      currentInventoryFileAbsent = cachedInventoryFile.absent;
     }
 
     if (!currentInventoryFileContent) {
       // load the Ownership file as in memory is either wrong or absent
       let inventoryFileData = this.readAndVerifyInventoryFile(fileInfo, inventoryFile);
       if (!inventoryFileData.success) {
-        corUtils.log(`   Ownership file is wrong:\t${inventoryFileData.errors}`);
-        result.errors.push(`Ownership file is wrong:\t${inventoryFileData.errors}`);
+        corUtils.warn(`   FTestInventory file is wrong:\t${inventoryFileData.errors}`);
+        result.errors.push(`FTestInventory file is wrong:\t${inventoryFileData.errors}`);
         result.errors.push(inventoryFileData.errors);
         result.success = false;
         return result;
@@ -211,8 +221,9 @@ const fTestInventoryFileUtil = {
       if (cachedInventoryFile) {
         cachedInventoryFile.cachedFilePath = rootRelativePath;
         cachedInventoryFile.content = currentInventoryFileContent;
+        cachedInventoryFile.absent = currentInventoryFileAbsent;
       }
-      corUtils.info(`[analyseFTestInventoryFile] succeeded file load ${fileInfo.relative} Success:${inventoryFileData.success}`);
+      corUtils.trace(`[analyseFTestInventoryFile] succeeded file load ${fileInfo.relative} Success:${inventoryFileData.success}`);
     }
 
     fileInfo.fTestInventoryInfo = {
@@ -223,7 +234,7 @@ const fTestInventoryFileUtil = {
     fileInfo.fTestInventoryInfo.testInfo = inventoryInfo;
     fileInfo.fTestInventoryInfo.found = inventoryInfo.success && inventoryInfo.found;
 
-    corUtils.info(`[analyseFTestInventoryFile] finished FTestInventory file analysis ${fileInfo.relative}`);
+    corUtils.trace(`[analyseFTestInventoryFile] finished FTestInventory file analysis ${fileInfo.relative}`);
     return fileInfo.fTestInventoryInfo;
   }
 };

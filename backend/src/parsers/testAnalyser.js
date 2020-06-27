@@ -1,6 +1,7 @@
 const
   resolve = require('path').resolve,
   fs = require('fs'),
+  path = require('path'),
   corUtil = require("../corUtils"),
   yaml = require('yaml'),
   javaParser = require("./javaParser"),
@@ -33,25 +34,32 @@ const testAnalyser = {
   },
 
   analyseJavaTestFile(fileInfo) {
-    corUtil.info(`[analyseJavaTestFile] started Java file analysis ${fileInfo.relative}`);
+    corUtil.trace(`[analyseJavaTestFile] started Java file analysis ${fileInfo.relative}`);
     let fileFullPath = resolve(fileInfo.root, fileInfo.relative);
     let javaClassContent = fs.readFileSync(fileFullPath, "UTF-8").toString();
-    let parsingResult = javaParser.parseJavaContent(javaClassContent);
-    if(parsingResult.success === true) {
-      corUtil.info(`[analyseJavaTestFile] succeeded file analysis ${fileInfo.relative} Error: ${parsingResult.success}`);
-    } else {
-      corUtil.error(`[analyseJavaTestFile] failed file analysis ${fileInfo.relative} Error: ${parsingResult.success}`);
+    let parsingResult;
+    try {
+      parsingResult = javaParser.parseJavaContent(javaClassContent, fileInfo);
+      if (parsingResult.success === true) {
+        corUtil.trace(`[analyseJavaTestFile] succeeded file analysis ${fileInfo.relative} Error: ${parsingResult.success}`);
+      } else {
+        corUtil.error(`[analyseJavaTestFile] failed file analysis ${fileInfo.relative} Error: ${parsingResult.success}`);
+      }
+      fileInfo.javaInfo = parsingResult;
+    } catch (e) {
+      corUtil.error(`Failed parsing of java file ${fileInfo.relative}`, e);
     }
-    fileInfo.javaInfo = parsingResult;
 
-    corUtil.info(`[analyseJavaTestFile] finished file analysis ${fileInfo.relative}`);
+    corUtil.trace(`[analyseJavaTestFile] finished file analysis ${fileInfo.relative}`);
     return parsingResult;
   },
 
   writeReport(fileInfo, reportFolder) {
     let reportObject = this.renderReport(fileInfo);
     if (reportFolder) {
-      let reportFileYaml = resolve(reportFolder, fileInfo.filename + ".yaml");
+      let reportFolderForModule = path.join(reportFolder, fileInfo.module);
+      fs.mkdirSync(reportFolderForModule, {recursive: true});
+      let reportFileYaml = resolve(reportFolderForModule, fileInfo.filename + ".yaml");
       let reportTextYaml = yaml.stringify(reportObject);
       fs.writeFileSync(reportFileYaml, reportTextYaml);
 
@@ -64,31 +72,41 @@ const testAnalyser = {
 
   renderReport(fileInfo) {
     let report = {};
-    Object.assign(report, fileInfo.javaInfo.javaOwnershipInfo);
+    if (fileInfo.javaInfo && fileInfo.javaInfo.javaOwnershipInfo) {
+      Object.assign(report, fileInfo.javaInfo.javaOwnershipInfo);
+    }
 
     report.class = fileInfo.javaClassFQN;
     report.module = fileInfo.moduleRoot;
 
-    if (fileInfo.ownershipFile && fileInfo.ownershipFile.owningTeam) {
-      // copy information into target owners
-      corUtil.addTagInfo(report.classInfo.owners, fileInfo.ownershipFile.owningTeam, "Ownership.yaml");
+    if (fileInfo.ownershipFile && fileInfo.ownershipFile.owningTeam && report.classInfo) {
+      if (report.classInfo) {
+        // copy information into target owners
+        corUtil.addTagInfo(report.classInfo.owners, fileInfo.ownershipFile.owningTeam, "Ownership.yaml");
+      } else {
+        corUtil.warn(`Attempt to add ownership info to non-Java class ${fileInfo.relative}`);
+      }
     }
 
     if (fileInfo.fTestInventoryInfo && fileInfo.fTestInventoryInfo.found) {
-      // copy information into target owners
-      corUtil.addTagInfo(report.classInfo.owners, fileInfo.fTestInventoryInfo.testInfo.owners);
+      if (report.classInfo) {
+        // copy information into target owners
+        corUtil.addTagInfo(report.classInfo.owners, fileInfo.fTestInventoryInfo.testInfo.owners);
+      } else {
+        corUtil.warn(`Attempt to add fTestInventory to non-Java class ${fileInfo.relative}`);
+      }
     }
 
     return report;
   },
 
   analyseOwnershipFile(fileInfo, cachedOwnershipFile) {
-    corUtil.info(`[analyseJavaTestFile] started Ownership file analysis for ${fileInfo.relative}`);
+    corUtil.trace(`[analyseJavaTestFile] started Ownership file analysis for ${fileInfo.relative}`);
     return ownersFileUtil.getFileOwningTeam(fileInfo, cachedOwnershipFile);
   },
 
   analyseFTestInventoryFile(fileInfo, cachedInventoryFile) {
-    corUtil.info(`[analyseJavaTestFile] FTestInventory file analysis for ${fileInfo.relative}`);
+    corUtil.trace(`[analyseJavaTestFile] FTestInventory file analysis for ${fileInfo.relative}`);
     fTestInventoryFileUtil.getTestOwningTeam(fileInfo, cachedInventoryFile);
     return fileInfo.fTestInventoryInfo;
   }

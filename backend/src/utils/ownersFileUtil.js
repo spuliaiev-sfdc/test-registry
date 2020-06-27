@@ -10,7 +10,7 @@ const ownersFileUtil = {
   DEFAULT_OWNERSHIP_FILE_PATH: '/java/resources/ownership.yaml',
 
   readAndVerifyOwnershipFile: function (rootFolder, relativePath) {
-    utils.trace(`[readAndVerifyOwnershipFile] Ownership file:\t${relativePath}`);
+    utils.trace(`[readAndVerifyOwnershipFile] Ownership file: ${relativePath}`);
 
     let fullPath = path.join(rootFolder, relativePath);
     let result = {
@@ -32,20 +32,26 @@ const ownersFileUtil = {
       result.success = false;
       return result;
     }
-    let currentOwnersFileContent = yaml.parse(fileContent);
-    if (!currentOwnersFileContent.ownership || !Array.isArray(currentOwnersFileContent.ownership) || currentOwnersFileContent.ownership.length === 0) {
-      utils.error(`     Ownership file doesn't have any ownership definitions!  ${relativePath}`)
-      result.errors.push(`Ownership file doesn't have any ownership definitions:  ${relativePath}`);
+    try {
+      let currentOwnersFileContent = yaml.parse(fileContent);
+      if (!currentOwnersFileContent.ownership || !Array.isArray(currentOwnersFileContent.ownership) || currentOwnersFileContent.ownership.length === 0) {
+        utils.error(`     Ownership file doesn't have any ownership definitions!  ${relativePath}`)
+        result.errors.push(`Ownership file doesn't have any ownership definitions:  ${relativePath}`);
+        result.success = false;
+        return result;
+      } else {
+        let ownerInfo = currentOwnersFileContent.ownership[0];
+        // when this is the first declared team and it doesnt have any path - assume it owns everything
+        let owningTeam = ownerInfo.team;
+        utils.trace(`      Default team: ${owningTeam}`);
+        result.content = currentOwnersFileContent;
+        result.success = true;
+        result.defaultOwningTeam = owningTeam;
+      }
+    } catch (e) {
+      utils.error(`     Ownership file is broken ${relativePath}`, e)
+      result.errors.push(`Ownership file is broken: ${relativePath}`);
       result.success = false;
-      return result;
-    } else {
-      let ownerInfo = currentOwnersFileContent.ownership[0];
-      // when this is the first declared team and it doesnt have any path - assume it owns everything
-      let owningTeam = ownerInfo.team;
-      utils.log(`      Default team: ${owningTeam}`);
-      result.content = currentOwnersFileContent;
-      result.success = true;
-      result.defaultOwningTeam = owningTeam;
     }
     return result;
   },
@@ -73,7 +79,7 @@ const ownersFileUtil = {
       utils.trace("[getFileOwningTeam] get file from filesystem");
       let loadResult = this.readAndVerifyOwnershipFile(path.resolve(fileInfo.root, fileInfo.moduleRoot), relativePath);
       if (!loadResult.success) {
-        utils.log(`   Ownership file load failed:\t${loadResult.errors}`);
+        utils.warn(`   Ownership file load failed: ${loadResult.errors}`);
         result.errors.push(`Ownership file is wrong:\t${loadResult.errors}`);
         result.errors.push(loadResult.errors);
         result.success = false;
@@ -96,7 +102,7 @@ const ownersFileUtil = {
     let owningTeam = ownersFileUtil.evaluateOwnerFileRules(currentOwnersFileContent, fileInfo.moduleRoot, fileInfo.relativeToModuleRoot);
 
     if (owningTeam) {
-      utils.info(`     ${owningTeam} \t ${fileInfo.relativeToModuleRoot}\t ${fileInfo.relative}`);
+      utils.trace(`     ${owningTeam} \t ${fileInfo.relativeToModuleRoot}\t ${fileInfo.relative}`);
     } else {
       utils.warn(`     Owning team not defined for operation \t ${fileInfo.relative}`)
       owningTeam = "UNASSIGNED";

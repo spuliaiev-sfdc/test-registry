@@ -96,9 +96,9 @@ const projectIndexer = {
         // verify that this folder has not yet been processed
         let needsToBeProcessed = !runInfo.foldersProcessedAlready.has(status.currentPath);
         if (needsToBeProcessed) {
-          utils.info(`Folder processing ${status.foldersProcessed} / ${status.foldersListToProcess} : ${status.currentPath}`);
+          utils.info(`Folder processing ${status.foldersProcessed} / ${status.foldersListToProcess.length} : ${status.currentPath}`);
         } else {
-          utils.trace(`Folder skipped    ${status.foldersProcessed} / ${status.foldersListToProcess} : ${status.currentPath}`);
+          utils.trace(`Folder skipped    ${status.foldersProcessed} / ${status.foldersListToProcess.length} : ${status.currentPath}`);
         }
         return needsToBeProcessed;
       }

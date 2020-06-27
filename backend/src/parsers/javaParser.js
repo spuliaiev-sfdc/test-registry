@@ -55,8 +55,20 @@ const javaParser = {
     return children ? this.extractExpressionValue(children[0]) : null;
   },
 
-  parseJavaContent(fileContent) {
-    let content = parser.parse(fileContent);
+  parseJavaContent(fileContent, fileInfo) {
+    let content;
+    try {
+      content = parser.parse(fileContent);
+      if (!content) {
+        throw Error(`Java file parsing failed ${fileInfo.related}`);
+      }
+    } catch (e) {
+      corUtil.error(`Failed to parse java file ${fileInfo.related}`, e);
+      return {
+        success: false,
+        errors: [ `Failed to parse java file ${fileInfo.related}`]
+      };
+    }
     let info = this.extractClassesInfo(content, fileContent);
 
     let javaOwnershipInfo = this.extractOwnershipInfo(info, content);
@@ -102,27 +114,34 @@ const javaParser = {
     classInfo.superclass = this.getParticularChildValue(false, classDeclaration, "extractClassInfo", "superclass", "classType", "Identifier");
     classInfo.className = this.getIdentifier(classDeclaration, "typeIdentifier");
 
-    let classBody = this.checkParticularChildren(true, classDeclaration, "extractClassInfo", "classBody", "classBodyDeclaration");
+    let classBodyWrapper = this.checkParticularChildren(true, classDeclaration, "extractClassInfo", "classBody");
+    let classBody;
+    if (classBodyWrapper && Array.isArray(classBodyWrapper)) {
+      classBody = this.checkParticularChildren(false, classBodyWrapper[0], "extractClassInfo", "classBodyDeclaration");
+    }
 
     classInfo.other = [];
     classInfo.fields = [];
     classInfo.methods = [];
-    for (let memberIndex=0; memberIndex < classBody.length; memberIndex++) {
-      let memberDeclaration = classBody[memberIndex];
-      let memberInfo = this.extractClassBodyInfo(classInfo, memberDeclaration);
-      if (!memberInfo) {
-        continue;
-      }
-      if (memberInfo.kind === 'field') {
-        classInfo.fields.push(memberInfo);
-      } else {
-        if (memberInfo.kind === 'method') {
-          classInfo.methods.push(memberInfo);
+
+    if (classBody) {
+      // it might be absent for empty classes
+      for (let memberIndex=0; memberIndex < classBody.length; memberIndex++) {
+        let memberDeclaration = classBody[memberIndex];
+        let memberInfo = this.extractClassBodyInfo(classInfo, memberDeclaration);
+        if (!memberInfo) {
+          continue;
+        }
+        if (memberInfo.kind === 'field') {
+          classInfo.fields.push(memberInfo);
         } else {
-          classInfo.other.push(memberInfo);
+          if (memberInfo.kind === 'method') {
+            classInfo.methods.push(memberInfo);
+          } else {
+            classInfo.other.push(memberInfo);
+          }
         }
       }
-
     }
 
 
@@ -135,9 +154,12 @@ const javaParser = {
 
     let ordinaryCompilationUnit = this.checkParticularChild(true, content, "getFirstClassDeclaration", "ordinaryCompilationUnit");
     let typeDeclaration = this.checkParticularChild(true, ordinaryCompilationUnit, "getFirstClassDeclaration", "typeDeclaration");
-    let firstClassDeclaration = this.checkParticularChild(true, typeDeclaration, "getFirstClassDeclaration", "classDeclaration");
-    let classInfo = this.extractClassInfo(firstClassDeclaration, typeDeclaration);
-    classesInfo.classes.push(classInfo);
+    let firstClassDeclaration = this.checkParticularChild(false, typeDeclaration, "getFirstClassDeclaration", "classDeclaration");
+    if (firstClassDeclaration) {
+      let classInfo = this.extractClassInfo(firstClassDeclaration, typeDeclaration);
+      classesInfo.classes.push(classInfo);
+      // this might be an Interface or Enum - so no class to parse
+    }
 
     return classesInfo;
   },
@@ -325,6 +347,28 @@ const javaParser = {
     return javaOwn;
   },
   classInfoPostprocessing(info, classInfo, javaOwn) {
+    // remove methods not starting with test
+    for (let methodName in javaOwn.methodsInfo) {
+      if (!methodName.startsWith("test")) {
+        if (!javaOwn.ignoredMethods) {
+          javaOwn.ignoredMethods = [];
+        }
+        javaOwn.ignoredMethods.push(methodName);
+        delete javaOwn.methodsInfo[methodName];
+        continue;
+      }
+      let labels = javaOwn.methodsInfo[methodName].labels;
+      for (let labelName in labels) {
+        if (labelName.endsWith("IN_DEV")) {
+          javaOwn.methodsInfo[methodName].IN_DEV = true;
+          if (!classInfo.partialIN_DEV) {
+            javaOwn.classInfo.partialIN_DEV = [];
+          }
+          javaOwn.classInfo.partialIN_DEV.push(methodName);
+        }
+      }
+    }
+
     // Copy method owners to the class.ownersPartial
     for (let methodName in javaOwn.methodsInfo) {
       let owners = javaOwn.methodsInfo[methodName].owners;

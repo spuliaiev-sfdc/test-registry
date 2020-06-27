@@ -5,7 +5,7 @@
   "main": "./src/index.js",
   "scripts": {
     "test": "mocha",
-    "start": "npm src/check.js"
+    "index": "node src/registry.js -c index"
   },
   "author": "",
   "license": "ISC",

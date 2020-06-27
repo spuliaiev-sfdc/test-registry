@@ -1,5 +1,6 @@
 var
   assert = require('assert'),
+  fs = require('fs'),
   utils = require('../src/corUtils.js')
     // This is just to set logging to warnings level
     .warningsOnly(),
@@ -45,6 +46,12 @@ public class SimpleJavaTest extends JavaBaseTest {
     public void testSecondMethod_02() throws Exception {
         // Do some other testing 02
     }
+    
+    public void fsetPresetup(){
+    }
+    
+    private void internalMethod() {
+    }
 
 }
 `;
@@ -80,13 +87,15 @@ describe('javaParserSample', function() {
 describe('javaParser', function() {
   describe('#parseJavaContent() - Simple Class', function() {
     it('should successfully parse simple Java', function() {
-      let parsingResult = javaParser.parseJavaContent(javaSimpleClass);
+      let fileInfo = { related: 'SomeFile.java' };
+      let parsingResult = javaParser.parseJavaContent(javaSimpleClass, fileInfo);
       assert.equal(parsingResult.success, true);
     });
   });
   describe('#parseJavaContent() - Simple Test Class', function() {
     it('should successfully parse simple Java with JavaDoc', function() {
-      let parsingResult = javaParser.parseJavaContent(javaDocClass);
+      let fileInfo = { related: 'SomeFile.java' };
+      let parsingResult = javaParser.parseJavaContent(javaDocClass, fileInfo);
       assert.equal(parsingResult.success, true);
       assert.deepEqual(parsingResult.info, {
         'classes': [{
@@ -120,8 +129,17 @@ describe('javaParser', function() {
         }]
       });
     });
+    // it('should fail to parse Particular Test Java', function() {
+      // let someContent = fs.readFileSync("/Users/spuliaiev/blt/app/main/core/ui-services-private/test/unit/java/src/strictunit/ui/services/internal/cache/UnAuthorizedSerializableForTest.java", 'utf8');
+      // let someContent = fs.readFileSync("/Users/spuliaiev/blt/app/main/core/industries-mfg-rebates/test/func/java/src/industries/mfg/rebates/entities/rebatetypebenefit/ProgramRebateTypeBenefitCreateTest.java", 'utf8');
+      // let someContent = fs.readFileSync("/Users/spuliaiev/blt/app/main/core/zero-shared/test/unit/java/src/strictunit/zero/zorse/ZorseMessageEnqueueTest.java", 'utf8');
+      // let fileInfo = { related: 'SomeFile.java' };
+      // let parsingResult = javaParser.parseJavaContent(someContent, fileInfo);
+      // assert.equal(parsingResult.success, false);
+    // });
     it('should successfully parse simple Test Java', function() {
-      let parsingResult = javaParser.parseJavaContent(javaTestClass);
+      let fileInfo = { related: 'SomeFile.java' };
+      let parsingResult = javaParser.parseJavaContent(javaTestClass, fileInfo);
       assert.equal(parsingResult.success, true);
       assert.deepEqual(parsingResult.javaOwnershipInfo, {
         classInfo: {
@@ -136,6 +154,10 @@ describe('javaParser', function() {
             "testFirstMethod_01"
           ]
         },
+        ignoredMethods: [
+          'fsetPresetup',
+          'internalMethod'
+        ],
         methodsInfo: {
           'testFirstMethod_01': {
             IN_DEV: true,
