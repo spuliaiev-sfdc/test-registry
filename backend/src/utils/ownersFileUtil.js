@@ -77,7 +77,7 @@ const ownersFileUtil = {
     if (!currentOwnersFileContent) {
       // load the Ownership file as in memory is either wrong or absent
       utils.trace("[getFileOwningTeam] get file from filesystem");
-      let loadResult = this.readAndVerifyOwnershipFile(path.resolve(fileInfo.root, fileInfo.moduleRoot), relativePath);
+      let loadResult = this.readAndVerifyOwnershipFile(fileInfo.root, path.join(fileInfo.moduleRoot, relativePath));
       if (!loadResult.success) {
         utils.warn(`   Ownership file load failed: ${loadResult.errors}`);
         result.errors.push(`Ownership file is wrong:\t${loadResult.errors}`);

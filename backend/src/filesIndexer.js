@@ -110,9 +110,7 @@ const filesIndexer = {
       let currentPath = status.foldersListToProcess.pop();
       status.currentPath = currentPath;
       status.currentFullPath = resolve(status.root, currentPath);
-      if (!callbackFolder || callbackFolder(status, "start")) {
-        scanFolder(status.currentFullPath, callbackFile, callbackFolder, callbackErr);
-      }
+      scanFolder(status.currentFullPath, callbackFile, callbackFolder, callbackErr);
     }
     callbackFolder(status, "finish_all");
   },
