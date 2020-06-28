@@ -74,6 +74,8 @@ describe('projectIndexer', function() {
       assert.deepEqual(fileInfo.report, {
         class: 'some.production.folder.SimpleJavaTest',
         module: 'module01/test/func',
+        relative: 'module01/test/func/java/src/some/production/folder/SimpleJavaTest.java',
+        testKind: 'func',
         classInfo: {
           labels: {
             'SomeLabel.ClassLabel01': ['TestLabel class annotation']
@@ -121,7 +123,7 @@ describe('projectIndexer', function() {
       let result = projectIndexer.iterateProject(rootFolder);
       assert.deepEqual(result, {
         foldersProcessedAlready: new Set([]),
-        foldersProcessed: [],
+        foldersProcessed: 0,
         rootFolder: './test-projects/empty',
         rootFoldersDetected: 0,
         rootFilesDetected: 0,
@@ -139,15 +141,7 @@ describe('projectIndexer', function() {
       let result = projectIndexer.iterateProject(rootFolder);
       assert.deepEqual(result, {
         foldersProcessedAlready: new Set([]),
-        foldersProcessed: [
-          'folder_02',
-          'folder_02/java',
-          'folder_02/java/src',
-          'folder_02/java/src/package_02_01',
-          'folder_01',
-          'folder_01/java',
-          'folder_01/java/src'
-        ],
+        foldersProcessed: 7,
         rootFolder: './test-projects/small',
         rootFoldersDetected: 2,
         rootFilesDetected: 0,
@@ -165,12 +159,7 @@ describe('projectIndexer', function() {
       let result = projectIndexer.iterateProject(rootFolder);
       assert.deepEqual(result, {
         foldersProcessedAlready: new Set(['folder_01']),
-        foldersProcessed: [
-          'folder_02',
-          'folder_02/java',
-          'folder_02/java/src',
-          'folder_02/java/src/package_02_01'
-        ],
+        foldersProcessed: 4,
         lastScanFound: true,
         rootFolder: './test-projects/smallPartial',
         rootFoldersDetected: 2,
@@ -192,7 +181,7 @@ describe('projectIndexer', function() {
         rootFoldersDetected: 0,
         rootFilesDetected: 0,
         foldersProcessedAlready: new Set([]),
-        foldersProcessed: [],
+        foldersProcessed: 0,
         lastScanFile: 'lastScan.log',
         reportFolder: undefined,
         rescan: undefined,

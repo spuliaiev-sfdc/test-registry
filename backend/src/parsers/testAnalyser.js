@@ -78,6 +78,7 @@ const testAnalyser = {
 
     report.class = fileInfo.javaClassFQN;
     report.module = fileInfo.moduleRoot;
+    report.testKind = fileInfo.testKind;
     report.relative = fileInfo.relative;
 
     if (fileInfo.ownershipFile && fileInfo.ownershipFile.owningTeam && report.classInfo) {
