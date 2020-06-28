@@ -227,37 +227,43 @@ const corUtils = {
         filename: this.getFileNameNoExt(relativeFileName)
     };
 
-    info.testFolder = parts[1] === "test";
+    info.testFolder = parts[1] === "test" || parts[1] === "func" || parts[1] === "unit";
+    let moduleRootOffset = 0;
+    let moduleSrcOffset = 0;
     if (info.testFolder) {
-      info.moduleSrcPath = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+parts[3]+"/"+parts[4];
-      info.moduleRoot = parts[0]+"/"+parts[1]+"/"+parts[2];
-
-      if (parts[2] === "func") {
+      moduleRootOffset = 1;
+      if (parts[1] === "test") {
+        // step one level down
+        moduleRootOffset++;
+      }
+      if (parts[moduleRootOffset] === "func") {
         info.testKind = "func";
+        moduleRootOffset = parts[1] === "test" ? 2 : 1;
       } else {
         // check if this is unit test
-        if (parts[2] === "unit") {
+        if (parts[moduleRootOffset] === "unit") {
           // clarify the kind of unit test - generic or strict
-          if (parts[5] === "unit") {
+          // type of unit test + one more time in sources
+          moduleSrcOffset++;
+          if (parts[moduleRootOffset+3] === "unit") {
             info.testKind = "unit";
           } else {
-            if (parts[5] === "strictunit") {
+            if (parts[moduleRootOffset+3] === "strictunit") {
               info.testKind = "strictunit";
             } else {
               info.testKind = "unknown-unit-test";
             }
           }
           // add the kind of unit test
-          info.moduleSrcPath = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+parts[3]+"/"+parts[4]+"/"+parts[5];
         } else {
           info.testKind = "unknown";
           corUtils.warn(` Unknown test folder detected ${relativeFileName}`);
         }
       }
-    } else {
-      info.moduleSrcPath = parts[0]+"/"+parts[1]+"/"+parts[2];
-      info.moduleRoot = parts[0];
     }
+    info.moduleSrcPath = parts.slice(0, moduleRootOffset+3+moduleSrcOffset).join("/");
+    info.moduleRoot = parts.slice(0, moduleRootOffset+1).join("/");
+
     // remove the module path and following slash
     info.relativeToModuleSrc = info.relative.substring(info.moduleSrcPath.length+1);
     info.relativeToModuleRoot = info.relative.substring(info.moduleRoot.length+1);

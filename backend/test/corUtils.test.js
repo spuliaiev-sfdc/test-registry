@@ -115,6 +115,24 @@ describe('corUtils', function() {
           testKind: 'strictunit'
       });
     });
+    it('Check for java func test file without test parent folder', function () {
+      let result = utils.analyseFileLocation('~/blt/app/main/core', 'module-test/func/java/src/pk1/pk2/ClassWithOtherLogicTest.java');
+      assert.deepEqual(result , {
+        ext: 'java',
+        filename: 'ClassWithOtherLogicTest',
+        module: 'module-test',
+        modulePath: 'module-test',
+        moduleRoot: 'module-test/func',
+        moduleSrcPath: 'module-test/func/java/src',
+        relative: 'module-test/func/java/src/pk1/pk2/ClassWithOtherLogicTest.java',
+        relativeToModuleRoot: 'java/src/pk1/pk2/ClassWithOtherLogicTest.java',
+        relativeToModuleSrc: 'pk1/pk2/ClassWithOtherLogicTest.java',
+        javaClassFQN: 'pk1.pk2.ClassWithOtherLogicTest',
+        root: '~/blt/app/main/core',
+        testFolder: true,
+        testKind: 'func'
+      });
+    });
   });
   describe('#addTagInfo()', function() {
     it('Add to empty owners', function () {
