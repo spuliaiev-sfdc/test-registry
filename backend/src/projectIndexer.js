@@ -33,7 +33,7 @@ const projectIndexer = {
     runInfo.rootFoldersDetected = 0;
     runInfo.rootFilesDetected = 0;
     runInfo.foldersProcessedAlready = new Set();
-    runInfo.foldersProcessed = [];
+    runInfo.foldersProcessed = 0;
     runInfo.errors = [];
 
     runInfo.lastScanFile = "lastScan.log";
@@ -106,7 +106,7 @@ const projectIndexer = {
         utils.info(`Folder ${status.foldersProcessed} processed, left:  ${status.foldersListToProcess.length}, operation: ${operation} for ${status.currentPath}`);
         if(status.currentPath !== ".") {
           // Do not store the current folder in the list of processed folders
-          runInfo.foldersProcessed.push(status.currentPath);
+          runInfo.foldersProcessed++;
           // Append the current processed ROOT folder into the list of processed folders in last sync file
           if (!status.currentPath.includes("/")) {
             this.addProcessedFolderToScanFile(runInfo, status.currentPath);

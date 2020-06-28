@@ -1,0 +1,1 @@
+cat execution.log | grep '\[ERROR\]' | sort -u | grep -v 'test/unit'> ex_errs.log
