@@ -1,11 +1,10 @@
-const express = require('express'),
-  app = express(),
+const
   fs = require('fs'),
   shell = require('shelljs'),
   path = require('path'),
-  bodyParser = require('body-parser'),
   resolve = require('path').resolve,
   utils = require('./corUtils.js'),
+  server = require('./server/server.js'),
   projectIndexer = require('./projectIndexer'),
   dateFormat = require('dateformat');
 
@@ -33,7 +32,7 @@ let args = require('minimist')(process.argv.slice(2), {
     t: 'to-date',       // From Date for analysis
     u: 'users',         // Users to analyse
     // s: 'server',        // Run as Server
-    // p: 'port',          //`Port to run the server on (default is ${defaultPort})`,
+    p: 'port',          //`Port to run the server on (default is ${defaultPort})`,
 
     m: 'module',         // verify only the following module
     g: 'google-sheet'    // add three additional columns for google sheet page
@@ -77,90 +76,87 @@ function printHelp() {
   utils.clean('        - This item has no defined action yet');
 }
 
-if (args.s) {
-  // Change the limits according to your response size
-  app.use(bodyParser.json({limit: '50mb', extended: true}));
-  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-  // app.use(requestHelper.requestProcessor);
-  app.listen(defaultPort, '127.0.0.1', () => {
-    utils.log(`CORE files ownership checker App ${VERSION} is listening now! Send them requests my way http://127.0.0.1:${defaultPort}/** !`);
-    utils.log(`Data for simulation is being stored at location: ${path.join(process.cwd(), folderPath)}`);
-  });
+let prefixColumns = args.g | false; // prefix columns for google sheet
+if (prefixColumns) {
+  utils.defaultLogPrefix = "\t\t\t";
 } else {
-  let prefixColumns = args.g | false; // prefix columns for google sheet
-  if (prefixColumns) {
-    utils.defaultLogPrefix = "\t\t\t";
-  } else {
-    utils.defaultLogPrefix = "";
-  }
-
-  utils.log(`CORE files ownership checker App ${VERSION}`);
-  utils.log(`  direct step execution run`);
-  let coreFolder = args.a || defaultCorePath;
-  let dataFolder = args.d || defaultDataPath;
-  let outputFolder = args.o || dataFolder;
-  let inputFile = args.i;
-  let rescan = args.r;
-  let dateFrom = args.f;
-  let dateTo = args.t;
-  let module = args.m;
-  if(args.v) { // Verbose output
-    utils.logLevelThreshold = 10;
-  }
-  if(args.c) { // Colored Output
-    require('colors').enable();
-  } else {
-    require('colors').disable();
-  }
-
-  // TEST VALUES
-  if (!outputFolder.startsWith("/")) {
-    outputFolder = resolve(outputFolder);
-  }
-  if (!coreFolder.startsWith("/")) {
-    coreFolder = resolve(coreFolder);
-  }
-  if (!dataFolder.startsWith("/")) {
-    dataFolder = resolve(dataFolder);
-  }
-
-  utils.log(`  core    : ${coreFolder}`);
-  utils.log(`  data    : ${dataFolder}`);
-  if (inputFile) {
-    utils.log(`  file    : ${inputFile}`);
-  }
-
-  if (outputFolder.endsWith("/")) {
-    // Add the current stamp of run
-    let date = new Date();
-    let dateStr = dateFormat(date, "yyyy-mm-dd_HH-MM-ss");
-    outputFolder += dateStr;
-    utils.log(`  output  : ${outputFolder}`);
-  } else {
-    utils.log(`  output  : ${outputFolder}`);
-  }
-
-
-  if (module) {
-    utils.log(`  module  : ${module}`);
-  }
-
-  if (args.h) {
-    printHelp();
-    process.exit(1);
-  }
-  if (!fs.existsSync(outputFolder)) {
-    fs.mkdirSync(outputFolder, { recursive: true });
-  }
-
-
-  if (args._.includes("index")) {
-    let runInfo = projectIndexer.iterateProject(coreFolder, outputFolder, rescan, module);
-    console.info(`Run finished`, runInfo);
-    return;
-  }
-
-  utils.clean("Unknown command supplied.");
-  printHelp();
-  process.exit(0);
+  utils.defaultLogPrefix = "";
 }
+
+utils.log(`CORE files Tests Ownership checker App ${VERSION}`);
+utils.log(`  direct step execution run`);
+let coreFolder = args.a || defaultCorePath;
+let dataFolder = args.d || defaultDataPath;
+let outputFolder = args.o || dataFolder;
+let inputFile = args.i;
+let rescan = args.r;
+let dateFrom = args.f;
+let dateTo = args.t;
+let port = args.port || defaultPort;
+let moduleToRunFor = args.m;
+if(args.v) { // Verbose output
+  utils.logLevelThreshold = 10;
+}
+if(args.c) { // Colored Output
+  require('colors').enable();
+} else {
+  require('colors').disable();
+}
+
+// TEST VALUES
+if (!outputFolder.startsWith("/")) {
+  outputFolder = resolve(outputFolder);
+}
+if (!coreFolder.startsWith("/")) {
+  coreFolder = resolve(coreFolder);
+}
+if (!dataFolder.startsWith("/")) {
+  dataFolder = resolve(dataFolder);
+}
+
+utils.log(`  core    : ${coreFolder}`);
+utils.log(`  data    : ${dataFolder}`);
+if (inputFile) {
+  utils.log(`  file    : ${inputFile}`);
+}
+
+if (outputFolder.endsWith("/")) {
+  // Add the current stamp of run
+  let date = new Date();
+  let dateStr = dateFormat(date, "yyyy-mm-dd_HH-MM-ss");
+  outputFolder += dateStr;
+  utils.log(`  output  : ${outputFolder}`);
+} else {
+  utils.log(`  output  : ${outputFolder}`);
+}
+
+
+if (moduleToRunFor) {
+  utils.log(`  module  : ${moduleToRunFor}`);
+}
+
+if (args.h) {
+  printHelp();
+  process.exit(1);
+}
+if (!fs.existsSync(outputFolder)) {
+  fs.mkdirSync(outputFolder, { recursive: true });
+}
+
+
+if (args._.includes("index")) {
+  let runInfo = projectIndexer.iterateProject(coreFolder, outputFolder, rescan, moduleToRunFor);
+  console.info(`Run finished`, runInfo);
+  return;
+}
+
+if (args._.includes("server")) {
+  utils.log(`CORE files Test Ownership checker App ${VERSION} is listening now! Send them requests my way http://127.0.0.1:${defaultPort}/** !`);
+  let runInfo = server.startServer({coreFolder, outputFolder, port});
+  console.info(`Run finished`, runInfo);
+  return;
+}
+
+utils.clean("Unknown command supplied.");
+printHelp();
+process.exit(0);

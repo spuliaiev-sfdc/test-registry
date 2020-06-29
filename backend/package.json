@@ -5,7 +5,8 @@
   "main": "./src/index.js",
   "scripts": {
     "test": "mocha",
-    "index": "node src/registry.js -c index"
+    "index": "node src/registry.js index -c ",
+    "dev": "nodemon src/registry.js server -c"
   },
   "author": "",
   "license": "ISC",
@@ -14,7 +15,7 @@
     "body-parser": "^1.18.3",
     "colors": "^1.4.0",
     "dateformat": "^3.0.3",
-    "express": "^4.16.3",
+    "express": "^4.17.1",
     "fast-xml-parser": "^3.17.4",
     "java-parser": "^0.8.0",
     "js-sorted-set": "^0.6.0",
@@ -23,10 +24,12 @@
     "minimist": "^1.2.0",
     "mocha": "^6.2.2",
     "p4api": "^3.3.1",
+    "pug": "^3.0.0",
     "shelljs": "^0.8.2",
     "yaml": "^1.9.2"
   },
   "devDependencies": {
+    "nodemon": "^2.0.4",
     "nyc": "^15.1.0"
   }
 }
