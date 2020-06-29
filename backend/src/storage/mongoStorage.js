@@ -9,16 +9,25 @@ let database = null;
 const mongoStorage = {
   database: null,
 
-  startDatabase() {
-    const mongo = new MongoMemoryServer();
-    const mongoDBURL = mongo.getConnectionString();
-    const connection = MongoClient.connect(mongoDBURL, {useNewUrlParser: true});
-    database = connection.db();
+  async startDatabase(withInMemoryDB) {
+    let mongoDBURL = "mongodb://localhost:27017/TestRegistry";
+    try {
+      if (withInMemoryDB) {
+        const mongo = new MongoMemoryServer();
+        mongoDBURL = await mongo.getConnectionString();
+      }
+      const connection = await MongoClient.connect(mongoDBURL, {useNewUrlParser: true});
+      this.database = connection.db();
+      return this.database;
+    } catch (e) {
+      return null;
+    }
   },
 
-  getDatabase() {
-    if (!database) this.startDatabase();
-    return database;
+  async getDatabase() {
+    if (!this.database)
+      await this.startDatabase();
+    return this.database;
   }
 }
 

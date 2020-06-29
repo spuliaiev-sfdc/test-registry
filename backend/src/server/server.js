@@ -12,12 +12,13 @@ const server = {
   outputFolder: null,
   logsFolder: null,
 
-  startServer(options) {
+  async startServer(options) {
     const app = express();
     this.coreFolder = options.coreFolder;
     this.outputFolder = options.outputFolder;
     this.logsFolder = options.logsFolder;
     this.port = options.port;
+    this.database = options.database;
 
     app.set("views", path.resolve("server/views"));
     app.use(express.static(path.resolve("server/public")));

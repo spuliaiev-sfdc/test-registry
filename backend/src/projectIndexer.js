@@ -7,16 +7,7 @@ const
 
 const projectIndexer = {
 
-  iterateProject(rootFolder, reportFolder, rescan, module, onReportGenerated) {
-    let runInfo = {
-      rootFolder,
-      // place to store report files
-      reportFolder: reportFolder,
-      // handler to react on report created for file
-      onReportGenerated: onReportGenerated,
-      rescan: rescan,
-      module: module
-    };
+  iterateProject(runInfo) {
     this.prepareRootFolderInfo(runInfo);
     utils.info("Execution information", runInfo);
 

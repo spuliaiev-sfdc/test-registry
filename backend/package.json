@@ -23,6 +23,8 @@
     "micromatch": "^4.0.2",
     "minimist": "^1.2.0",
     "mocha": "^6.2.2",
+    "mongodb": "^3.5.9",
+    "mongodb-memory-server": "^6.6.1",
     "p4api": "^3.3.1",
     "pug": "^3.0.0",
     "shelljs": "^0.8.2",

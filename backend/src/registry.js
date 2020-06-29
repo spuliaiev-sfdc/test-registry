@@ -145,17 +145,45 @@ if (!fs.existsSync(outputFolder)) {
   fs.mkdirSync(outputFolder, { recursive: true });
 }
 
+async function runIndex(runInfo) {
+  const mongoStorage = await require("./storage/mongoStorage").getDatabase();
+  runInfo.database = mongoStorage;
+
+  projectIndexer.iterateProject(runInfo);
+  console.info(`Run finished`, runInfo);
+  process.exit(0);
+}
+
+async function runServer(runInfo) {
+  const mongoStorage = await require("./storage/mongoStorage").getDatabase();
+  runInfo.database = mongoStorage;
+
+  utils.log(`CORE files Test Ownership checker App ${VERSION} is listening now! Send them requests my way http://127.0.0.1:${defaultPort}/** !`);
+  server.startServer(runInfo);
+}
 
 if (args._.includes("index")) {
-  let runInfo = projectIndexer.iterateProject(coreFolder, outputFolder, rescan, moduleToRunFor);
-  console.info(`Run finished`, runInfo);
+  let runInfo = {
+    rootFolder: coreFolder,
+    // place to store report files
+    reportFolder: outputFolder,
+    // handler to react on report created for file
+    onReportGenerated: undefined,
+    rescan: rescan,
+    module: moduleToRunFor
+  };
+  runIndex(runInfo);
   return;
 }
 
 if (args._.includes("server")) {
   utils.log(`CORE files Test Ownership checker App ${VERSION} is listening now! Send them requests my way http://127.0.0.1:${defaultPort}/** !`);
-  let runInfo = server.startServer({coreFolder, outputFolder, port, logsFolder});
-  console.info(`Run finished`, runInfo);
+  runServer({
+    coreFolder,
+    outputFolder,
+    port,
+    logsFolder
+  });
   return;
 }
 
