@@ -155,7 +155,7 @@ if (args.s) {
 
 
   if (args._.includes("index")) {
-    let runInfo = projectIndexer.iterateProject(coreFolder, outputFolder, rescan);
+    let runInfo = projectIndexer.iterateProject(coreFolder, outputFolder, rescan, module);
     console.info(`Run finished`, runInfo);
     return;
   }

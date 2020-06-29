@@ -7,14 +7,15 @@ const
 
 const projectIndexer = {
 
-  iterateProject(rootFolder, reportFolder, rescan, onReportGenerated) {
+  iterateProject(rootFolder, reportFolder, rescan, module, onReportGenerated) {
     let runInfo = {
       rootFolder,
       // place to store report files
       reportFolder: reportFolder,
       // handler to react on report created for file
       onReportGenerated: onReportGenerated,
-      rescan: rescan
+      rescan: rescan,
+      module: module
     };
     this.prepareRootFolderInfo(runInfo);
     utils.info("Execution information", runInfo);
@@ -67,6 +68,11 @@ const projectIndexer = {
         runInfo.rootFoldersDetected++;
         if (runInfo.foldersProcessedAlready.has(entries[i])) {
           utils.trace(`  folder ${entries[i]} is skipped as already processed`);
+          continue;
+        }
+        if (runInfo.module && runInfo.module !== entries[i]) {
+          utils.trace(`  folder ${entries[i]} is skipped as not the one requested`);
+          continue;
         }
       } else {
         runInfo.rootFilesDetected++;
@@ -95,6 +101,9 @@ const projectIndexer = {
       if (operation === 'start') {
         // verify that this folder has not yet been processed
         let needsToBeProcessed = !runInfo.foldersProcessedAlready.has(status.currentPath);
+        if (needsToBeProcessed && runInfo.module && status.currentPath !== '.' && !status.currentPath.startsWith(runInfo.module)) {
+          needsToBeProcessed = false;
+        }
         if (needsToBeProcessed) {
           utils.info(`Folder processing ${status.foldersProcessed} / ${status.foldersListToProcess.length} : ${status.currentPath}`);
         } else {
