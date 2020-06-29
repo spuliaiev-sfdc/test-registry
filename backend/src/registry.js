@@ -25,6 +25,7 @@ let args = require('minimist')(process.argv.slice(2), {
     o: 'output-folder', // data files with changelists and other output
     a: 'app-folder',   // Root folder for the core app
     d: 'data-folder',   // Root folder for the data
+    l: 'logs-folder',   // Root folder for the logs
 
     r: 'rescan',        // Ignore last scan file and do the full scan again
 
@@ -88,6 +89,7 @@ utils.log(`  direct step execution run`);
 let coreFolder = args.a || defaultCorePath;
 let dataFolder = args.d || defaultDataPath;
 let outputFolder = args.o || dataFolder;
+let logsFolder = args.l;
 let inputFile = args.i;
 let rescan = args.r;
 let dateFrom = args.f;
@@ -152,7 +154,7 @@ if (args._.includes("index")) {
 
 if (args._.includes("server")) {
   utils.log(`CORE files Test Ownership checker App ${VERSION} is listening now! Send them requests my way http://127.0.0.1:${defaultPort}/** !`);
-  let runInfo = server.startServer({coreFolder, outputFolder, port});
+  let runInfo = server.startServer({coreFolder, outputFolder, port, logsFolder});
   console.info(`Run finished`, runInfo);
   return;
 }
