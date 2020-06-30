@@ -1,19 +1,23 @@
 const {getDatabase} = require('../mongoStorage').getDatabase();
 
-const collectionName = 'ads';
-
 const testRecord = {
   collectionName: 'tests',
 
-  insertRecord(record) {
-    const database = getDatabase();
-    const {insertedId} = database.collection(collectionName).insertOne(record);
+  async getCollection() {
+    const database = await getDatabase();
+    return database.collection(this.collectionName);
+  },
+
+  async insertRecord(database, record) {
+    let coll = database.collection(this.collectionName);
+    const {insertedId} = await coll.insertOne(record);
     return insertedId;
   },
 
-  getRecords() {
-    const database = getDatabase();
-    return database.collection(collectionName).find({}).toArray();
+  async getRecords(database) {
+    let coll = database.collection(this.collectionName);
+    let list = await coll.find({});
+    return await list.toArray();
   }
 
 };

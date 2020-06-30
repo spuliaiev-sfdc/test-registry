@@ -1,7 +1,9 @@
 const
   express = require('express'),
   path = require('path'),
+  corUtils = require('../corUtils.js'),
   morgan = require('morgan'), // HTTP logging
+  testController = require('./controllers/testsController'),
   bodyParser = require('body-parser');
 
 /**
@@ -41,10 +43,68 @@ const server = {
   },
 
   setupRoutes(app) {
+    corUtils.impt(`HTTP Server registration start`);
+    this.setupController(testController, app);
+
     app.get("/", (req, res) => {
       res.render("index", { title: "Home" });
     });
-  }
+      // res.render("unknownMethod", {
+      //   controller: "TestsController",
+      //   url: "unknown",
+      //   method:""
+      // });
+    corUtils.impt(`HTTP Server registration done`);
+  },
+
+  async setupController(controller, expressApp) {
+    controller.database = this.database;
+    let parentUrl = controller.mappingUrl;
+    corUtils.impt(`  Controller registration ${controller.constructor.name} ${parentUrl}`);
+
+    for(let elementName in controller) {
+      if (controller.hasOwnProperty(elementName)) {
+        if (typeof controller[elementName] === 'function'){
+          if ( elementName.startsWith("get")) {
+            let urlMapping = path.join(parentUrl, await controller[elementName]());
+            if (typeof urlMapping == "string") {
+              corUtils.impt(`    method ${urlMapping} for ${elementName}`);
+              expressApp.get(urlMapping, async (req, res) => {
+                return await controller[elementName](req, res);
+              });
+            }
+          }
+          if (elementName.startsWith("put")) {
+            let urlMapping = path.join(parentUrl, await controller[elementName]());
+            if (typeof urlMapping == "string") {
+              corUtils.impt(`    method ${urlMapping} for ${elementName}`);
+              expressApp.put(urlMapping, async (req, res) => {
+                return await controller[elementName](req, res);
+              });
+            }
+          }
+          if (elementName.startsWith("post")) {
+            let urlMapping = path.join(parentUrl, await controller[elementName]());
+            if (typeof urlMapping == "string") {
+              corUtils.impt(`    method ${urlMapping} for ${elementName}`);
+              expressApp.post(urlMapping, async (req, res) => {
+                return await controller[elementName](req, res);
+              });
+            }
+          }
+          if (elementName.startsWith("delete")) {
+            let urlMapping = path.join(parentUrl, await controller[elementName]());
+            if (typeof urlMapping == "string") {
+              corUtils.impt(`    method ${urlMapping} for ${elementName}`);
+              expressApp.delete(urlMapping, async (req, res) => {
+                return await controller[elementName](req, res);
+              });
+            }
+          }
+        }
+      }
+    }
+  },
 }
 
 module.exports = server;

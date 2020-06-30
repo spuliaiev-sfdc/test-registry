@@ -1,0 +1,13 @@
+GET http://localhost:8072/api/tests/all
+Accept: application/json
+
+###
+
+PUT http://localhost:8072/api/tests/put
+Accept: application/json
+Content-Type: application/json
+
+{
+  "SimpleValue": "Value of string"
+}
+###
