@@ -122,15 +122,30 @@ const fTestInventoryFileUtil = {
 
       // only if it was not marked as owned by some other team in more precise level - on the test or underlaying category
       if (Object.keys(result.owners).length === 0 && category.attr.scrumteam) {
-
         corUtils.addTagInfo(result.owners, category.attr.scrumteam, ['FTestInventory category scrumteam']);
       }
     }
 
-    function findTestInCategory(category) {
+    function currentCategoryInfo(category, parentCategoryInfo) {
+      let info = Object.assign({categoryElements: [], categoryPath: undefined, scrumTeam: undefined}, parentCategoryInfo);
+      info.categoryElements.unshift(category.attr.name);
+      if (info.categoryPath) {
+        info.categoryPath = category.attr.name + '/' + info.categoryPath;
+      } else {
+        info.categoryPath = category.attr.name;
+      }
+
+      // only if it was not marked as owned by some other team in more precise level - on the test or underlaying category
+      if (category.attr.scrumteam) {
+        info.scrumTeam = category.attr.scrumteam;
+      }
+      return info;
+    }
+
+    function findTestInCategory(category, parentCategoryInfo) {
       if (Array.isArray(category)) {
         for (let i = 0; i < category.length; i++) {
-          if (findTestInCategory(category[i])) {
+          if (findTestInCategory(category[i], parentCategoryInfo)) {
             appendCategoryInfo(category[i]);
             result.found = true;
             return true;
@@ -138,27 +153,45 @@ const fTestInventoryFileUtil = {
         }
         return false;
       }
-      function checkClassMatching(test) {
-        if (test.attr && test.attr.class === testClassName) {
-          if (test.attr.scrumteam) {
-            corUtils.addTagInfo(result.owners, test.attr.scrumteam, ['FTestInventory test scrumteam']);
+      function checkClassMatching(test, categoryInfo) {
+        if (test.attr && test.attr.class) {
+          let matched = false;
+          if (typeof testClassName === "string") {
+            matched = testClassName === test.attr.class;
           }
-          return true;
+          if (typeof testClassName === "function") {
+            // Parameters:
+            // 1) Name of the class
+            // 2) ScrumTeam from the Test element
+            // 3) ScrumTeam from the categories tree
+            let scrumTeamSource = test.attr.scrumteam ? 'test' : 'category';
+            let scrumTeam = test.attr.scrumteam ? test.attr.scrumteam : categoryInfo.scrumteam;
+            matched = testClassName(test.attr.class, categoryInfo, scrumTeam, scrumTeamSource);
+          }
+          if (matched) {
+            if (test.attr.scrumteam) {
+              corUtils.addTagInfo(result.owners, test.attr.scrumteam, ['FTestInventory test scrumteam']);
+            } else {
+              corUtils.addTagInfo(result.owners, categoryInfo.scrumteam, ['FTestInventory category scrumteam']);
+            }
+            return true;
+          }
         }
         return false;
       }
+      let categoryInfo = currentCategoryInfo(category, parentCategoryInfo);
 
       if (category.test) {
         // iterate through tests to find the one we need
         if (Array.isArray(category.test)) {
           for (let i = 0; i < category.test.length; i++) {
-            if (checkClassMatching(category.test[i])) {
+            if (checkClassMatching(category.test[i], categoryInfo)) {
               appendCategoryInfo(category);
               return true;
             }
           }
         } else {
-          if (checkClassMatching(category.test)) {
+          if (checkClassMatching(category.test, categoryInfo)) {
             appendCategoryInfo(category);
             return true;
           }
@@ -167,12 +200,12 @@ const fTestInventoryFileUtil = {
 
       // search in sub categories
       if (category.category) {
-        return findTestInCategory(category.category);
+        return findTestInCategory(category.category, categoryInfo);
       }
       return false;
     }
 
-    result.found = findTestInCategory(inventoryInfo.ftests);
+    result.found = findTestInCategory(inventoryInfo.ftests, {});
     // not failed, so always success
     result.success = true;
     return result;
@@ -236,6 +269,51 @@ const fTestInventoryFileUtil = {
 
     corUtils.trace(`[analyseFTestInventoryFile] finished FTestInventory file analysis ${fileInfo.relative}`);
     return fileInfo.fTestInventoryInfo;
+  },
+
+  enumerateAllTests(runInfo) {
+    utils.trace(` FTestInventory complete evaluation start`);
+
+    this.callbackOnFile = (status, relativePath, fileName) => {
+      utils.trace(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);
+
+      let fileInfo = corUtil.analyseFileLocation(runInfo.rootFolder, relativePath);
+      if (fileInfo.ext.toLocaleString() === 'xml') {
+        utils.info(` File ${status.filesProcessed+1} ${relativePath} is Test`);
+
+        if (runInfo.callbackOnFile) {
+          runInfo.callbackOnFile(runInfo, fileInfo);
+        }
+        status.filesProcessed++;
+      } else {
+        utils.trace(` File ${status.filesProcessed} ${relativePath} is skipped as not Test`);
+      }
+    };
+
+    this.callbackOnFolder = (status, operation) => {
+      if (operation === 'start') {
+        // verify that this folder has not yet been processed
+        let needsToBeProcessed = true;
+        if (needsToBeProcessed && runInfo.module && status.currentPath !== '.' && !status.currentPath.startsWith(runInfo.module)) {
+          needsToBeProcessed = false;
+        }
+        if (needsToBeProcessed) {
+          utils.info(`Folder processing ${status.foldersProcessed} / ${status.foldersListToProcess.length} : ${status.currentPath}`);
+        } else {
+          utils.trace(`Folder skipped    ${status.foldersProcessed} / ${status.foldersListToProcess.length} : ${status.currentPath}`);
+        }
+        return needsToBeProcessed;
+      }
+    };
+
+    this.callbackOnError = (status, errorCode, path, ex) => {
+      console.error(`Error ${errorCode} for ${path}`, ex);
+      runInfo.errors.push(`Error ${errorCode} for ${path}`);
+    };
+
+    filesIndexer.iterateFiles(runInfo.rootFolder, this.callbackOnFile, this.callbackOnFolder, this.callbackOnError, 1);
+
+    utils.trace(` Root folder iteration done`);
   }
 };
 

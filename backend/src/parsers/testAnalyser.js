@@ -88,6 +88,8 @@ const testAnalyser = {
       } else {
         corUtil.warn(`Attempt to add ownership info to non-Java class ${fileInfo.relative}`);
       }
+    } else {
+      report.ownershipFileMissing = true;
     }
 
     if (fileInfo.fTestInventoryInfo && fileInfo.fTestInventoryInfo.found) {
@@ -97,6 +99,8 @@ const testAnalyser = {
       } else {
         corUtil.warn(`Attempt to add fTestInventory to non-Java class ${fileInfo.relative}`);
       }
+    } else {
+      report.testInventoryMissing = true;
     }
 
     return report;

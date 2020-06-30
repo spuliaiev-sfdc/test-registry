@@ -18,6 +18,12 @@ const fTestInventoryRecord = {
     let coll = database.collection(this.collectionName);
     let list = await coll.find({});
     return list.toArray();
+  },
+
+  async dropAll(database) {
+    let coll = database.collection(this.collectionName);
+    await coll.drop();
+    return true;
   }
 
 };

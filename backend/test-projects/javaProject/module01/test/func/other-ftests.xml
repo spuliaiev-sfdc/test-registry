@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ftests xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" name="All functional tests_ADD" xsi:noNamespaceSchemaLocation="../../../sfdc-test/func/ftest.xsd">
+    <category name="Example Tests_ADD">
+        <category name="TestsCategory01_ADD" scrumteam="FTEnvTeam_Main_ADD">
+            <test class="some.production.additional.SimpleJavaTest"/>
+            <test class="some.production.additional.SecondJavaTest" scrumteam="FTEnvTeam_Second"/>
+        </category>
+        <test class="some.production.additional.ThirdJavaTest"/>
+    </category>
+    <category name="Example Tests Group OTHER 2_ADD">
+        <test class="some.production.additional.OtherSimpleJavaTest"/>
+        <category name="TestsCategory Group OTHER 01 in 02_ADD" scrumteam="FTEnvTeam_Third_Other_ADD">
+            <test class="some.production.additional.OtherSimpleJavaTest"/>
+            <test class="some.production.additional.OtherSecondJavaTest" scrumteam="FTEnvTeam_Second_Other_ADD"/>
+        </category>
+    </category>
+</ftests>

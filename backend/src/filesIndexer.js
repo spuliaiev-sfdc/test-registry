@@ -99,6 +99,8 @@ const filesIndexer = {
             }
             status.foldersProcessed++;
             callbackFolder(status, "finish");
+          } else {
+            // callBackFolder returned false - so folder should be skipped
           }
         } else {
           let foundFilePath = resolve(path, files[i]);

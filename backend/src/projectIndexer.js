@@ -3,6 +3,7 @@ const
   resolve = require('path').resolve,
   utils = require('./corUtils.js'),
   testAnalyser = require('./parsers/testAnalyser'),
+  testRecord = require('./storage/data/testRecord'),
   filesIndexer = require('./filesIndexer');
 
 const projectIndexer = {
@@ -10,6 +11,11 @@ const projectIndexer = {
   iterateProject(runInfo) {
     this.prepareRootFolderInfo(runInfo);
     utils.info("Execution information", runInfo);
+    runInfo.onReportGenerated( fileInfo => {
+      if (fileInfo.report) {
+        testRecord.insertRecord(runInfo.database, fileInfo.report);
+      }
+    })
 
     this.iterateRootFolder(runInfo);
 

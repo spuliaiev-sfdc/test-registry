@@ -18,6 +18,12 @@ const testRecord = {
     let coll = database.collection(this.collectionName);
     let list = await coll.find({});
     return await list.toArray();
+  },
+
+  async dropAll(database) {
+    let coll = database.collection(this.collectionName);
+    await coll.drop();
+    return true;
   }
 
 };
