@@ -96,9 +96,14 @@ const projectIndexer = {
 
     this.callbackOnFolder = (status, operation) => {
       if (operation === 'start') {
+        // processing of the root folder - always true
+        if (status.currentPath === '.') { return true; }
+
+        let pathParts = status.currentPath.split('/');
+
         // verify that this folder has not yet been processed
         let needsToBeProcessed = !runInfo.foldersProcessedAlready.has(status.currentPath);
-        if (needsToBeProcessed && runInfo.module && status.currentPath !== '.' && !status.currentPath.startsWith(runInfo.module)) {
+        if (needsToBeProcessed && runInfo.module && pathParts[0] !== runInfo.module) {
           needsToBeProcessed = false;
         }
         if (needsToBeProcessed) {

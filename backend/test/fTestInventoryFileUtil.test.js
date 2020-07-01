@@ -204,12 +204,22 @@ describe('fTestInventory', function() {
     describe('#readAndVerifyInventoryFile()', function() {
       it('Simple Inventory file', function () {
         let rootFolder = './test-projects/javaProject/';
-        let fileName = 'module01/test/func/java/src/some/production/folder/SimpleJavaTest.java';
-        let realFileInfo = utils.analyseFileLocation(rootFolder, fileName);
-        let inventoryInfo = fTestInventory.enumerateAllTests(realFileInfo);
+        let foundInventoryFiles = [];
+        let runInfo = {
+          rootFolder: rootFolder,
+          module: undefined,
+          errors: [],
+          callbackOnFile: function (runInfo, fileInfo) {
+            console.log(`callbackOnFile ${fileInfo.relative}`);
+            foundInventoryFiles.push(fileInfo.relative);
+          }
+        }
+        let inventoryInfo = fTestInventory.enumerateAllTests(runInfo);
         assert.equal(inventoryInfo.success, true);
-        assert.equal(inventoryInfo.filename, 'ftest-inventory.xml');
-        assert.equal(!inventoryInfo.content, false);
+        assert.deepEqual(foundInventoryFiles, [
+          'module01/test/func/ftest-inventory.xml',
+          'module01/test/func/other-ftests.xml'
+        ]);
       });
     });
   });

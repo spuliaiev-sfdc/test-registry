@@ -6,6 +6,7 @@ const
   relative = require('path').relative,
   xmlParser = require('fast-xml-parser'),
   he = require('he'),
+  filesIndexer = require('../filesIndexer'),
   corUtils = require('../corUtils.js');
 
 let options = {
@@ -272,37 +273,64 @@ const fTestInventoryFileUtil = {
   },
 
   enumerateAllTests(runInfo) {
-    utils.trace(` FTestInventory complete evaluation start`);
+    corUtils.trace(` FTestInventory complete evaluation start`);
 
     this.callbackOnFile = (status, relativePath, fileName) => {
-      utils.trace(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);
+      corUtils.trace(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);
 
-      let fileInfo = corUtil.analyseFileLocation(runInfo.rootFolder, relativePath);
+      let fileInfo = corUtils.analyseFileLocation(runInfo.rootFolder, relativePath);
       if (fileInfo.ext.toLocaleString() === 'xml') {
-        utils.info(` File ${status.filesProcessed+1} ${relativePath} is Test`);
+        corUtils.info(` File ${status.filesProcessed+1} ${relativePath} is Test`);
 
         if (runInfo.callbackOnFile) {
           runInfo.callbackOnFile(runInfo, fileInfo);
         }
         status.filesProcessed++;
       } else {
-        utils.trace(` File ${status.filesProcessed} ${relativePath} is skipped as not Test`);
+        corUtils.trace(` File ${status.filesProcessed} ${relativePath} is skipped as not Test`);
       }
     };
 
     this.callbackOnFolder = (status, operation) => {
       if (operation === 'start') {
+        // processing of the root folder - always true
+        if (status.currentPath === '.') { return true; }
+
         // verify that this folder has not yet been processed
         let needsToBeProcessed = true;
-        if (needsToBeProcessed && runInfo.module && status.currentPath !== '.' && !status.currentPath.startsWith(runInfo.module)) {
+
+        let pathParts = status.currentPath.split('/');
+        try {
+          // If module specified - process only this module
+          if (needsToBeProcessed && runInfo.module && currentPath[0] !== runInfo.module) {
+            needsToBeProcessed = false;
+            return needsToBeProcessed;
+          }
+          // if first level - process all
+          if (needsToBeProcessed && pathParts.length < 2) {
+            needsToBeProcessed = true;
+            return needsToBeProcessed;
+          }
+          // if second level - only process the following patters:
+          // module/func
+          // module/test/func
+          if (needsToBeProcessed && (
+              pathParts[1] === 'func' ||
+              pathParts.length === 2  && pathParts[1] === 'test' ||
+              pathParts.length > 2  && pathParts[1] === 'test' && pathParts[2] === 'func'
+          )) {
+            needsToBeProcessed = true;
+            return needsToBeProcessed;
+          }
           needsToBeProcessed = false;
+          return needsToBeProcessed;
+        } finally {
+          if (needsToBeProcessed) {
+            corUtils.info(`Folder processing ${status.foldersProcessed} / ${status.foldersListToProcess.length} : ${status.currentPath}`);
+          } else {
+            corUtils.trace(`Folder skipped    ${status.foldersProcessed} / ${status.foldersListToProcess.length} : ${status.currentPath}`);
+          }
         }
-        if (needsToBeProcessed) {
-          utils.info(`Folder processing ${status.foldersProcessed} / ${status.foldersListToProcess.length} : ${status.currentPath}`);
-        } else {
-          utils.trace(`Folder skipped    ${status.foldersProcessed} / ${status.foldersListToProcess.length} : ${status.currentPath}`);
-        }
-        return needsToBeProcessed;
       }
     };
 
@@ -313,7 +341,9 @@ const fTestInventoryFileUtil = {
 
     filesIndexer.iterateFiles(runInfo.rootFolder, this.callbackOnFile, this.callbackOnFolder, this.callbackOnError, 1);
 
-    utils.trace(` Root folder iteration done`);
+    corUtils.trace(` Root folder iteration done`);
+    runInfo.success = true;
+    return runInfo;
   }
 };
 
