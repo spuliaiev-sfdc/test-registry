@@ -7,6 +7,7 @@ const
   xmlParser = require('fast-xml-parser'),
   he = require('he'),
   filesIndexer = require('../filesIndexer'),
+  testRecord = require('../storage/data/testRecord'),
   corUtils = require('../corUtils.js');
 
 let options = {
@@ -367,6 +368,14 @@ const fTestInventoryFileUtil = {
         corUtils.trace(`  test class found in inventory ${className}`);
         if (runInfo.onTestFound) {
           runInfo.onTestFound(runInfo, fileInfo, className, categoryInfo, scrumTeam, source);
+        }
+        if (runInfo.database) {
+          testRecord.insertRecord(runInfo.database, {
+            className,
+            scrumTeam,
+            source,
+            categoryPath: categoryInfo.categoryPath
+          })
         }
         return false;
       }
