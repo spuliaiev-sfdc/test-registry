@@ -8,6 +8,7 @@ const
   he = require('he'),
   filesIndexer = require('../filesIndexer'),
   testRecord = require('../storage/data/testRecord'),
+  fTestInventoryRecord = require('../storage/data/fTestInventoryRecord'),
   corUtils = require('../corUtils.js');
 
 let options = {
@@ -106,6 +107,20 @@ const fTestInventoryFileUtil = {
     return result;
   },
 
+  /**
+   * This function is parsing the inventory and providing the test class information
+   * @param {Object} inventoryInfo object with inventory filename, content and parsed xml data
+   * @param {string} testClassName Name of the class to find or callback to process the matching class
+   * @returns
+   * {
+   *    success: boolean,
+   *    errors: [ 'Error 1 information' ],
+   *    found: boolean,
+   *    owners: { 'scrumTeam1': [ 'FTestInventory category scrumteam' ]},
+   *    categoryPath: 'category1/SubCategory2',
+   *    categoryElements: ['category1', 'SubCategory2']
+   *}
+   */
   findTestOwnershipInfo(inventoryInfo, testClassName) {
     let result = {
       owners: {},
@@ -166,6 +181,10 @@ const fTestInventoryFileUtil = {
       function checkClassMatching(test, categoryInfo) {
         if (test.attr && test.attr.class) {
           let matched = false;
+          let description = test.attr.scrumteam ? 'FTestInventory test scrumteam' : 'FTestInventory category scrumteam';
+          let scrumTeamSource = test.attr.scrumteam ? 'test' : 'category';
+          let scrumTeam = test.attr.scrumteam ? test.attr.scrumteam : categoryInfo.scrumteam;
+
           if (typeof testClassName === "string") {
             matched = testClassName === test.attr.class;
           }
@@ -174,16 +193,10 @@ const fTestInventoryFileUtil = {
             // 1) Name of the class
             // 2) ScrumTeam from the Test element
             // 3) ScrumTeam from the categories tree
-            let scrumTeamSource = test.attr.scrumteam ? 'test' : 'category';
-            let scrumTeam = test.attr.scrumteam ? test.attr.scrumteam : categoryInfo.scrumteam;
-            matched = testClassName(test.attr.class, categoryInfo, scrumTeam, scrumTeamSource);
+            matched = testClassName(test.attr.class, categoryInfo, scrumTeam, scrumTeamSource, description);
           }
           if (matched) {
-            if (test.attr.scrumteam) {
-              corUtils.addTagInfo(result.owners, test.attr.scrumteam, ['FTestInventory test scrumteam']);
-            } else {
-              corUtils.addTagInfo(result.owners, categoryInfo.scrumteam, ['FTestInventory category scrumteam']);
-            }
+            corUtils.addTagInfo(result.owners, scrumTeam, description);
             return true;
           }
         }
@@ -351,7 +364,7 @@ const fTestInventoryFileUtil = {
 
     filesIndexer.iterateFiles(runInfo.rootFolder, this.callbackOnFile, this.callbackOnFolder, this.callbackOnError, 1);
 
-    corUtils.trace(` Root folder iteration done`);
+    corUtils.trace(` FTestInventory complete evaluation done`);
     runInfo.success = true;
     return runInfo;
   },
@@ -363,18 +376,25 @@ const fTestInventoryFileUtil = {
       success: null
     }
     try {
-      function onClassInInventory(className, categoryInfo, scrumTeam, source) {
+      function onClassInInventory(className, categoryInfo, scrumTeam, source, description) {
         // classesFound.push({className, scrumTeam, source, categoryInfo });
         corUtils.trace(`  test class found in inventory ${className}`);
         if (runInfo.onTestFound) {
           runInfo.onTestFound(runInfo, fileInfo, className, categoryInfo, scrumTeam, source);
         }
         if (runInfo.database) {
-          testRecord.insertRecord(runInfo.database, {
+          if (!scrumTeam) {
+            corUtils.warn(` scrumTeam is undefined for class ${className} in ${fileInfo.relative}`);
+          }
+          fTestInventoryRecord.insertRecord(runInfo.database, {
             className,
             scrumTeam,
             source,
-            categoryPath: categoryInfo.categoryPath
+            file: fileInfo.relative,
+            module: fileInfo.module,
+            description: description,
+            categoryPath: categoryInfo.categoryPath,
+            categoryElements: categoryInfo.categoryElements
           })
         }
         return false;

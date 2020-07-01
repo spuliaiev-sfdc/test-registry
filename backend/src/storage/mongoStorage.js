@@ -16,18 +16,23 @@ const mongoStorage = {
         const mongo = new MongoMemoryServer();
         mongoDBURL = await mongo.getConnectionString();
       }
-      const connection = await MongoClient.connect(mongoDBURL, {useNewUrlParser: true});
+      const connection = await MongoClient.connect(mongoDBURL, {useNewUrlParser: true, useUnifiedTopology: true });
       this.database = connection.db();
       return this.database;
     } catch (e) {
+      console.error(`Failed to initialise MongoDB`,e);
       return null;
     }
   },
 
   async getDatabase() {
-    if (!this.database)
+    if (!this.database) {
       await this.startDatabase();
+      await this.setupIndexes(this.database);
+    }
     return this.database;
+  },
+  setupIndexes(database) {
   }
 }
 

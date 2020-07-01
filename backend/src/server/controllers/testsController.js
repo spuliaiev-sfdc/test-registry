@@ -1,5 +1,6 @@
 let
   testRecord = require('../../storage/data/testRecord'),
+  fTestInv = require('../../storage/data/fTestInventoryRecord'),
   path = require('path');
 
 const testsController = {
@@ -18,6 +19,13 @@ const testsController = {
   async putTest(req, res) {
     if (arguments.length === 0) return "put";
     let id = await testRecord.insertRecord(this.database, req.body);
+    res.send( 'hello world from TestsController.getAllTests' +
+              ` RecordId = ${id}`);
+  },
+
+  async putInv(req, res) {
+    if (arguments.length === 0) return "putInventory";
+    let id = await fTestInv.insertRecord(this.database, req.body);
     res.send( 'hello world from TestsController.getAllTests' +
               ` RecordId = ${id}`);
   }

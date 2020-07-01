@@ -3,7 +3,8 @@ const
   resolve = require('path').resolve,
   utils = require('./corUtils.js'),
   testAnalyser = require('./parsers/testAnalyser'),
-  testRecord = require('./storage/data/testRecord'),
+  fTestInventory = require('./utils/ftestInventory'),
+  fTestInventoryRecord = require('./storage/data/fTestInventoryRecord'),
   filesIndexer = require('./filesIndexer');
 
 const projectIndexer = {
@@ -11,6 +12,8 @@ const projectIndexer = {
   iterateProject(runInfo) {
     this.prepareRootFolderInfo(runInfo);
     utils.info("Execution information", runInfo);
+
+    fTestInventory.enumerateAllTests(runInfo);
 
     this.iterateRootFolder(runInfo);
 
@@ -131,21 +134,14 @@ const projectIndexer = {
     utils.trace(` Root folder iteration done`);
   },
 
-  runFileAnalysis(runInfo, status, fileInfo) {
+  async runFileAnalysis(runInfo, status, fileInfo) {
     utils.trace(` File analysis start ${fileInfo.relative}`);
     if (fileInfo.lang === "java") {
       testAnalyser.analyseJavaTestFile(fileInfo);
-      if (!runInfo.cachedOwnershipFile) {
-        // init the caching for ownership file
-        runInfo.cachedOwnershipFile = {};
-      }
-      testAnalyser.analyseOwnershipFile(fileInfo, runInfo.cachedOwnershipFile);
 
-      if (!runInfo.cachedInventoryFile) {
-        // init the caching for ownership file
-        runInfo.cachedInventoryFile = {};
-      }
-      testAnalyser.analyseFTestInventoryFile(fileInfo, runInfo.cachedInventoryFile);
+      await this.populateOwnershipFileInformation(runInfo, fileInfo);
+
+      await this.populateFTestInventoryFileInformation(runInfo, fileInfo);
 
       fileInfo.report = testAnalyser.writeReport(fileInfo, runInfo.reportFolder);
       if (runInfo.onReportGenerated) {
@@ -160,6 +156,30 @@ const projectIndexer = {
   addProcessedFolderToScanFile(runInfo, currentPath) {
     let lastScanFileFullPath = resolve(runInfo.rootFolder, runInfo.lastScanFile);
     fs.appendFileSync(lastScanFileFullPath, currentPath+"\n");
+  },
+
+  async populateOwnershipFileInformation(runInfo, fileInfo) {
+    if (!runInfo.cachedOwnershipFile) {
+      // init the caching for ownership file
+      runInfo.cachedOwnershipFile = {};
+    }
+    testAnalyser.analyseOwnershipFile(fileInfo, runInfo.cachedOwnershipFile);
+  },
+
+  async populateFTestInventoryFileInformation(runInfo, fileInfo) {
+    if (runInfo.database) {
+      // If DB is available - read the data from database
+      let invRecord = await fTestInventoryRecord.findByClassName(fileInfo.javaClassFQN);
+      if (invRecord) {
+        fileInfo.fTestInventoryInfo = invRecord;
+      }
+    } else {
+      if (!runInfo.cachedInventoryFile) {
+        // init the caching for ownership file
+        runInfo.cachedInventoryFile = {};
+      }
+      testAnalyser.analyseFTestInventoryFile(fileInfo, runInfo.cachedInventoryFile);
+    }
   }
 };
 

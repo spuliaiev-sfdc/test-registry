@@ -8,6 +8,17 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "SimpleValue": "Value of string"
+  "SimpleValue": "Value of string",
+  "kind": "Test"
+}
+###
+
+PUT http://localhost:8072/api/tests/putInventory
+Accept: application/json
+Content-Type: application/json
+
+{
+  "SimpleValue": "Value of string",
+  "kind": "Inventory"
 }
 ###
