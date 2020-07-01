@@ -120,7 +120,16 @@ describe('projectIndexer', function() {
     it('empty project folder', function () {
       let rootFolder = './test-projects/empty';
       addedFoldersIntoScanFile = [];
-      let result = projectIndexer.iterateProject(rootFolder);
+      let runInfo = {
+        rootFolder,
+        // place to store report files
+        reportFolder: undefined,
+        // handler to react on report created for file
+        onReportGenerated: undefined,
+        rescan: false,
+        module: undefined
+      };
+      let result = projectIndexer.iterateProject(runInfo);
       assert.deepEqual(result, {
         foldersProcessedAlready: new Set([]),
         foldersProcessed: 0,
@@ -129,7 +138,8 @@ describe('projectIndexer', function() {
         rootFilesDetected: 0,
         lastScanFile: 'lastScan.log',
         reportFolder: undefined,
-        rescan: undefined,
+        rescan: false,
+        module: undefined,
         onReportGenerated: undefined,
         errors: [],
       });
@@ -138,7 +148,14 @@ describe('projectIndexer', function() {
     it('small project folder', function () {
       let rootFolder = './test-projects/small';
       addedFoldersIntoScanFile = [];
-      let result = projectIndexer.iterateProject(rootFolder);
+      let runInfo = {
+        rootFolder,
+        // place to store report files
+        reportFolder: undefined,
+        // handler to react on report created for file
+        onReportGenerated: undefined
+      };
+      let result = projectIndexer.iterateProject(runInfo);
       assert.deepEqual(result, {
         foldersProcessedAlready: new Set([]),
         foldersProcessed: 7,
@@ -147,7 +164,6 @@ describe('projectIndexer', function() {
         rootFilesDetected: 0,
         lastScanFile: 'lastScan.log',
         reportFolder: undefined,
-        rescan: undefined,
         onReportGenerated: undefined,
         errors: [],
       });
@@ -156,7 +172,14 @@ describe('projectIndexer', function() {
     it('small project folder with Preprocessed folders', function () {
       let rootFolder = './test-projects/smallPartial';
       addedFoldersIntoScanFile = [];
-      let result = projectIndexer.iterateProject(rootFolder);
+      let runInfo = {
+        rootFolder,
+        // place to store report files
+        reportFolder: undefined,
+        // handler to react on report created for file
+        onReportGenerated: undefined
+      };
+      let result = projectIndexer.iterateProject(runInfo);
       assert.deepEqual(result, {
         foldersProcessedAlready: new Set(['folder_01']),
         foldersProcessed: 4,
@@ -166,7 +189,6 @@ describe('projectIndexer', function() {
         rootFilesDetected: 1,
         lastScanFile: 'lastScan.log',
         reportFolder: undefined,
-        rescan: undefined,
         onReportGenerated: undefined,
         errors: [],
       });
@@ -175,7 +197,14 @@ describe('projectIndexer', function() {
     it('big project folder', function () {
       let rootFolder = './test-projects/big';
       addedFoldersIntoScanFile = [];
-      let result = projectIndexer.iterateProject(rootFolder);
+      let runInfo = {
+        rootFolder,
+        // place to store report files
+        reportFolder: undefined,
+        // handler to react on report created for file
+        onReportGenerated: undefined
+      };
+      let result = projectIndexer.iterateProject(runInfo);
       assert.deepEqual(result, {
         rootFolder: './test-projects/big',
         rootFoldersDetected: 0,
@@ -184,7 +213,6 @@ describe('projectIndexer', function() {
         foldersProcessed: 0,
         lastScanFile: 'lastScan.log',
         reportFolder: undefined,
-        rescan: undefined,
         onReportGenerated: undefined,
         errors: [],
       });

@@ -33,6 +33,15 @@ let options = {
 
 const fTestInventoryFileUtil = {
 
+  readInventoryFileContent(moduleRootFolder, fileName) {
+    let fullFilePath = resolve(moduleRootFolder, fileName);
+    const fileContent = fs.readFileSync(fullFilePath, 'utf8');
+    if (fileContent.includes("<ftests ")) {
+      return {fileName: fileName, content: fileContent, success: true};
+    }
+    return null;
+  },
+
   findInventoryFile(moduleRootFolder) {
     let files;
     try {
@@ -43,10 +52,9 @@ const fTestInventoryFileUtil = {
     }
     for (let i = 0; i < files.length; i++) {
       if (files[i].toLowerCase().endsWith(".xml")) {
-        let foundFilePath = resolve(moduleRootFolder, files[i]);
-        const fileContent = fs.readFileSync(foundFilePath, 'utf8');
-        if (fileContent.includes("<ftests ")) {
-          return {fileName: relative(moduleRootFolder, foundFilePath), content: fileContent};
+        let result = this.readInventoryFileContent(moduleRootFolder, files[i]);
+        if (result && result.success) {
+          return result;
         }
       }
     }
@@ -106,7 +114,7 @@ const fTestInventoryFileUtil = {
       found: false,
       success: false
     }
-    if (!inventoryInfo || !inventoryInfo.ftests) {
+    if (!inventoryInfo || !inventoryInfo.content || !inventoryInfo.content.ftests) {
       corUtils.error(`     FTestInventory content is wrong`)
       result.errors.push(`FTestInventory content is wrong:`);
       result.success = false;
@@ -206,7 +214,7 @@ const fTestInventoryFileUtil = {
       return false;
     }
 
-    result.found = findTestInCategory(inventoryInfo.ftests, {});
+    result.found = findTestInCategory(inventoryInfo.content.ftests, {});
     // not failed, so always success
     result.success = true;
     return result;
@@ -264,7 +272,7 @@ const fTestInventoryFileUtil = {
       inventoryFile,
       found: false
     };
-    let inventoryInfo = this.findTestOwnershipInfo(currentInventoryFileContent, fileInfo.javaClassFQN);
+    let inventoryInfo = this.findTestOwnershipInfo(cachedInventoryFile, fileInfo.javaClassFQN);
     fileInfo.fTestInventoryInfo.testInfo = inventoryInfo;
     fileInfo.fTestInventoryInfo.found = inventoryInfo.success && inventoryInfo.found;
 
@@ -279,11 +287,12 @@ const fTestInventoryFileUtil = {
       corUtils.trace(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);
 
       let fileInfo = corUtils.analyseFileLocation(runInfo.rootFolder, relativePath);
-      if (fileInfo.ext.toLocaleString() === 'xml') {
-        corUtils.info(` File ${status.filesProcessed+1} ${relativePath} is Test`);
+      if (fileInfo.ext.toLocaleString() === 'xml' && fileInfo.filename.toLocaleString() !== 'pom') {
+        corUtils.info(` File ${status.filesProcessed+1} ${relativePath} is potentially an inventory`);
 
+        let processed = this.enumeratingInventoryProcessor(runInfo, fileInfo);
         if (runInfo.callbackOnFile) {
-          runInfo.callbackOnFile(runInfo, fileInfo);
+          runInfo.callbackOnFile(runInfo, fileInfo, processed);
         }
         status.filesProcessed++;
       } else {
@@ -344,6 +353,46 @@ const fTestInventoryFileUtil = {
     corUtils.trace(` Root folder iteration done`);
     runInfo.success = true;
     return runInfo;
+  },
+
+  enumeratingInventoryProcessor(runInfo, fileInfo) {
+    let result = {
+      content: null,
+      errors: [],
+      success: null
+    }
+    try {
+      function onClassInInventory(className, categoryInfo, scrumTeam, source) {
+        // classesFound.push({className, scrumTeam, source, categoryInfo });
+        corUtils.trace(`  test class found in inventory ${className}`);
+        if (runInfo.onTestFound) {
+          runInfo.onTestFound(runInfo, fileInfo, className, categoryInfo, scrumTeam, source);
+        }
+        return false;
+      }
+      let modulePath = path.resolve(fileInfo.root, fileInfo.moduleRoot);
+      let inventoryFile = this.readInventoryFileContent(path.resolve(fileInfo.root, fileInfo.moduleRoot), fileInfo.relativeToModuleRoot);
+      if (!inventoryFile || !inventoryFile.success) {
+        result.success = false;
+        result.errors.push(` Failed to read inventory file ${fileInfo.relative}`)
+        return result;
+      }
+      let inventoryInfo = this.readAndVerifyInventoryFile(fileInfo, inventoryFile);
+      if (!inventoryInfo.success) {
+        result.success = false;
+        result.errors.push(` Failed to parse inventory file ${fileInfo.relative}`)
+        result.errors.push(inventoryInfo.errors);
+        return result;
+      }
+
+      return this.findTestOwnershipInfo(inventoryInfo, onClassInInventory);
+    }catch (e) {
+      corUtils.error(`Failed in processing the potential inventory file ${fileInfo.relative}`, e);
+      return {
+        errors: [ `Failed in processing the potential inventory file ${fileInfo.relative}` ],
+        success: false
+      }
+    }
   }
 };
 

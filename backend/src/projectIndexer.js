@@ -11,11 +11,6 @@ const projectIndexer = {
   iterateProject(runInfo) {
     this.prepareRootFolderInfo(runInfo);
     utils.info("Execution information", runInfo);
-    runInfo.onReportGenerated( fileInfo => {
-      if (fileInfo.report) {
-        testRecord.insertRecord(runInfo.database, fileInfo.report);
-      }
-    })
 
     this.iterateRootFolder(runInfo);
 
