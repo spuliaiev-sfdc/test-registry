@@ -2,6 +2,10 @@ GET http://localhost:8072/api/tests/all
 Accept: application/json
 
 ###
+GET http://localhost:8072/api/tests/allInvs
+Accept: application/json
+
+###
 
 PUT http://localhost:8072/api/tests/put
 Accept: application/json
@@ -19,6 +23,6 @@ Content-Type: application/json
 
 {
   "SimpleValue": "Value of string",
-  "kind": "Inventory"
+  "kind": "Inventory3"
 }
 ###

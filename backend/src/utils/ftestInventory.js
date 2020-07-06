@@ -294,8 +294,9 @@ const fTestInventoryFileUtil = {
     return fileInfo.fTestInventoryInfo;
   },
 
-  enumerateAllTests(runInfo) {
+  async enumerateAllTests(runInfo) {
     corUtils.trace(` FTestInventory complete evaluation start`);
+    let info = await require('../storage/data/fTestInventoryRecord').insertRecord(runInfo.database, { kind: 'mongoTest', label: ' Test from mongoTest 004' });
 
     this.callbackOnFile = (status, relativePath, fileName) => {
       corUtils.trace(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);

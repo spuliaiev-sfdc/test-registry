@@ -9,12 +9,16 @@ const
 
 const projectIndexer = {
 
-  iterateProject(runInfo) {
+  async iterateProject(runInfo) {
     this.prepareRootFolderInfo(runInfo);
     utils.info("Execution information", runInfo);
 
-    fTestInventory.enumerateAllTests(runInfo);
+    // fTestInventoryRecord.insertRecord(runInfo.database, { kind: 'mongoTest', label: ' Test from mongoTest 003' });
+    await fTestInventoryRecord.insertRecord(runInfo.database, { kind: 'mongoTest', label: ' Test from mongoTest 003_00' });
 
+    await fTestInventory.enumerateAllTests(runInfo);
+
+    await fTestInventoryRecord.insertRecord(runInfo.database, { kind: 'mongoTest', label: ' Test from mongoTest 003_01' });
     this.iterateRootFolder(runInfo);
 
     return runInfo;

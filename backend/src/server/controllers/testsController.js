@@ -16,6 +16,12 @@ const testsController = {
             JSON.stringify(await  testRecord.getRecords(this.database), null, 2));
   },
 
+  async getAllInvs(req, res) {
+    if (arguments.length === 0) return "allInvs";
+    res.send(`hello world from TestsController.getAllInvs\n` +
+            JSON.stringify(await  fTestInv.getRecords(this.database), null, 2));
+  },
+
   async putTest(req, res) {
     if (arguments.length === 0) return "put";
     let id = await testRecord.insertRecord(this.database, req.body);

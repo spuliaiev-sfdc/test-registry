@@ -6,6 +6,12 @@ var
   path = require('path'),
   fTestInventory = require('../src/utils/ftestInventory');
 
+// Async Testing utilities
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+const { expect } = chai;
+chai.use(chaiAsPromised);
+
 // Test Suites
 describe('fTestInventory', function() {
   describe('#readAndVerifyInventoryFile()', function() {
@@ -214,12 +220,17 @@ describe('fTestInventory', function() {
             foundInventoryFiles.push(fileInfo.relative);
           }
         }
-        let inventoryInfo = fTestInventory.enumerateAllTests(runInfo);
-        assert.equal(inventoryInfo.success, true);
-        assert.deepEqual(foundInventoryFiles, [
-          'module01/test/func/ftest-inventory.xml',
-          'module01/test/func/other-ftests.xml'
-        ]);
+
+        return expect(
+          fTestInventory.enumerateAllTests(runInfo)
+        ).to.eventually.be.fulfilled
+          .then((inventoryInfo) => {
+            assert.equal(inventoryInfo.success, true);
+            assert.deepEqual(foundInventoryFiles, [
+              'module01/test/func/ftest-inventory.xml',
+              'module01/test/func/other-ftests.xml'
+            ]);
+          });
       });
     });
     it('Simple Inventory file with reports', function () {
@@ -251,74 +262,78 @@ describe('fTestInventory', function() {
         }
       }
 
-      let inventoryInfo = fTestInventory.enumerateAllTests(runInfo);
-      assert.equal(inventoryInfo.success, true);
-      assert.deepEqual(foundInventoryFiles, [
-        'module01/test/func/ftest-inventory.xml',
-        'module01/test/func/other-ftests.xml'
-      ]);
-      assert.deepEqual(foundTests, [
-        {
-          "categoryPath": "Example Tests/All functional tests",
-          "className": "some.production.folder.ThirdJavaTest",
-          "scrumTeam": undefined
-        },
-        {
-          "categoryPath": "TestsCategory01/Example Tests/All functional tests",
-          "className": "some.production.folder.SimpleJavaTest",
-          "scrumTeam": undefined
-        },
-        {
-          "categoryPath": "TestsCategory01/Example Tests/All functional tests",
-          "className": "some.production.folder.SecondJavaTest",
-          "scrumTeam": "FTEnvTeam_Second"
-        },
-        {
-          "categoryPath": "Example Tests Group OTHER 2/All functional tests",
-          "className": "some.production.folder.OtherSimpleJavaTest",
-          "scrumTeam": undefined
-        },
-        {
-          "categoryPath": "TestsCategory Group OTHER 01 in 02/Example Tests Group OTHER 2/All functional tests",
-          "className": "some.production.folder.OtherSimpleJavaTest",
-          "scrumTeam": undefined
-        },
-        {
-          "categoryPath": "TestsCategory Group OTHER 01 in 02/Example Tests Group OTHER 2/All functional tests",
-          "className": "some.production.folder.OtherSecondJavaTest",
-          "scrumTeam": "FTEnvTeam_Second_Other"
-        },
-        {
-          "categoryPath": "Example Tests_ADD/All functional tests_ADD",
-          "className": "some.production.additional.ThirdJavaTest",
-          "scrumTeam": undefined
-        },
-        {
-          "categoryPath": "TestsCategory01_ADD/Example Tests_ADD/All functional tests_ADD",
-          "className": "some.production.additional.SimpleJavaTest",
-          "scrumTeam": undefined
-        },
-        {
-          "categoryPath": "TestsCategory01_ADD/Example Tests_ADD/All functional tests_ADD",
-          "className": "some.production.additional.SecondJavaTest",
-          "scrumTeam": "FTEnvTeam_Second"
-        },
-        {
-          "categoryPath": "Example Tests Group OTHER 2_ADD/All functional tests_ADD",
-          "className": "some.production.additional.OtherSimpleJavaTest",
-          "scrumTeam": undefined
-        },
-        {
-          "categoryPath": "TestsCategory Group OTHER 01 in 02_ADD/Example Tests Group OTHER 2_ADD/All functional tests_ADD",
-          "className": "some.production.additional.OtherSimpleJavaTest",
-          "scrumTeam": undefined
-        },
-        {
-          "categoryPath": "TestsCategory Group OTHER 01 in 02_ADD/Example Tests Group OTHER 2_ADD/All functional tests_ADD",
-          "className": "some.production.additional.OtherSecondJavaTest",
-          "scrumTeam": "FTEnvTeam_Second_Other_ADD"
-        }
-      ]);
+      return expect(
+        fTestInventory.enumerateAllTests(runInfo)
+      ).to.eventually.be.fulfilled
+        .then((inventoryInfo) => {
+          assert.equal(inventoryInfo.success, true);
+          assert.deepEqual(foundInventoryFiles, [
+            'module01/test/func/ftest-inventory.xml',
+            'module01/test/func/other-ftests.xml'
+          ]);
+          assert.deepEqual(foundTests, [
+            {
+              "categoryPath": "Example Tests/All functional tests",
+              "className": "some.production.folder.ThirdJavaTest",
+              "scrumTeam": undefined
+            },
+            {
+              "categoryPath": "TestsCategory01/Example Tests/All functional tests",
+              "className": "some.production.folder.SimpleJavaTest",
+              "scrumTeam": undefined
+            },
+            {
+              "categoryPath": "TestsCategory01/Example Tests/All functional tests",
+              "className": "some.production.folder.SecondJavaTest",
+              "scrumTeam": "FTEnvTeam_Second"
+            },
+            {
+              "categoryPath": "Example Tests Group OTHER 2/All functional tests",
+              "className": "some.production.folder.OtherSimpleJavaTest",
+              "scrumTeam": undefined
+            },
+            {
+              "categoryPath": "TestsCategory Group OTHER 01 in 02/Example Tests Group OTHER 2/All functional tests",
+              "className": "some.production.folder.OtherSimpleJavaTest",
+              "scrumTeam": undefined
+            },
+            {
+              "categoryPath": "TestsCategory Group OTHER 01 in 02/Example Tests Group OTHER 2/All functional tests",
+              "className": "some.production.folder.OtherSecondJavaTest",
+              "scrumTeam": "FTEnvTeam_Second_Other"
+            },
+            {
+              "categoryPath": "Example Tests_ADD/All functional tests_ADD",
+              "className": "some.production.additional.ThirdJavaTest",
+              "scrumTeam": undefined
+            },
+            {
+              "categoryPath": "TestsCategory01_ADD/Example Tests_ADD/All functional tests_ADD",
+              "className": "some.production.additional.SimpleJavaTest",
+              "scrumTeam": undefined
+            },
+            {
+              "categoryPath": "TestsCategory01_ADD/Example Tests_ADD/All functional tests_ADD",
+              "className": "some.production.additional.SecondJavaTest",
+              "scrumTeam": "FTEnvTeam_Second"
+            },
+            {
+              "categoryPath": "Example Tests Group OTHER 2_ADD/All functional tests_ADD",
+              "className": "some.production.additional.OtherSimpleJavaTest",
+              "scrumTeam": undefined
+            },
+            {
+              "categoryPath": "TestsCategory Group OTHER 01 in 02_ADD/Example Tests Group OTHER 2_ADD/All functional tests_ADD",
+              "className": "some.production.additional.OtherSimpleJavaTest",
+              "scrumTeam": undefined
+            },
+            {
+              "categoryPath": "TestsCategory Group OTHER 01 in 02_ADD/Example Tests Group OTHER 2_ADD/All functional tests_ADD",
+              "className": "some.production.additional.OtherSecondJavaTest",
+              "scrumTeam": "FTEnvTeam_Second_Other_ADD"
+            }
+          ]);
+        });
     });
   });
 });

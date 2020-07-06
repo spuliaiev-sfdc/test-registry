@@ -8,6 +8,7 @@ const fTestInventoryRecord = {
   async setupCollection() {
     const database = await getDatabase();
     let collection = database.collection(this.collectionName);
+    // https://docs.mongodb.com/manual/reference/method/db.collection.createIndex/
     collection.createIndex( { className: 1 }, { unique: 1 });
     collection.createIndex( { scrumTeam: 1 }, { unique: 1 });
 
@@ -15,10 +16,11 @@ const fTestInventoryRecord = {
   },
 
   async insertRecord(database, record) {
+    if (!database) return;
     try {
       let coll = database.collection(this.collectionName);
-      const insertedId = await coll.insertOne(record);
-      return insertedId;
+      const inserted = await coll.insertOne(record);
+      return inserted && inserted.insertedCount === 1 ? inserted.insertedId : null;
     } catch (e) {
       corUtils.warn(`Failed to insert fTestInventoryRecord`, e);
       return null;
