@@ -122,7 +122,7 @@ const fTestInventoryFileUtil = {
    *    categoryElements: ['category1', 'SubCategory2']
    *}
    */
-  findTestOwnershipInfo(inventoryInfo, testClassName) {
+  async findTestOwnershipInfo(inventoryInfo, testClassName) {
     let result = {
       owners: {},
       categoryElements: [],
@@ -151,17 +151,18 @@ const fTestInventoryFileUtil = {
       return info;
     }
 
-    function findTestInCategory(category, parentCategoryInfo) {
+    async function findTestInCategory(category, parentCategoryInfo) {
       if (Array.isArray(category)) {
         for (let i = 0; i < category.length; i++) {
-          if (findTestInCategory(category[i], parentCategoryInfo)) {
+          let found = await findTestInCategory(category[i], parentCategoryInfo);
+          if (found) {
             result.found = true;
             return true;
           }
         }
         return false;
       }
-      function checkClassMatching(test, categoryInfo) {
+      async function checkClassMatching(test, categoryInfo) {
         if (test.attr && test.attr.class) {
           let matched = false;
           let description = test.attr.scrumteam ? 'FTestInventory test scrumteam' : 'FTestInventory category scrumteam';
@@ -176,7 +177,11 @@ const fTestInventoryFileUtil = {
             // 1) Name of the class
             // 2) ScrumTeam from the Test element
             // 3) ScrumTeam from the categories tree
-            matched = testClassName(test.attr.class, categoryInfo, scrumTeam, scrumTeamSource, description);
+            if (testClassName.constructor.name === 'AsyncFunction') {
+              matched = await testClassName(test.attr.class, categoryInfo, scrumTeam, scrumTeamSource, description);
+            } else {
+              matched = testClassName(test.attr.class, categoryInfo, scrumTeam, scrumTeamSource, description);
+            }
           }
           if (matched) {
             result.categoryElements = categoryInfo.categoryElements;
@@ -192,12 +197,12 @@ const fTestInventoryFileUtil = {
         // iterate through tests to find the one we need
         if (Array.isArray(category.test)) {
           for (let i = 0; i < category.test.length; i++) {
-            if (checkClassMatching(category.test[i], categoryInfo)) {
+            if (await checkClassMatching(category.test[i], categoryInfo)) {
               return true;
             }
           }
         } else {
-          if (checkClassMatching(category.test, categoryInfo)) {
+          if (await checkClassMatching(category.test, categoryInfo)) {
             return true;
           }
         }
@@ -205,18 +210,18 @@ const fTestInventoryFileUtil = {
 
       // search in sub categories
       if (category.category) {
-        return findTestInCategory(category.category, categoryInfo);
+        return await findTestInCategory(category.category, categoryInfo);
       }
       return false;
     }
 
-    result.found = findTestInCategory(inventoryInfo.content.ftests, {});
+    result.found = await findTestInCategory(inventoryInfo.content.ftests, {});
     // not failed, so always success
     result.success = true;
     return result;
   },
 
-  getTestOwningTeam(fileInfo, cachedInventoryFile) {
+  async getTestOwningTeam(fileInfo, cachedInventoryFile) {
     let result = {
       owningTeam: null,
       errors: [],
@@ -268,7 +273,7 @@ const fTestInventoryFileUtil = {
       inventoryFile,
       found: false
     };
-    let inventoryInfo = this.findTestOwnershipInfo(cachedInventoryFile, fileInfo.javaClassFQN);
+    let inventoryInfo = await this.findTestOwnershipInfo(cachedInventoryFile, fileInfo.javaClassFQN);
     fileInfo.fTestInventoryInfo.testInfo = inventoryInfo;
     fileInfo.fTestInventoryInfo.found = inventoryInfo.success && inventoryInfo.found;
 
@@ -278,18 +283,20 @@ const fTestInventoryFileUtil = {
 
   async enumerateAllTests(runInfo) {
     corUtils.trace(` FTestInventory complete evaluation start`);
-    let info = await require('../storage/data/fTestInventoryRecord').insertRecord(runInfo.database, { kind: 'mongoTest', label: ' Test from mongoTest 004' });
+    await require('../storage/data/fTestInventoryRecord').testRecord(runInfo.database, 'mongoTest', ' Test from mongoTest 004');
 
-    this.callbackOnFile = (status, relativePath, fileName) => {
+    this.callbackOnFile = async (status, relativePath, fileName) => {
       corUtils.trace(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);
+      await require('../storage/data/fTestInventoryRecord').testRecord(runInfo.database, 'mongoTest', ' Test from mongoTest 005');
+      await require('../storage/data/fTestInventoryRecord').testRecord(runInfo.database, 'mongoTest', ' Test from mongoTest 005+');
 
       let fileInfo = corUtils.analyseFileLocation(runInfo.rootFolder, relativePath);
       if (fileInfo.ext.toLocaleString() === 'xml' && fileInfo.filename.toLocaleString() !== 'pom') {
         corUtils.info(` File ${status.filesProcessed+1} ${relativePath} is potentially an inventory`);
 
-        let processed = this.enumeratingInventoryProcessor(runInfo, fileInfo);
+        let processed = await this.enumeratingInventoryProcessor(runInfo, fileInfo);
         if (runInfo.callbackOnFile) {
-          runInfo.callbackOnFile(runInfo, fileInfo, processed);
+          await runInfo.callbackOnFile(runInfo, fileInfo, processed);
         }
         status.filesProcessed++;
       } else {
@@ -345,23 +352,24 @@ const fTestInventoryFileUtil = {
       runInfo.errors.push(`Error ${errorCode} for ${path}`);
     };
 
-    filesIndexer.iterateFiles(runInfo.rootFolder, this.callbackOnFile, this.callbackOnFolder, this.callbackOnError, 1);
+    await filesIndexer.iterateFiles(runInfo.rootFolder, this.callbackOnFile, this.callbackOnFolder, this.callbackOnError, 1);
 
     corUtils.trace(` FTestInventory complete evaluation done`);
     runInfo.success = true;
     return runInfo;
   },
 
-  enumeratingInventoryProcessor(runInfo, fileInfo) {
+  async enumeratingInventoryProcessor(runInfo, fileInfo) {
     let result = {
       content: null,
       errors: [],
       success: null
     }
     try {
-      function onClassInInventory(className, categoryInfo, scrumTeam, source, description) {
+      async function onClassInInventory(className, categoryInfo, scrumTeam, source, description) {
         // classesFound.push({className, scrumTeam, source, categoryInfo });
         corUtils.trace(`  test class found in inventory ${className}`);
+        await require('../storage/data/fTestInventoryRecord').testRecord(runInfo.database, 'mongoTest', ' Test from mongoTest 010');
         if (runInfo.onTestFound) {
           runInfo.onTestFound(runInfo, fileInfo, className, categoryInfo, scrumTeam, source);
         }
@@ -369,7 +377,7 @@ const fTestInventoryFileUtil = {
           if (!scrumTeam) {
             corUtils.warn(` scrumTeam is undefined for class ${className} in ${fileInfo.relative}`);
           }
-          fTestInventoryRecord.insertRecord(runInfo.database, {
+          await fTestInventoryRecord.insertRecord(runInfo.database, {
             className,
             scrumTeam,
             source,
@@ -396,7 +404,7 @@ const fTestInventoryFileUtil = {
         return result;
       }
 
-      return this.findTestOwnershipInfo(inventoryInfo, onClassInInventory);
+      return await this.findTestOwnershipInfo(inventoryInfo, onClassInInventory);
     }catch (e) {
       corUtils.error(`Failed in processing the potential inventory file ${fileInfo.relative}`, e);
       return {

@@ -2,7 +2,8 @@ var
   assert = require('assert'),
   utils = require('../src/corUtils.js')
     // This is just to set logging to warnings level
-    .warningsOnly(),
+    // .warningsOnly()
+  ,
   testAnalyser = require('../src/parsers/testAnalyser'),
   projectIndexer = require('../src/projectIndexer');
 
@@ -91,7 +92,7 @@ describe('projectIndexer', function() {
                 'SomeLabel.ClassLabel01': ['TestLabel class annotation']
               },
               owners: {
-                'FTEnvTeam_Main': ['FTestInventory category scrumteam'],
+                "FTEnvTeam_Main": ["FTestInventory category scrumteam"],
                 'Team_01': ['ScrumTeam class annotation'],
                 'Team_01_Sub': ['ScrumTeam javadoc'],
                 'The Other Team 03 Name': ['Ownership.yaml']
@@ -138,7 +139,9 @@ describe('projectIndexer', function() {
         // handler to react on report created for file
         onReportGenerated: undefined,
         rescan: false,
-        module: undefined
+        module: undefined,
+        onFolderProcessed: status => runInfo.foldersProcessedList.push(status.currentPath),
+        foldersProcessedList: []
       };
 
       return expect(
@@ -148,6 +151,7 @@ describe('projectIndexer', function() {
           assert.deepEqual(result, {
             foldersProcessedAlready: new Set([]),
             foldersProcessed: 0,
+            foldersProcessedList: [],
             rootFolder: './test-projects/empty',
             rootFoldersDetected: 0,
             rootFilesDetected: 0,
@@ -155,7 +159,6 @@ describe('projectIndexer', function() {
             reportFolder: undefined,
             rescan: false,
             module: undefined,
-            onReportGenerated: undefined,
             errors: [],
             success: true
           });
@@ -167,10 +170,13 @@ describe('projectIndexer', function() {
       addedFoldersIntoScanFile = [];
       let runInfo = {
         rootFolder,
+        rescan: true,
         // place to store report files
         reportFolder: undefined,
         // handler to react on report created for file
-        onReportGenerated: undefined
+        onReportGenerated: undefined,
+        onFolderProcessed: status => runInfo.foldersProcessedList.push(status.currentPath),
+        foldersProcessedList: []
       };
       return expect(
         projectIndexer.iterateProject(runInfo)
@@ -179,12 +185,20 @@ describe('projectIndexer', function() {
           assert.deepEqual(result, {
             foldersProcessedAlready: new Set([]),
             foldersProcessed: 7,
+            foldersProcessedList: [
+              "folder_02",
+              "folder_02/java",
+              "folder_02/java/src",
+              "folder_02/java/src/package_02_01",
+              "folder_01",
+              "folder_01/java",
+              "folder_01/java/src"            ],
+            rescan: true,
             rootFolder: './test-projects/small',
             rootFoldersDetected: 2,
             rootFilesDetected: 0,
             lastScanFile: 'lastScan.log',
             reportFolder: undefined,
-            onReportGenerated: undefined,
             errors: [],
             success: true
           });
@@ -196,10 +210,13 @@ describe('projectIndexer', function() {
       addedFoldersIntoScanFile = [];
       let runInfo = {
         rootFolder,
+        rescan: false,
         // place to store report files
         reportFolder: undefined,
         // handler to react on report created for file
-        onReportGenerated: undefined
+        onReportGenerated: undefined,
+        onFolderProcessed: status => runInfo.foldersProcessedList.push(status.currentPath),
+        foldersProcessedList: []
       };
       return expect(
         projectIndexer.iterateProject(runInfo)
@@ -208,13 +225,19 @@ describe('projectIndexer', function() {
           assert.deepEqual(result, {
             foldersProcessedAlready: new Set(['folder_01']),
             foldersProcessed: 4,
+            foldersProcessedList: [
+              "folder_02",
+              "folder_02/java",
+              "folder_02/java/src",
+              "folder_02/java/src/package_02_01"
+            ],
             lastScanFound: true,
+            rescan: false,
             rootFolder: './test-projects/smallPartial',
             rootFoldersDetected: 2,
             rootFilesDetected: 1,
             lastScanFile: 'lastScan.log',
             reportFolder: undefined,
-            onReportGenerated: undefined,
             errors: [],
             success: true
           });
@@ -229,7 +252,9 @@ describe('projectIndexer', function() {
         // place to store report files
         reportFolder: undefined,
         // handler to react on report created for file
-        onReportGenerated: undefined
+        onReportGenerated: undefined,
+        onFolderProcessed: status => runInfo.foldersProcessedList.push(status.currentPath),
+        foldersProcessedList: []
       };
       return expect(
         projectIndexer.iterateProject(runInfo)
@@ -241,9 +266,9 @@ describe('projectIndexer', function() {
             rootFilesDetected: 0,
             foldersProcessedAlready: new Set([]),
             foldersProcessed: 0,
+            foldersProcessedList: [],
             lastScanFile: 'lastScan.log',
             reportFolder: undefined,
-            onReportGenerated: undefined,
             errors: [],
             success: true
           });

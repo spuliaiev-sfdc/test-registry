@@ -5,6 +5,11 @@ var
     .warningsOnly(),
   testAnalyser = require('../src/parsers/testAnalyser');
 
+// Async Testing utilities
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+const { expect } = chai;
+chai.use(chaiAsPromised);
 
 describe('testAnalyser', function() {
   describe('#verifyFileIsTest()', function() {

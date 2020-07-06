@@ -4,6 +4,7 @@ const corUtils = require('../../corUtils');
 
 const fTestInventoryRecord = {
   collectionName: 'fTestInventory',
+  testRecords: false,
 
   async setupCollection() {
     const database = await getDatabase();
@@ -13,6 +14,12 @@ const fTestInventoryRecord = {
     collection.createIndex( { scrumTeam: 1 }, { unique: 1 });
 
     return collection;
+  },
+
+  async testRecord(database, kind, description) {
+    if (this.testRecords) {
+      await this.insertRecord(database, { kind: kind, label: description });
+    }
   },
 
   async insertRecord(database, record) {

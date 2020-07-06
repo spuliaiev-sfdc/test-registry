@@ -13,13 +13,9 @@ const projectIndexer = {
     this.prepareRootFolderInfo(runInfo);
     utils.info("Execution information", runInfo);
 
-    // fTestInventoryRecord.insertRecord(runInfo.database, { kind: 'mongoTest', label: ' Test from mongoTest 003' });
-    await fTestInventoryRecord.insertRecord(runInfo.database, { kind: 'mongoTest', label: ' Test from mongoTest 003_00' });
-
     await fTestInventory.enumerateAllTests(runInfo);
 
-    await fTestInventoryRecord.insertRecord(runInfo.database, { kind: 'mongoTest', label: ' Test from mongoTest 003_01' });
-    this.iterateRootFolder(runInfo);
+    await this.iterateRootFolder(runInfo);
 
     return runInfo;
   },
@@ -80,16 +76,19 @@ const projectIndexer = {
     utils.trace(` Root folder scan done`);
   },
 
-  iterateRootFolder(runInfo) {
+  async iterateRootFolder(runInfo) {
     utils.trace(` Root folder iteration start`);
-
+    let onReportGenerated = runInfo.onReportGenerated;
+    if (runInfo.hasOwnProperty('onReportGenerated')) delete runInfo.onReportGenerated;
+    let onFolderProcessed = runInfo.onFolderProcessed;
+    if (runInfo.hasOwnProperty('onFolderProcessed')) delete runInfo.onFolderProcessed;
     this.callbackOnFile = (status, relativePath, fileName) => {
       utils.trace(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);
 
       let fileInfo = testAnalyser.verifyFileIsTest(runInfo.rootFolder, relativePath);
       if (fileInfo.testFile) {
         utils.info(` File ${status.filesProcessed+1} ${relativePath} is Test`);
-        this.runFileAnalysis(runInfo, status, fileInfo);
+        this.runFileAnalysis(runInfo, status, fileInfo, onReportGenerated);
         status.filesProcessed++;
       } else {
         utils.trace(` File ${status.filesProcessed} ${relativePath} is skipped as not Test`);
@@ -120,6 +119,9 @@ const projectIndexer = {
         if(status.currentPath !== ".") {
           // Do not store the current folder in the list of processed folders
           runInfo.foldersProcessed++;
+          if (onFolderProcessed) {
+            onFolderProcessed(status);
+          }
           // Append the current processed ROOT folder into the list of processed folders in last sync file
           if (!status.currentPath.includes("/")) {
             this.addProcessedFolderToScanFile(runInfo, status.currentPath);
@@ -133,12 +135,12 @@ const projectIndexer = {
       runInfo.errors.push(`Error ${errorCode} for ${path}`);
     };
 
-    filesIndexer.iterateFiles(runInfo.rootFolder, this.callbackOnFile, this.callbackOnFolder, this.callbackOnError, 1);
+    await filesIndexer.iterateFiles(runInfo.rootFolder, this.callbackOnFile, this.callbackOnFolder, this.callbackOnError, 1);
 
     utils.trace(` Root folder iteration done`);
   },
 
-  async runFileAnalysis(runInfo, status, fileInfo) {
+  async runFileAnalysis(runInfo, status, fileInfo, onReportGenerated) {
     utils.trace(` File analysis start ${fileInfo.relative}`);
     if (fileInfo.lang === "java") {
       testAnalyser.analyseJavaTestFile(fileInfo);
@@ -148,8 +150,8 @@ const projectIndexer = {
       await this.populateFTestInventoryFileInformation(runInfo, fileInfo);
 
       fileInfo.report = testAnalyser.writeReport(fileInfo, runInfo.reportFolder);
-      if (runInfo.onReportGenerated) {
-        runInfo.onReportGenerated(fileInfo);
+      if (onReportGenerated) {
+        onReportGenerated(fileInfo);
       }
     }
 
@@ -182,7 +184,7 @@ const projectIndexer = {
         // init the caching for ownership file
         runInfo.cachedInventoryFile = {};
       }
-      testAnalyser.analyseFTestInventoryFile(fileInfo, runInfo.cachedInventoryFile);
+      await testAnalyser.analyseFTestInventoryFile(fileInfo, runInfo.cachedInventoryFile);
     }
   }
 };

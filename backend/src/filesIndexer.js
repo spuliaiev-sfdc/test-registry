@@ -45,7 +45,7 @@ const filesIndexer = {
 
   },
 
-  iterateFiles(path, callbackFile, callbackFolder, callbackErr, concurrency) {
+  async iterateFiles(path, callbackFile, callbackFolder, callbackErr, concurrency) {
     let status = {
       root: resolve(path),
       currentPath: null,
@@ -58,24 +58,24 @@ const filesIndexer = {
     status.currentFullPath = resolve(status.root, status.currentPath);
     status.foldersListToProcess.push(status.currentPath);
 
-    let scanFolder = function(path, callbackFile, callbackFolder, callbackErr) {
+    let scanFolder = async function(path, callbackFile, callbackFolder, callbackErr) {
         let stats;
         try {
           stats = fs.statSync(path);
         } catch (ex) {
           if (ex.code === 'ENOENT') {
-            return callbackErr(status, "not_found", path);
+            return await callbackErr(status, "not_found", path);
           } else {
-            return callbackErr(status, "other", path, ex);
+            return await callbackErr(status, "other", path, ex);
           }
         }
         if (stats.isDirectory()) {
-          if (!callbackFolder || callbackFolder(status, "start")) {
+          if (!callbackFolder || await callbackFolder(status, "start")) {
             let files;
             try {
               files = fs.readdirSync(path);
             } catch (ex) {
-              callbackErr(status, "read_dir", path, ex);
+              await callbackErr(status, "read_dir", path, ex);
             }
             for (let i = 0; i < files.length; i++) {
               let foundFilePath = resolve(path, files[i]);
@@ -84,37 +84,37 @@ const filesIndexer = {
                 statFile = fs.statSync(foundFilePath);
               } catch (ex) {
                 if (ex.code === 'ENOENT') {
-                  return callbackErr(status, "not_found", foundFilePath);
+                  return await callbackErr(status, "not_found", foundFilePath);
                 } else {
-                  return callbackErr(status, "other", foundFilePath, ex);
+                  return await callbackErr(status, "other", foundFilePath, ex);
                 }
               }
               let relativePath = relative(status.root, foundFilePath);
               if (statFile.isDirectory()) {
                 status.foldersListToProcess.push(relativePath);
               } else {
-                callbackFile(status, relativePath, files[i]);
+                await callbackFile(status, relativePath, files[i]);
                 status.filesProcessed++;
               }
             }
             status.foldersProcessed++;
-            callbackFolder(status, "finish");
+            await callbackFolder(status, "finish");
           } else {
             // callBackFolder returned false - so folder should be skipped
           }
         } else {
           let foundFilePath = resolve(path, files[i]);
-          callbackFile(status, foundFilePath, files[i]);
+          await callbackFile(status, foundFilePath, files[i]);
         }
       };
-    callbackFolder(status, "start_all");
+    await callbackFolder(status, "start_all");
     while(status.foldersListToProcess.length > 0) {
       let currentPath = status.foldersListToProcess.pop();
       status.currentPath = currentPath;
       status.currentFullPath = resolve(status.root, currentPath);
-      scanFolder(status.currentFullPath, callbackFile, callbackFolder, callbackErr);
+      await scanFolder(status.currentFullPath, callbackFile, callbackFolder, callbackErr);
     }
-    callbackFolder(status, "finish_all");
+    await callbackFolder(status, "finish_all");
   },
 
   indexFiles(param) {

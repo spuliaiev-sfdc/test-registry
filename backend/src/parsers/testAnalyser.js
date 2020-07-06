@@ -111,9 +111,9 @@ const testAnalyser = {
     return ownersFileUtil.getFileOwningTeam(fileInfo, cachedOwnershipFile);
   },
 
-  analyseFTestInventoryFile(fileInfo, cachedInventoryFile) {
+  async analyseFTestInventoryFile(fileInfo, cachedInventoryFile) {
     corUtil.trace(`[analyseJavaTestFile] FTestInventory file analysis for ${fileInfo.relative}`);
-    fTestInventoryFileUtil.getTestOwningTeam(fileInfo, cachedInventoryFile);
+    await fTestInventoryFileUtil.getTestOwningTeam(fileInfo, cachedInventoryFile);
     return fileInfo.fTestInventoryInfo;
   }
 };

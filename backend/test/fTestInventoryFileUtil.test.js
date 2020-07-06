@@ -48,17 +48,21 @@ describe('fTestInventory', function() {
       assert.equal(inventoryInfo.filename, 'ftest-inventory.xml');
 
       let testClassName = 'some.production.folder.SimpleJavaTest';
-      let classInventoryInfo = fTestInventory.findTestOwnershipInfo(inventoryInfo, testClassName);
-      assert.equal(classInventoryInfo.success, true);
-      assert.equal(classInventoryInfo.found, true);
-      assert.deepEqual(classInventoryInfo.owners, {
-        'FTEnvTeam_Main': [ 'FTestInventory category scrumteam' ]
-      });
-      assert.deepStrictEqual(classInventoryInfo.categoryElements, [
-        'All functional tests',
-        'Example Tests',
-        'TestsCategory01'
-      ]);
+      return expect(
+        fTestInventory.findTestOwnershipInfo(inventoryInfo, testClassName)
+      ).to.eventually.be.fulfilled
+        .then((classInventoryInfo) => {
+          assert.equal(classInventoryInfo.success, true);
+          assert.equal(classInventoryInfo.found, true);
+          assert.deepEqual(classInventoryInfo.owners, {
+            'FTEnvTeam_Main': ['FTestInventory category scrumteam']
+          });
+          assert.deepStrictEqual(classInventoryInfo.categoryElements, [
+            'All functional tests',
+            'Example Tests',
+            'TestsCategory01'
+          ]);
+        });
     });
     it('Wrong inventory object in regular project', function () {
       let inventoryInfo = fTestInventory.readAndVerifyInventoryFile({moduleRoot: "module_00", testKind: undefined}, undefined);
@@ -85,17 +89,21 @@ describe('fTestInventory', function() {
       assert.equal(inventoryInfo.filename, 'ftest-inventory.xml');
 
       let testClassName = 'some.production.folder.SecondJavaTest';
-      let classInventoryInfo = fTestInventory.findTestOwnershipInfo(inventoryInfo, testClassName);
-      assert.equal(classInventoryInfo.success, true);
-      assert.equal(classInventoryInfo.found, true);
-      assert.deepEqual(classInventoryInfo.owners, {
-        'FTEnvTeam_Second': [ 'FTestInventory test scrumteam' ]
-      });
-      assert.deepStrictEqual(classInventoryInfo.categoryElements, [
-        'All functional tests',
-        'Example Tests',
-        'TestsCategory01'
-      ]);
+      return expect(
+        fTestInventory.findTestOwnershipInfo(inventoryInfo, testClassName)
+      ).to.eventually.be.fulfilled
+        .then((classInventoryInfo) => {
+          assert.equal(classInventoryInfo.success, true);
+          assert.equal(classInventoryInfo.found, true);
+          assert.deepEqual(classInventoryInfo.owners, {
+            'FTEnvTeam_Second': ['FTestInventory test scrumteam']
+          });
+          assert.deepStrictEqual(classInventoryInfo.categoryElements, [
+            'All functional tests',
+            'Example Tests',
+            'TestsCategory01'
+          ]);
+        });
     });
     it('Find all test classes in inventory', function () {
       let rootFolder = './test-projects/javaProject/';
@@ -112,86 +120,90 @@ describe('fTestInventory', function() {
         classesFound.push({className, scrumTeam, source, categoryInfo });
         return false;
       }
-      let classInventoryInfo = fTestInventory.findTestOwnershipInfo(inventoryInfo, onClassInInventory);
-      assert.equal(classInventoryInfo.success, true);
-      assert.deepEqual(classesFound, [
-          {
-            "categoryInfo": {
-              "categoryElements": [
-                "All functional tests",
-                "Example Tests"
-              ],
-              "scrumTeam": undefined
-            },
-            "className": "some.production.folder.ThirdJavaTest",
-            "scrumTeam": undefined,
-            "source": "category"
-          },
-          {
-            "categoryInfo": {
-              "categoryElements": [
-                "All functional tests",
-                "Example Tests",
-                "TestsCategory01"
-              ],
-              "scrumTeam": "FTEnvTeam_Main"
-            },
-            "className": "some.production.folder.SimpleJavaTest",
-            "scrumTeam": "FTEnvTeam_Main",
-            "source": "category"
-          },
-          {
-            "categoryInfo": {
-              "categoryElements": [
-                "All functional tests",
-                "Example Tests",
-                "TestsCategory01"
-              ],
-              "scrumTeam": "FTEnvTeam_Main"
-            },
-            "className": "some.production.folder.SecondJavaTest",
-            "scrumTeam": "FTEnvTeam_Second",
-            "source": "test"
-          },
-          {
-            "categoryInfo": {
-              "categoryElements": [
-                "All functional tests",
-                "Example Tests Group OTHER 2"
-              ],
+      return expect(
+        fTestInventory.findTestOwnershipInfo(inventoryInfo, onClassInInventory)
+      ).to.eventually.be.fulfilled
+        .then((classInventoryInfo) => {
+          assert.equal(classInventoryInfo.success, true);
+          assert.deepEqual(classesFound, [
+            {
+              "categoryInfo": {
+                "categoryElements": [
+                  "All functional tests",
+                  "Example Tests"
+                ],
+                "scrumTeam": undefined
+              },
+              "className": "some.production.folder.ThirdJavaTest",
               "scrumTeam": undefined,
+              "source": "category"
             },
-            "className": "some.production.folder.OtherSimpleJavaTest",
-            "scrumTeam": undefined,
-            "source": "category"
-          },
-          {
-            "categoryInfo": {
-              "categoryElements": [
-                "All functional tests",
-                "Example Tests Group OTHER 2",
-                "TestsCategory Group OTHER 01 in 02"
-              ],
-              "scrumTeam": "FTEnvTeam_Third_Other"
+            {
+              "categoryInfo": {
+                "categoryElements": [
+                  "All functional tests",
+                  "Example Tests",
+                  "TestsCategory01"
+                ],
+                "scrumTeam": "FTEnvTeam_Main"
+              },
+              "className": "some.production.folder.SimpleJavaTest",
+              "scrumTeam": "FTEnvTeam_Main",
+              "source": "category"
             },
-            "className": "some.production.folder.OtherSimpleJavaTest",
-            "scrumTeam": "FTEnvTeam_Third_Other",
-            "source": "category"
-          },
-          {
-            "categoryInfo": {
-              "categoryElements": [
-                "All functional tests",
-                "Example Tests Group OTHER 2",
-                "TestsCategory Group OTHER 01 in 02"
-              ],
-              "scrumTeam": "FTEnvTeam_Third_Other"
+            {
+              "categoryInfo": {
+                "categoryElements": [
+                  "All functional tests",
+                  "Example Tests",
+                  "TestsCategory01"
+                ],
+                "scrumTeam": "FTEnvTeam_Main"
+              },
+              "className": "some.production.folder.SecondJavaTest",
+              "scrumTeam": "FTEnvTeam_Second",
+              "source": "test"
             },
-            "className": "some.production.folder.OtherSecondJavaTest",
-            "scrumTeam": "FTEnvTeam_Second_Other",
-            "source": "test"
-          }
-      ]);
+            {
+              "categoryInfo": {
+                "categoryElements": [
+                  "All functional tests",
+                  "Example Tests Group OTHER 2"
+                ],
+                "scrumTeam": undefined,
+              },
+              "className": "some.production.folder.OtherSimpleJavaTest",
+              "scrumTeam": undefined,
+              "source": "category"
+            },
+            {
+              "categoryInfo": {
+                "categoryElements": [
+                  "All functional tests",
+                  "Example Tests Group OTHER 2",
+                  "TestsCategory Group OTHER 01 in 02"
+                ],
+                "scrumTeam": "FTEnvTeam_Third_Other"
+              },
+              "className": "some.production.folder.OtherSimpleJavaTest",
+              "scrumTeam": "FTEnvTeam_Third_Other",
+              "source": "category"
+            },
+            {
+              "categoryInfo": {
+                "categoryElements": [
+                  "All functional tests",
+                  "Example Tests Group OTHER 2",
+                  "TestsCategory Group OTHER 01 in 02"
+                ],
+                "scrumTeam": "FTEnvTeam_Third_Other"
+              },
+              "className": "some.production.folder.OtherSecondJavaTest",
+              "scrumTeam": "FTEnvTeam_Second_Other",
+              "source": "test"
+            }
+          ]);
+        });
     });
     describe('#readAndVerifyInventoryFile()', function() {
       it('Simple Inventory file', function () {

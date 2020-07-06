@@ -149,13 +149,6 @@ async function runIndex(runInfo) {
   const mongoStorage = await require("./storage/mongoStorage").getDatabase();
   runInfo.database = mongoStorage;
 
-  let info = await require('./storage/data/fTestInventoryRecord').insertRecord(runInfo.database, { kind: 'mongoTest', label: ' Test from mongoTest 000' });
-  console.log('Invs insert ', info);
-
-  // const invRecord2 = require('./storage/data/fTestInventoryRecord');
-  // let info2 = await invRecord2.insertRecord(runInfo.database, { kind: 'mongoTest', label: ' Test from mongoTest 001' });
-  // console.log('Invs insert ', info2);
-
   await projectIndexer.iterateProject(runInfo);
   console.info(`Run finished`, runInfo);
   process.exit(0);
@@ -167,9 +160,6 @@ async function runTestMongo(runInfo) {
   const invRecord = require('./storage/data/fTestInventoryRecord');
   let records = await invRecord.getRecords(runInfo.database);
   console.log('Invs list', records);
-
-  let info = await require('./storage/data/fTestInventoryRecord').insertRecord(runInfo.database, { kind: 'mongoTest', label: ' Test from mongoTest 002' });
-  console.log('Invs insert ', info);
 
   utils.log(`CORE files Test Ownership checker App ${VERSION} is listening now! Send them requests my way http://127.0.0.1:${defaultPort}/** !`);
   server.startServer(runInfo);
