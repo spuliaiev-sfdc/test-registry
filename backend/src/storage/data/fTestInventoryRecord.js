@@ -48,26 +48,15 @@ const fTestInventoryRecord = {
    *    scrumTeam: string = 'Team_01',
    *    description: string,
    *    source: stromg,
-   *    categoryPath: string,
    *    categoryElements: [string, string]},
    *    module: string,
    *    file: string
    * }}
    */
   async findByClassName(javaClassFQN) {
-    let result = {
-      className,
-        scrumTeam: scrumTeam,
-        source,
-        file: 'fileInfo.relative',
-      module: 'fileInfo.module',
-      description: 'description',
-      categoryPath: 'categoryInfo.categoryPath',
-      categoryElements: ['categoryInfo','categoryElements']
-    };
     let coll = database.collection(this.collectionName);
-    let list = await coll.findOne({className: javaClassFQN});
-    return list;
+    let result = await coll.findOne({className: javaClassFQN});
+    return result;
   }
 };
 

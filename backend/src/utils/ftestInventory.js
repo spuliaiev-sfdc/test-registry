@@ -11,6 +11,8 @@ const
   fTestInventoryRecord = require('../storage/data/fTestInventoryRecord'),
   corUtils = require('../corUtils.js');
 
+const lodash = require('lodash')
+
 let options = {
   attributeNamePrefix: "",
   // attributeNamePrefix : "@_",
@@ -117,14 +119,12 @@ const fTestInventoryFileUtil = {
    *    errors: [ 'Error 1 information' ],
    *    found: boolean,
    *    owners: { 'scrumTeam1': [ 'FTestInventory category scrumteam' ]},
-   *    categoryPath: 'category1/SubCategory2',
    *    categoryElements: ['category1', 'SubCategory2']
    *}
    */
   findTestOwnershipInfo(inventoryInfo, testClassName) {
     let result = {
       owners: {},
-      categoryPath: "",
       categoryElements: [],
       errors: [],
       found: false,
@@ -137,28 +137,12 @@ const fTestInventoryFileUtil = {
       return result;
     }
 
-    function appendCategoryInfo(category) {
-      result.categoryElements.unshift(category.attr.name);
-      if (result.categoryPath) {
-        result.categoryPath = category.attr.name + '/' + result.categoryPath;
-      } else {
-        result.categoryPath = category.attr.name;
-      }
-
-      // only if it was not marked as owned by some other team in more precise level - on the test or underlaying category
-      if (Object.keys(result.owners).length === 0 && category.attr.scrumteam) {
-        corUtils.addTagInfo(result.owners, category.attr.scrumteam, ['FTestInventory category scrumteam']);
-      }
-    }
-
     function currentCategoryInfo(category, parentCategoryInfo) {
-      let info = Object.assign({categoryElements: [], categoryPath: undefined, scrumTeam: undefined}, parentCategoryInfo);
-      info.categoryElements.unshift(category.attr.name);
-      if (info.categoryPath) {
-        info.categoryPath = category.attr.name + '/' + info.categoryPath;
-      } else {
-        info.categoryPath = category.attr.name;
-      }
+      let info = lodash.cloneDeep(parentCategoryInfo);
+      if (!info.categoryElements) info.categoryElements = [];
+      if (!info.scrumTeam) info.scrumTeam = undefined;
+
+      info.categoryElements.push(category.attr.name);
 
       // only if it was not marked as owned by some other team in more precise level - on the test or underlaying category
       if (category.attr.scrumteam) {
@@ -171,7 +155,6 @@ const fTestInventoryFileUtil = {
       if (Array.isArray(category)) {
         for (let i = 0; i < category.length; i++) {
           if (findTestInCategory(category[i], parentCategoryInfo)) {
-            appendCategoryInfo(category[i]);
             result.found = true;
             return true;
           }
@@ -183,7 +166,7 @@ const fTestInventoryFileUtil = {
           let matched = false;
           let description = test.attr.scrumteam ? 'FTestInventory test scrumteam' : 'FTestInventory category scrumteam';
           let scrumTeamSource = test.attr.scrumteam ? 'test' : 'category';
-          let scrumTeam = test.attr.scrumteam ? test.attr.scrumteam : categoryInfo.scrumteam;
+          let scrumTeam = test.attr.scrumteam ? test.attr.scrumteam : categoryInfo.scrumTeam;
 
           if (typeof testClassName === "string") {
             matched = testClassName === test.attr.class;
@@ -196,6 +179,7 @@ const fTestInventoryFileUtil = {
             matched = testClassName(test.attr.class, categoryInfo, scrumTeam, scrumTeamSource, description);
           }
           if (matched) {
+            result.categoryElements = categoryInfo.categoryElements;
             corUtils.addTagInfo(result.owners, scrumTeam, description);
             return true;
           }
@@ -209,13 +193,11 @@ const fTestInventoryFileUtil = {
         if (Array.isArray(category.test)) {
           for (let i = 0; i < category.test.length; i++) {
             if (checkClassMatching(category.test[i], categoryInfo)) {
-              appendCategoryInfo(category);
               return true;
             }
           }
         } else {
           if (checkClassMatching(category.test, categoryInfo)) {
-            appendCategoryInfo(category);
             return true;
           }
         }
@@ -394,7 +376,6 @@ const fTestInventoryFileUtil = {
             file: fileInfo.relative,
             module: fileInfo.module,
             description: description,
-            categoryPath: categoryInfo.categoryPath,
             categoryElements: categoryInfo.categoryElements
           })
         }
