@@ -5,6 +5,7 @@ const
   testAnalyser = require('./parsers/testAnalyser'),
   fTestInventory = require('./utils/ftestInventory'),
   fTestInventoryRecord = require('./storage/data/fTestInventoryRecord'),
+  testRecord = require('./storage/data/testRecord'),
   filesIndexer = require('./filesIndexer');
 
 const projectIndexer = {
@@ -13,7 +14,14 @@ const projectIndexer = {
     this.prepareRootFolderInfo(runInfo);
     utils.info("Execution information", runInfo);
 
-    await fTestInventory.enumerateAllTests(runInfo);
+    await this.iterateRootFolder(runInfo);
+
+    return runInfo;
+  },
+
+  async iterateProjectFTestInventory(runInfo) {
+    this.prepareRootFolderInfo(runInfo);
+    utils.info("Execution information", runInfo);
 
     await this.iterateRootFolder(runInfo);
 
@@ -37,7 +45,8 @@ const projectIndexer = {
     if (fs.existsSync(lastScanFileFullPath)) {
       utils.info(` lastScan.log file is found in the folder will be excluded from reindex. remove the file if full scan needed`);
       if (runInfo.rescan) {
-        utils.info(` lastScan.log file is ignored because of rescan option`);
+        utils.info(` lastScan.log file is backed up because of rescan option`);
+        fs.renameSync(lastScanFileFullPath, lastScanFileFullPath+"-"+utils.timestamp()+".bak");
       } else {
         runInfo.lastScanFound = true;
         fs.readFileSync(lastScanFileFullPath, "UTF-8").toString().split("\n").map(line => {
@@ -82,13 +91,13 @@ const projectIndexer = {
     if (runInfo.hasOwnProperty('onReportGenerated')) delete runInfo.onReportGenerated;
     let onFolderProcessed = runInfo.onFolderProcessed;
     if (runInfo.hasOwnProperty('onFolderProcessed')) delete runInfo.onFolderProcessed;
-    this.callbackOnFile = (status, relativePath, fileName) => {
+    this.callbackOnFile = async (status, relativePath, fileName) => {
       utils.trace(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);
 
       let fileInfo = testAnalyser.verifyFileIsTest(runInfo.rootFolder, relativePath);
       if (fileInfo.testFile) {
         utils.info(` File ${status.filesProcessed+1} ${relativePath} is Test`);
-        this.runFileAnalysis(runInfo, status, fileInfo, onReportGenerated);
+        await this.runFileAnalysis(runInfo, status, fileInfo, onReportGenerated);
         status.filesProcessed++;
       } else {
         utils.trace(` File ${status.filesProcessed} ${relativePath} is skipped as not Test`);
@@ -153,6 +162,9 @@ const projectIndexer = {
       if (onReportGenerated) {
         onReportGenerated(fileInfo);
       }
+      if (runInfo.database) {
+        await testRecord.insertRecord(runInfo.database, fileInfo.report);
+      }
     }
 
     utils.trace(` File analysis end ${fileInfo.relative}`);
@@ -173,18 +185,37 @@ const projectIndexer = {
   },
 
   async populateFTestInventoryFileInformation(runInfo, fileInfo) {
+    let populated = false;
     if (runInfo.database) {
       // If DB is available - read the data from database
-      let invRecord = await fTestInventoryRecord.findByClassName(fileInfo.javaClassFQN);
+      // let invRecords = await fTestInventoryRecord.getRecords(runInfo.database);
+      let invRecord = await fTestInventoryRecord.findByClassName(runInfo.database, fileInfo.javaClassFQN);
       if (invRecord) {
-        fileInfo.fTestInventoryInfo = invRecord;
+        populated = true;
+        fileInfo.fTestInventoryInfo = {
+          testInfo: {
+            owners: {},
+            categoryElements: invRecord.categoryElements,
+            module: invRecord.module,
+            file: invRecord.file
+          },
+          found: true,
+          success: true
+        };
+        utils.addTagInfo(fileInfo.fTestInventoryInfo.testInfo.owners, invRecord.scrumTeam, invRecord.description);
+        delete fileInfo.fTestInventoryInfo.testInfo['_id'];
       }
-    } else {
+    }
+    if (!populated) {
       if (!runInfo.cachedInventoryFile) {
         // init the caching for ownership file
         runInfo.cachedInventoryFile = {};
       }
       await testAnalyser.analyseFTestInventoryFile(fileInfo, runInfo.cachedInventoryFile);
+      populated = fileInfo.fTestInventoryInfo && fileInfo.fTestInventoryInfo.success;
+    }
+    if (!populated) {
+      utils.info(`  FTestInventory info not populated for file ${fileInfo.relative}`);
     }
   }
 };

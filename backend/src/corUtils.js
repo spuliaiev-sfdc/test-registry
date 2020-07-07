@@ -309,6 +309,15 @@ const corUtils = {
     }
     return ownersCollection;
   },
+
+  /**
+   * '2012-11-04_14:55:45'
+   */
+  timestamp() {
+    return new Date().toISOString().
+      replace(/T/, '_').      // replace T with a space
+      replace(/\..+/, '')     // delete the dot and everything after
+  }
 };
 
 

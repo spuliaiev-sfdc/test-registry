@@ -154,6 +154,15 @@ async function runIndex(runInfo) {
   process.exit(0);
 }
 
+async function runFTestInventoryIndex(runInfo) {
+  const mongoStorage = await require("./storage/mongoStorage").getDatabase();
+  runInfo.database = mongoStorage;
+
+  await projectIndexer.iterateProjectFTestInventory(runInfo);
+  console.info(`Run finished`, runInfo);
+  process.exit(0);
+}
+
 async function runTestMongo(runInfo) {
   const mongoStorage = await require("./storage/mongoStorage").getDatabase();
   runInfo.database = mongoStorage;
@@ -184,6 +193,20 @@ if (args._.includes("index")) {
     module: moduleToRunFor
   };
   runIndex(runInfo);
+  return;
+}
+
+if (args._.includes("fTests")) {
+  let runInfo = {
+    rootFolder: coreFolder,
+    // place to store report files
+    reportFolder: outputFolder,
+    // handler to react on report created for file
+    onReportGenerated: undefined,
+    rescan: rescan,
+    module: moduleToRunFor
+  };
+  runFTestInventoryIndex(runInfo);
   return;
 }
 

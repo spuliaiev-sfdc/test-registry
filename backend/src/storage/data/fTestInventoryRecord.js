@@ -7,7 +7,7 @@ const fTestInventoryRecord = {
   testRecords: false,
 
   async setupCollection() {
-    const database = await getDatabase();
+    const database = await storage.getDatabase();
     let collection = database.collection(this.collectionName);
     // https://docs.mongodb.com/manual/reference/method/db.collection.createIndex/
     collection.createIndex( { className: 1 }, { unique: 1 });
@@ -26,7 +26,7 @@ const fTestInventoryRecord = {
     if (!database) return;
     try {
       let coll = database.collection(this.collectionName);
-      const inserted = await coll.insertOne(record);
+      const inserted = await coll.replaceOne({className: record.className, file: record.file}, record, {upsert: true});
       return inserted && inserted.insertedCount === 1 ? inserted.insertedId : null;
     } catch (e) {
       corUtils.warn(`Failed to insert fTestInventoryRecord`, e);
@@ -36,7 +36,15 @@ const fTestInventoryRecord = {
 
   async getRecords(database) {
     let coll = database.collection(this.collectionName);
-    let list = await coll.find({});
+    let list = coll.find({});
+    list.forEach(
+      function(doc) {
+        console.log(doc);
+      },
+      function(err) {
+        client.close();
+      }
+    );
     return list.toArray();
   },
 
@@ -48,6 +56,7 @@ const fTestInventoryRecord = {
 
   /**
    * Find the fTestInventoryRecord from the database
+   * @param {database} database reference to the MongDB dastabase client
    * @param {string} javaClassFQN Fully qualified name of java class
    * @returns
    *  {{
@@ -60,10 +69,16 @@ const fTestInventoryRecord = {
    *    file: string
    * }}
    */
-  async findByClassName(javaClassFQN) {
-    let coll = database.collection(this.collectionName);
-    let result = await coll.findOne({className: javaClassFQN});
-    return result;
+  async findByClassName(database, javaClassFQN) {
+    try {
+      // const database = await storage.getDatabase();
+      let coll = database.collection(this.collectionName);
+      let result = await coll.findOne({className: javaClassFQN});
+      return result;
+    } catch (e) {
+      corUtils.warn(`Failed to insert fTestInventoryRecord`, e);
+      return null;
+    }
   }
 };
 
