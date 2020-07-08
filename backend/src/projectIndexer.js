@@ -145,7 +145,7 @@ const projectIndexer = {
     };
 
     await filesIndexer.iterateFiles(runInfo.rootFolder, this.callbackOnFile, this.callbackOnFolder, this.callbackOnError, 1);
-
+    runInfo.success = true;
     utils.trace(` Root folder iteration done`);
   },
 

@@ -4,7 +4,7 @@ const
   readline = require('readline'),
   colors = require('colors');
 
-const corUtils = {
+const utils = {
   defaultLogPrefix: "",
   logLevelThreshold: 6,
   logColored: false,
@@ -16,40 +16,40 @@ const corUtils = {
   LOWEST:10,
 
   warningsOnly() {
-    this.logLevelThreshold = corUtils.WARN;
+    this.logLevelThreshold = utils.WARN;
     return this;
   },
 
   warn(message, entity) {
-    corUtils.log(this.WARN, colors.bgYellow.black(message), entity);
+    utils.log(this.WARN, colors.bgYellow.black(message), entity);
   },
 
   error(message, entity) {
-    corUtils.log(this.ERROR, colors.bgRed.white(message), entity);
+    utils.log(this.ERROR, colors.bgRed.white(message), entity);
   },
 
   impt(message, entity) {
-    corUtils.log(this.IMPORTANT, colors.bgCyan.black(message), entity);
+    utils.log(this.IMPORTANT, colors.bgCyan.black(message), entity);
   },
 
   imptWithPrefix(prefix, message) {
-    corUtils.logWithPrefix(prefix, this.IMPORTANT, colors.bgCyan.black(message));
+    utils.logWithPrefix(prefix, this.IMPORTANT, colors.bgCyan.black(message));
   },
 
   info(message, entity) {
-    corUtils.log(this.INFO, message, entity);
+    utils.log(this.INFO, message, entity);
   },
 
   trace(message, entity) {
-    corUtils.log(this.TRACE, message, entity);
+    utils.log(this.TRACE, message, entity);
   },
 
   clean(message, entity) {
-    corUtils.log(5, message, entity);
+    utils.log(5, message, entity);
   },
 
   log(level, message, entity) {
-    corUtils.logWithPrefix(corUtils.defaultLogPrefix, level, message, entity);
+    utils.logWithPrefix(utils.defaultLogPrefix, level, message, entity);
   },
 
   logWithPrefix(logPrefix, level, message, entity) {
@@ -88,17 +88,17 @@ const corUtils = {
   },
 
   progressStart(message) {
-    process.stdout.write(corUtils.defaultLogPrefix + "\t"+message+"\n");
+    process.stdout.write(utils.defaultLogPrefix + "\t"+message+"\n");
   },
 
   progress(message) {
-    corUtils.clearCurrentConsoleLine();
-    process.stdout.write(corUtils.defaultLogPrefix + "\t"+message);
+    utils.clearCurrentConsoleLine();
+    process.stdout.write(utils.defaultLogPrefix + "\t"+message);
   },
 
   progressEnd(message) {
     this.clearCurrentConsoleLine();
-    process.stdout.write(corUtils.defaultLogPrefix + "\t"+message+"\n");
+    process.stdout.write(utils.defaultLogPrefix + "\t"+message+"\n");
   },
 
   clearCurrentConsoleLine(){
@@ -171,7 +171,7 @@ const corUtils = {
   },
 
   writeContent(outFilePath, user, writeContentFunction, onFinish) {
-    corUtils.trace(`          dumping them into file ${outFilePath}`);
+    utils.trace(`          dumping them into file ${outFilePath}`);
     try {
       let logger = fs.createWriteStream(outFilePath);
       logger.on('ready', function () {
@@ -179,7 +179,7 @@ const corUtils = {
           try {
             writeContentFunction(logger);
           } catch (e) {
-            corUtils.trace(`  Failed in writing content function for ${outFilePath}`, e);
+            utils.trace(`  Failed in writing content function for ${outFilePath}`, e);
           }
         }
         if (typeof writeContentFunction === 'string') {
@@ -197,7 +197,7 @@ const corUtils = {
         if (onFinish) {
           onFinish();
         }
-        corUtils.info(`         Saving done into the file for user ${user}`);
+        utils.info(`         Saving done into the file for user ${user}`);
       });
     } catch (e) {
       console.error(`   Failed to write content into file ${outFilePath}`, e);
@@ -257,7 +257,7 @@ const corUtils = {
           // add the kind of unit test
         } else {
           info.testKind = "unknown";
-          corUtils.warn(` Unknown test folder detected ${relativeFileName}`);
+          utils.warn(` Unknown test folder detected ${relativeFileName}`);
         }
       }
     }
@@ -305,7 +305,7 @@ const corUtils = {
         ownersCollection[tagName].push(sourceDescription);
       }
     } else {
-      corUtils.warn(`Attempt to add undefined tag`);
+      utils.warn(`Attempt to add undefined tag`);
     }
     return ownersCollection;
   },
@@ -321,4 +321,4 @@ const corUtils = {
 };
 
 
-module.exports = corUtils;
+module.exports = utils;

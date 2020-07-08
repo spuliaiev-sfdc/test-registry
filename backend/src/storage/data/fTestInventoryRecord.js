@@ -1,6 +1,6 @@
 'use strict';
 const storage = require('../mongoStorage');
-const corUtils = require('../../corUtils');
+const utils = require('../../corUtils');
 
 const fTestInventoryRecord = {
   collectionName: 'fTestInventory',
@@ -29,7 +29,7 @@ const fTestInventoryRecord = {
       const inserted = await coll.replaceOne({className: record.className, file: record.file}, record, {upsert: true});
       return inserted && inserted.insertedCount === 1 ? inserted.insertedId : null;
     } catch (e) {
-      corUtils.warn(`Failed to insert fTestInventoryRecord`, e);
+      utils.warn(`Failed to insert fTestInventoryRecord`, e);
       return null;
     }
   },
@@ -68,7 +68,7 @@ const fTestInventoryRecord = {
       let result = await coll.findOne({className: javaClassFQN});
       return result;
     } catch (e) {
-      corUtils.warn(`Failed to insert fTestInventoryRecord`, e);
+      utils.warn(`Failed to insert fTestInventoryRecord`, e);
       return null;
     }
   }

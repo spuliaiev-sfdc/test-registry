@@ -9,7 +9,7 @@ const
   filesIndexer = require('../filesIndexer'),
   testRecord = require('../storage/data/testRecord'),
   fTestInventoryRecord = require('../storage/data/fTestInventoryRecord'),
-  corUtils = require('../corUtils.js');
+  utils = require('../corUtils.js');
 
 const lodash = require('lodash')
 
@@ -51,7 +51,7 @@ const fTestInventoryFileUtil = {
     try {
       files = fs.readdirSync(moduleRootFolder);
     } catch (ex) {
-      corUtils.error(`Folder read error ${moduleRootFolder}`, ex);
+      utils.error(`Folder read error ${moduleRootFolder}`, ex);
       return;
     }
     for (let i = 0; i < files.length; i++) {
@@ -73,32 +73,32 @@ const fTestInventoryFileUtil = {
     }
     if (!inventoryFile) {
       if (fileInfo.testKind === 'func') {
-        corUtils.error(`   FTestInventory file not found for module ${fileInfo.moduleRoot}`);
+        utils.error(`   FTestInventory file not found for module ${fileInfo.moduleRoot}`);
         result.errors.push(`FTestInventory file not found for module ${fileInfo.moduleRoot}`);
         result.success = false;
         return result;
       }
-      corUtils.trace(`   FTestInventory file not found for non-func test module ${fileInfo.moduleRoot}`);
+      utils.trace(`   FTestInventory file not found for non-func test module ${fileInfo.moduleRoot}`);
       result.success = true;
       return result;
     }
     const fileContent = inventoryFile.content;
     if (!fileContent || fileContent.trim().length === 0) {
-      corUtils.error(`     FTestInventory file is empty for module ${inventoryFile.moduleRoot}`)
+      utils.error(`     FTestInventory file is empty for module ${inventoryFile.moduleRoot}`)
       result.errors.push(`FTestInventory file is empty for module ${inventoryFile.moduleRoot}`);
       result.success = false;
       return result;
     }
     result.filename = inventoryFile.fileName;
     if (!xmlParser.validate(fileContent)) { //optional (it'll return an object in case it's not valid)
-      corUtils.error(`     FTestInventory file is wrong ${inventoryFile.fileName}`)
+      utils.error(`     FTestInventory file is wrong ${inventoryFile.fileName}`)
       result.errors.push(`FTestInventory file is wrong: ${inventoryFile.fileName}`);
       result.success = false;
       return result;
     }
     let currentOwnersFileContent = xmlParser.parse(fileContent, options);
     if (!currentOwnersFileContent.ftests) {
-      corUtils.error(`     FTestInventory file doesn't have any ftest inventory definitions!  ${inventoryFile.fileName}`)
+      utils.error(`     FTestInventory file doesn't have any ftest inventory definitions!  ${inventoryFile.fileName}`)
       result.errors.push(`FTestInventory file doesn't have any ftest inventory definitions:  ${inventoryFile.fileName}`);
       result.success = false;
       return result;
@@ -131,7 +131,7 @@ const fTestInventoryFileUtil = {
       success: false
     }
     if (!inventoryInfo || !inventoryInfo.content || !inventoryInfo.content.ftests) {
-      corUtils.error(`     FTestInventory content is wrong`)
+      utils.error(`     FTestInventory content is wrong`)
       result.errors.push(`FTestInventory content is wrong:`);
       result.success = false;
       return result;
@@ -185,7 +185,7 @@ const fTestInventoryFileUtil = {
           }
           if (matched) {
             result.categoryElements = categoryInfo.categoryElements;
-            corUtils.addTagInfo(result.owners, scrumTeam, description);
+            utils.addTagInfo(result.owners, scrumTeam, description);
             return true;
           }
         }
@@ -227,16 +227,16 @@ const fTestInventoryFileUtil = {
       errors: [],
       success: null
     };
-    corUtils.trace(`[analyseFTestInventoryFile] started FTestInventory file analysis ${fileInfo.relative}`);
+    utils.trace(`[analyseFTestInventoryFile] started FTestInventory file analysis ${fileInfo.relative}`);
     let inventoryFile = this.findInventoryFile(resolve(fileInfo.root, fileInfo.moduleRoot));
     if (!inventoryFile) {
       if (fileInfo.testKind === 'func') {
-        corUtils.error(`   FTestInventory file not found for module ${fileInfo.moduleRoot}`);
+        utils.error(`   FTestInventory file not found for module ${fileInfo.moduleRoot}`);
         result.errors.push(`FTestInventory file not found for module ${fileInfo.moduleRoot}`);
         result.success = false;
         return result;
       }
-      corUtils.trace(`   FTestInventory file not found for non-func test module ${fileInfo.moduleRoot}`);
+      utils.trace(`   FTestInventory file not found for non-func test module ${fileInfo.moduleRoot}`);
       result.success = true;
       return result;
     }
@@ -254,7 +254,7 @@ const fTestInventoryFileUtil = {
       // load the Ownership file as in memory is either wrong or absent
       let inventoryFileData = this.readAndVerifyInventoryFile(fileInfo, inventoryFile);
       if (!inventoryFileData.success) {
-        corUtils.warn(`   FTestInventory file is wrong:\t${inventoryFileData.errors}`);
+        utils.warn(`   FTestInventory file is wrong:\t${inventoryFileData.errors}`);
         result.errors.push(`FTestInventory file is wrong:\t${inventoryFileData.errors}`);
         result.errors.push(inventoryFileData.errors);
         result.success = false;
@@ -266,7 +266,7 @@ const fTestInventoryFileUtil = {
         cachedInventoryFile.content = currentInventoryFileContent;
         cachedInventoryFile.absent = currentInventoryFileAbsent;
       }
-      corUtils.trace(`[analyseFTestInventoryFile] succeeded file load ${fileInfo.relative} Success:${inventoryFileData.success}`);
+      utils.trace(`[analyseFTestInventoryFile] succeeded file load ${fileInfo.relative} Success:${inventoryFileData.success}`);
     }
 
     fileInfo.fTestInventoryInfo = {
@@ -277,22 +277,22 @@ const fTestInventoryFileUtil = {
     fileInfo.fTestInventoryInfo.testInfo = inventoryInfo;
     fileInfo.fTestInventoryInfo.found = inventoryInfo.success && inventoryInfo.found;
 
-    corUtils.trace(`[analyseFTestInventoryFile] finished FTestInventory file analysis ${fileInfo.relative}`);
+    utils.trace(`[analyseFTestInventoryFile] finished FTestInventory file analysis ${fileInfo.relative}`);
     return fileInfo.fTestInventoryInfo;
   },
 
   async enumerateAllTests(runInfo) {
-    corUtils.trace(` FTestInventory complete evaluation start`);
+    utils.trace(` FTestInventory complete evaluation start`);
     await require('../storage/data/fTestInventoryRecord').testRecord(runInfo.database, 'mongoTest', ' Test from mongoTest 004');
 
     this.callbackOnFile = async (status, relativePath, fileName) => {
-      corUtils.trace(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);
+      utils.trace(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);
       await require('../storage/data/fTestInventoryRecord').testRecord(runInfo.database, 'mongoTest', ' Test from mongoTest 005');
       await require('../storage/data/fTestInventoryRecord').testRecord(runInfo.database, 'mongoTest', ' Test from mongoTest 005+');
 
-      let fileInfo = corUtils.analyseFileLocation(runInfo.rootFolder, relativePath);
+      let fileInfo = utils.analyseFileLocation(runInfo.rootFolder, relativePath);
       if (fileInfo.ext.toLocaleString() === 'xml' && fileInfo.filename.toLocaleString() !== 'pom') {
-        corUtils.info(` File ${status.filesProcessed+1} ${relativePath} is potentially an inventory`);
+        utils.info(` File ${status.filesProcessed+1} ${relativePath} is potentially an inventory`);
 
         let processed = await this.enumeratingInventoryProcessor(runInfo, fileInfo);
         if (runInfo.callbackOnFile) {
@@ -300,7 +300,7 @@ const fTestInventoryFileUtil = {
         }
         status.filesProcessed++;
       } else {
-        corUtils.trace(` File ${status.filesProcessed} ${relativePath} is skipped as not Test`);
+        utils.trace(` File ${status.filesProcessed} ${relativePath} is skipped as not Test`);
       }
     };
 
@@ -339,9 +339,9 @@ const fTestInventoryFileUtil = {
           return needsToBeProcessed;
         } finally {
           if (needsToBeProcessed) {
-            corUtils.info(`Folder processing ${status.foldersProcessed} / ${status.foldersListToProcess.length} : ${status.currentPath}`);
+            utils.info(`Folder processing ${status.foldersProcessed} / ${status.foldersListToProcess.length} : ${status.currentPath}`);
           } else {
-            corUtils.trace(`Folder skipped    ${status.foldersProcessed} / ${status.foldersListToProcess.length} : ${status.currentPath}`);
+            utils.trace(`Folder skipped    ${status.foldersProcessed} / ${status.foldersListToProcess.length} : ${status.currentPath}`);
           }
         }
       }
@@ -354,7 +354,7 @@ const fTestInventoryFileUtil = {
 
     await filesIndexer.iterateFiles(runInfo.rootFolder, this.callbackOnFile, this.callbackOnFolder, this.callbackOnError, 1);
 
-    corUtils.trace(` FTestInventory complete evaluation done`);
+    utils.trace(` FTestInventory complete evaluation done`);
     runInfo.success = true;
     return runInfo;
   },
@@ -368,14 +368,14 @@ const fTestInventoryFileUtil = {
     try {
       async function onClassInInventory(className, categoryInfo, scrumTeam, source, description) {
         // classesFound.push({className, scrumTeam, source, categoryInfo });
-        corUtils.trace(`  test class found in inventory ${className}`);
+        utils.trace(`  test class found in inventory ${className}`);
         await require('../storage/data/fTestInventoryRecord').testRecord(runInfo.database, 'mongoTest', ' Test from mongoTest 010');
         if (runInfo.onTestFound) {
           runInfo.onTestFound(runInfo, fileInfo, className, categoryInfo, scrumTeam, source);
         }
         if (runInfo.database) {
           if (!scrumTeam) {
-            corUtils.warn(` scrumTeam is undefined for class ${className} in ${fileInfo.relative}`);
+            utils.warn(` scrumTeam is undefined for class ${className} in ${fileInfo.relative}`);
           }
           await fTestInventoryRecord.insertRecord(runInfo.database, {
             className,
@@ -406,7 +406,7 @@ const fTestInventoryFileUtil = {
 
       return await this.findTestOwnershipInfo(inventoryInfo, onClassInInventory);
     }catch (e) {
-      corUtils.error(`Failed in processing the potential inventory file ${fileInfo.relative}`, e);
+      utils.error(`Failed in processing the potential inventory file ${fileInfo.relative}`, e);
       return {
         errors: [ `Failed in processing the potential inventory file ${fileInfo.relative}` ],
         success: false
