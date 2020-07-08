@@ -1,11 +1,11 @@
 let
-  repository = require('../../storage/data/testRecord'),
+  repository = require('../../storage/data/fTestInventoryRecord'),
   restResponse = require('./restResponse'),
   restRequest = require('./restRequest'),
   path = require('path');
 
 const controller = {
-  mappingUrl: '/api/tests',
+  mappingUrl: '/api/fTestInv',
   database: null,
 
   setupForServer(server, expressApp, parentUrl) {

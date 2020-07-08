@@ -33,6 +33,10 @@ const mongoStorage = {
     return this.database;
   },
   setupIndexes(database) {
+  },
+  applyPagination(pagination, requestParameters) {
+    requestParameters.skip = pagination.pageOffset;
+    requestParameters.limit = pagination.pageSize;
   }
 }
 

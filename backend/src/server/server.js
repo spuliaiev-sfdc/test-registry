@@ -4,6 +4,7 @@ const
   corUtils = require('../corUtils.js'),
   morgan = require('morgan'), // HTTP logging
   testController = require('./controllers/testsController'),
+  fTestInventoryController = require('./controllers/fTestInventoryController'),
   bodyParser = require('body-parser');
 
 /**
@@ -28,6 +29,7 @@ const server = {
     app.use(bodyParser.json({limit: '50mb', extended: true}));
     app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
     app.set("view engine", "pug");
+    app.set('json spaces', 2)
     // adding morgan to log HTTP requests
     if (this.logsFolder) {
       // create a write stream (in append mode)
@@ -45,6 +47,7 @@ const server = {
   setupRoutes(app) {
     corUtils.impt(`HTTP Server registration start`);
     this.setupController(testController, app);
+    this.setupController(fTestInventoryController, app);
 
     app.get("/", (req, res) => {
       res.render("index", { title: "Home" });
@@ -68,7 +71,7 @@ const server = {
           if ( elementName.startsWith("get")) {
             let urlMapping = path.join(parentUrl, await controller[elementName]());
             if (typeof urlMapping == "string") {
-              corUtils.impt(`    method ${urlMapping} for ${elementName}`);
+              corUtils.impt(`    method GET   ${urlMapping} for ${elementName}`);
               expressApp.get(urlMapping, async (req, res) => {
                 return await controller[elementName](req, res);
               });
@@ -77,7 +80,7 @@ const server = {
           if (elementName.startsWith("put")) {
             let urlMapping = path.join(parentUrl, await controller[elementName]());
             if (typeof urlMapping == "string") {
-              corUtils.impt(`    method ${urlMapping} for ${elementName}`);
+              corUtils.impt(`    method PUT   ${urlMapping} for ${elementName}`);
               expressApp.put(urlMapping, async (req, res) => {
                 return await controller[elementName](req, res);
               });
@@ -86,7 +89,7 @@ const server = {
           if (elementName.startsWith("post")) {
             let urlMapping = path.join(parentUrl, await controller[elementName]());
             if (typeof urlMapping == "string") {
-              corUtils.impt(`    method ${urlMapping} for ${elementName}`);
+              corUtils.impt(`    method POST   ${urlMapping} for ${elementName}`);
               expressApp.post(urlMapping, async (req, res) => {
                 return await controller[elementName](req, res);
               });
@@ -95,7 +98,7 @@ const server = {
           if (elementName.startsWith("delete")) {
             let urlMapping = path.join(parentUrl, await controller[elementName]());
             if (typeof urlMapping == "string") {
-              corUtils.impt(`    method ${urlMapping} for ${elementName}`);
+              corUtils.impt(`    method DELETE ${urlMapping} for ${elementName}`);
               expressApp.delete(urlMapping, async (req, res) => {
                 return await controller[elementName](req, res);
               });
