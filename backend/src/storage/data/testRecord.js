@@ -1,4 +1,4 @@
-const {getDatabase} = require('../mongoStorage').getDatabase();
+const storage = require('../mongoStorage');
 
 const testRecord = {
   collectionName: 'tests',
@@ -29,25 +29,30 @@ const testRecord = {
     return await list.toArray();
   },
 
-  async getRecordsByTeam(database, teamName) {
-    let coll = database.collection(this.collectionName);
-
-    let queryCriteria = [];
-    let criterion = {};
-    criterion["classInfo.owners."+teamName] = { $exists: true };
-    queryCriteria.push(criterion);
-    criterion["classInfo.ownersPartial."+teamName] = { $exists: true };
-    queryCriteria.push(criterion);
-
-    let list = await coll.find({ $or: queryCriteria }, {}).sort({});
-    return await list.toArray();
-  },
-
   async dropAll(database) {
     let coll = database.collection(this.collectionName);
     await coll.drop();
     return true;
-  }
+  },
+
+  async getRecordsByTeam(database, requestContent, teamName) {
+    let coll = database.collection(this.collectionName);
+
+    let queryCriteria = [];
+    let query = { $or: queryCriteria };
+
+    let criterion = {};
+    criterion["classInfo.owners."+teamName] = { $exists: true };
+    queryCriteria.push(criterion);
+    criterion = {};
+    criterion["classInfo.ownersPartial."+teamName] = { $exists: true };
+    queryCriteria.push(criterion);
+
+    let queryParameters = {};
+    let querySorting = {class : 1, relative: 1};
+
+    return await storage.runQuery(coll, query, queryParameters, querySorting, requestContent.pagination);
+  },
 
 };
 

@@ -33,6 +33,26 @@ const mongoStorage = {
     return this.database;
   },
   setupIndexes(database) {
+  },
+
+ async runQuery(coll, query, queryParameters, querySorting, pagination) {
+    let response = {
+      pagination: pagination
+    }
+    if (pagination) {
+      queryParameters.skip = pagination.pageOffset;
+      queryParameters.limit = pagination.pageSize;
+    }
+
+    let request = await coll.find(query, queryParameters).sort(querySorting);
+    let result = await request.toArray();
+    response.data = result;
+
+    if (pagination) {
+      pagination.totalCount = await coll.find(query).count();
+      pagination.count = result.length;
+    }
+    return response;
   }
 }
 

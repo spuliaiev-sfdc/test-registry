@@ -36,16 +36,8 @@ const fTestInventoryRecord = {
 
   async getRecords(database) {
     let coll = database.collection(this.collectionName);
-    let list = coll.find({});
-    list.forEach(
-      function(doc) {
-        console.log(doc);
-      },
-      function(err) {
-        client.close();
-      }
-    );
-    return list.toArray();
+    let list = await coll.find({});
+    return await list.toArray();
   },
 
   async dropAll(database) {
