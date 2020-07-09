@@ -15,6 +15,14 @@ const server = {
   outputFolder: null,
   logsFolder: null,
 
+  async setupLibraries(app) {
+    let staticPrefix = __dirname+"/../..";
+    app.use('/jquery', express.static(staticPrefix + '/node_modules/jquery/dist/'));
+    app.use('/bootstrap', express.static(staticPrefix + '/node_modules/bootstrap/dist/'));
+    app.use('/bootstrap-material-design', express.static(staticPrefix + '/node_modules/bootstrap-material-design/dist/'));
+    app.use('/datatables', express.static(staticPrefix + '/node_modules/datatables.net-bs4/'));
+  },
+
   async startServer(options) {
     const app = express();
     this.coreFolder = options.coreFolder;
@@ -29,7 +37,8 @@ const server = {
     app.use(bodyParser.json({limit: '50mb', extended: true}));
     app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
     app.set("view engine", "pug");
-    app.set('json spaces', 2)
+    app.set('json spaces', 2);
+    await this.setupLibraries(app);
     // adding morgan to log HTTP requests
     if (this.logsFolder) {
       // create a write stream (in append mode)
