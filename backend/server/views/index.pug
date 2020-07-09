@@ -1,15 +1,27 @@
 extends layout
 
+block layout-header
+        li.nav-item
+          a.nav-link(href='#') NEWITEM
+
 block layout-content
+    h1.mt-5 Sticky footer with fixed navbar
+    p.lead
+        | Pin a fixed-height footer to the bottom of the viewport in desktop browsers with this custom HTML and CSS. A fixed navbar has been added with
+        code padding-top: 60px;
+        |  on the
+        code body > .container
+        | .
+    p
+        | Back to
+        a(href='../sticky-footer') the default sticky footer
+        |  minus the navbar.
     div.View
-        h1.Banner Core App Test Ownership
         div.Message
             div.Title
                 h3 Making the Best
                 h1 Food For Devs
             span.Details Access the WHATABYTE Team Portal
-        div.NavButtons
-            a(href="/user")
-                div.NavButton Just dive in!
-            a(href="/login")
-                div.NavButton Log in
+
+block layout-footer
+     span.text-muted Place sticky footer content here.

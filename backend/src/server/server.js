@@ -20,7 +20,9 @@ const server = {
     app.use('/jquery', express.static(staticPrefix + '/node_modules/jquery/dist/'));
     app.use('/bootstrap', express.static(staticPrefix + '/node_modules/bootstrap/dist/'));
     app.use('/bootstrap-material-design', express.static(staticPrefix + '/node_modules/bootstrap-material-design/dist/'));
-    app.use('/datatables', express.static(staticPrefix + '/node_modules/datatables.net-bs4/'));
+    app.use('/datatables', express.static(staticPrefix + '/node_modules/datatables.net/'));
+    app.use('/datatables-bs4', express.static(staticPrefix + '/node_modules/datatables.net-bs4/'));
+    app.use('/popper', express.static(staticPrefix + '/node_modules/@popperjs/core/dist/umd/'));
   },
 
   async startServer(options) {
