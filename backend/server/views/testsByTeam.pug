@@ -1,0 +1,38 @@
+extends layout
+
+block layout-head
+    script(type="text/javascript" src="/js/testsByTeam.js")
+
+block  layout-header-nav-buttons
+        li.nav-item
+          a.nav-link(href='#') NEWITEM
+
+block layout-content
+    h1.mt-3 Find tests by Owning Team
+    p.lead
+        div.input-group.mb-3.hidden
+          div.input-group-prepend
+            span.input-group-text Team name
+          input(type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1")
+
+        div.input-group.mb-3
+          input(class="form-control" type="text" placeholder="Team name" aria-label="Team name" aria-describedby="button-addon2")
+          div.input-group-append
+            button.btn.btn-outline-secondary(type="button" id="button-find")
+                | Find
+    div.View.hidden
+        div.Message
+            div.Title
+                h3 Making the Best
+                h1 Food For Devs
+            span.Details Access the WHATABYTE Team Portal
+    table#example.table.table-striped.table-bordered(style='width:100%')
+      thead
+        tr
+          th Class
+          th Module
+          th TestKind
+      tbody
+
+block layout-footer
+     span.text-muted Place sticky footer content here.

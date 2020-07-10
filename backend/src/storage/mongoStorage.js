@@ -49,8 +49,7 @@ const mongoStorage = {
     response.data = result;
 
     if (pagination) {
-      pagination.totalCount = await coll.find(query).count();
-      pagination.count = result.length;
+      pagination.length = await coll.find(query).count();
     }
     return response;
   }

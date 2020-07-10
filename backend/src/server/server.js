@@ -63,11 +63,12 @@ const server = {
     app.get("/", (req, res) => {
       res.render("index", { title: "Home" });
     });
-      // res.render("unknownMethod", {
-      //   controller: "TestsController",
-      //   url: "unknown",
-      //   method:""
-      // });
+    app.get("/testsByTeam", (req, res) => {
+      res.render("testsByTeam", { title: "Tests By Team" });
+    });
+    app.get("/teams", (req, res) => {
+      res.render("teams", { title: "Teams reference" });
+    });
     utils.impt(`HTTP Server registration done`);
   },
 
