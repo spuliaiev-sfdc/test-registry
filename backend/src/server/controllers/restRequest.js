@@ -4,6 +4,8 @@ const restRequest = {
   analyse(req) {
     let result = {};
     this.detectPagination(req, result);
+    this.detectSorting(req, result);
+    this.detectSearchParameter(req, result);
     return result;
   },
 
@@ -30,8 +32,32 @@ const restRequest = {
         result.pagination.pageOffset = result.pagination.pageIndex * result.pagination.pageSize;
       }
     }
-  }
+  },
 
+  /**
+   * Detect the columns and order from DataTable request
+   */
+  detectSorting(req, result) {
+    if (req.query.order && req.query.columns) {
+      result.sorting = {};
+      for(let orderIndex = 0; orderIndex < req.query.order.length; orderIndex++) {
+        let direction = req.query.order[orderIndex].dir === "asc" ? 1 : -1;
+        let columnName = req.query.columns[parseInt(req.query.order[orderIndex].column)].data;
+        result.sorting[columnName] = direction;
+      }
+    }
+  },
+
+  /**
+   * Detect the Searching from DataTable request
+   */
+  detectSearchParameter(req, result) {
+    if (req.query.search && req.query.search.value.trim().length > 0) {
+      result.filter = {};
+      result.filter.searchString = req.query.search.value.trim();
+      result.filter.isRegExp = "true" === req.query.search.regex;
+    }
+  }
 }
 
 module.exports = restRequest;

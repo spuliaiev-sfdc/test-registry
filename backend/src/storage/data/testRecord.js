@@ -1,13 +1,14 @@
-const storage = require('../mongoStorage');
+const storage = require('../mongoStorage'),
+  corUtil = require("../../corUtils");
 
 const testRecord = {
   collectionName: 'tests',
 
-  async setupCollection() {
-    const database = await getDatabase();
+  async setupCollection(database) {
     let collection = database.collection(this.collectionName);
-    collection.createIndex( { className: 1 }, { unique: 1 });
-    collection.createIndex( { scrumTeam: 1 }, { unique: 1 });
+    collection.createIndex( { class: 1 }, { unique: 1 });
+    collection.createIndex( { module: 1 }, { unique: 0 });
+    collection.createIndex( { "$**": "text" } );
 
     return collection;
   },
@@ -35,6 +36,16 @@ const testRecord = {
     return true;
   },
 
+  addStringContains(fieldName, isRegExp, substring) {
+    if (isRegExp) {
+      let criterion = {};
+      criterion[fieldName] = {$regex: substring};
+      return criterion;
+    } else {
+      return {$expr: { $gt: [{ $indexOfCP: [ "$" + fieldName, substring ] }, -1]}}
+    }
+  },
+
   async getRecordsByTeam(database, requestContent, teamName) {
     let coll = database.collection(this.collectionName);
 
@@ -49,9 +60,37 @@ const testRecord = {
     queryCriteria.push(criterion);
 
     let queryParameters = {};
-    let querySorting = {class : 1, relative: 1};
 
-    return await storage.runQuery(coll, query, queryParameters, querySorting, requestContent.pagination);
+    if (!requestContent.sorting) {
+      requestContent.sorting = {class: 1, relative: 1};
+    }
+    if (requestContent.filter) {
+      let oldQuery = query;
+      let filterByTextCriteria = [];
+      query = { $and: [ oldQuery, {$or: filterByTextCriteria }] };
+
+      criterion = {$text: {
+              $search: requestContent.filter.searchString,
+              $caseSensitive: false,
+              $diacriticSensitive: false
+            }};
+      filterByTextCriteria.push(criterion);
+
+      criterion = this.addStringContains("class", requestContent.filter.isRegExp, requestContent.filter.searchString);
+      filterByTextCriteria.push(criterion);
+      criterion = this.addStringContains("module", requestContent.filter.isRegExp, requestContent.filter.searchString);
+      filterByTextCriteria.push(criterion);
+      criterion = this.addStringContains("relative", requestContent.filter.isRegExp, requestContent.filter.searchString);
+      filterByTextCriteria.push(criterion);
+      // criterion = this.addStringContains("classInfo.owners.name", requestContent.filter.isRegExp, requestContent.filter.searchString);
+      // filterByTextCriteria.push(criterion);
+      // criterion = this.addStringContains("methodsInfo.name", requestContent.filter.isRegExp,requestContent.filter.searchString);
+      // filterByTextCriteria.push(criterion);
+    }
+
+    corUtil.log('[testRecord] Query', JSON.stringify(query, null, 2));
+
+    return await storage.runQuery(coll, query, queryParameters, requestContent.sorting, requestContent.pagination);
   },
 
 };

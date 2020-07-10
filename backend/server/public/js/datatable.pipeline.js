@@ -19,9 +19,9 @@ $.fn.dataTable.pipeline = function ( opts ) {
 
   return function ( request, drawCallback, settings ) {
     var ajax          = false;
-    var requestStart  = request.start;
-    var drawStart     = request.start;
-    var requestLength = request.length;
+    var requestStart  = request.pageOffset;
+    var drawStart     = request.pageOffset;
+    var requestLength = request.pageSize;
     var requestEnd    = requestStart + requestLength;
 
     if ( settings.clearCache ) {
@@ -57,8 +57,8 @@ $.fn.dataTable.pipeline = function ( opts ) {
       cacheLower = requestStart;
       cacheUpper = requestStart + (requestLength * conf.pages);
 
-      request.start = requestStart;
-      request.length = requestLength*conf.pages;
+      request.pageOffset = requestStart;
+      request.pageSize = requestLength*conf.pages;
 
       // Provide the same `data` options as DataTables.
       if ( typeof conf.data === 'function' ) {
@@ -88,7 +88,7 @@ $.fn.dataTable.pipeline = function ( opts ) {
             json.data.splice( 0, drawStart-cacheLower );
           }
           if ( requestLength >= -1 ) {
-            json.data.splice( requestLength, json.data.length );
+            json.data.splice( requestLength, json.data.pageSize );
           }
 
           drawCallback( json );
@@ -99,7 +99,7 @@ $.fn.dataTable.pipeline = function ( opts ) {
       json = $.extend( true, {}, cacheLastJson );
       json.draw = request.draw; // Update the echo for each response
       json.data.splice( 0, requestStart-cacheLower );
-      json.data.splice( requestLength, json.data.length );
+      json.data.splice( requestLength, json.data.pageSize );
 
       drawCallback(json);
     }
