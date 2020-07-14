@@ -1,5 +1,8 @@
 extends layout
 
+block layout-head
+    script(type="text/javascript" src="/js/dashboard.js")
+
 block  layout-header-nav-buttons
         li.nav-item
           a.nav-link(href='#') NEWITEM
@@ -22,6 +25,19 @@ block layout-content
                 h3 Making the Best
                 h1 Food For Devs
             span.Details Access the WHATABYTE Team Portal
+    div.container
+      div.row
+        div.col-sm
+             div.card-body
+                h5.card-title Card title
+                canvas(id="chPie")
+                a.card-link(href="#") Link1
+        div.col-sm
+          div.card
+             div.card-body
+                canvas(id="chLine")
+        div.col-sm
+          One of three columns
 
 block layout-footer
      span.text-muted Place sticky footer content here.

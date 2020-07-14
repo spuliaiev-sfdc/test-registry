@@ -23,6 +23,7 @@ const server = {
     app.use('/datatables', express.static(staticPrefix + '/node_modules/datatables.net/'));
     app.use('/datatables-bs4', express.static(staticPrefix + '/node_modules/datatables.net-bs4/'));
     app.use('/popper', express.static(staticPrefix + '/node_modules/@popperjs/core/dist/umd/'));
+    app.use('/charts', express.static(staticPrefix + '/node_modules/chart.js/dist/'));
   },
 
   async startServer(options) {
