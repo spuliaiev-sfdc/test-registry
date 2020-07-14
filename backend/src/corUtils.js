@@ -276,7 +276,20 @@ const utils = {
     return info;
   },
 
+  getTagInfo(ownersCollection, tagName) {
+    return ownersCollection[tagName];
+  },
+
   addTagInfo(ownersCollection, tagName, sourceDescription) {
+    if (typeof sourceDescription === "undefined" && typeof ownersCollection === "string") {
+      // Shift everything one step right - the initial collection is undefined
+      sourceDescription = tagName;
+      tagName = ownersCollection;
+      ownersCollection = {};
+    }
+    if (typeof ownersCollection === "undefined") {
+      ownersCollection = {};
+    }
     if (Array.isArray(tagName)) {
       // If array - process tags one by one
       tagName.forEach( tagName => this.addTagInfo(ownersCollection, tagName, sourceDescription) );

@@ -136,68 +136,50 @@ describe('corUtils', function() {
   });
   describe('#addTagInfo()', function() {
     it('Add to empty owners', function () {
-      assert.deepEqual(utils.addTagInfo({}, 'Team_01', 'Desc_01'), {
+      assert.deepEqual(utils.addTagInfo('Team_01', 'Desc_01'), {
         'Team_01': ['Desc_01']
       });
     });
     it('Add undefined Tag to empty owners', function () {
-      assert.deepEqual(utils.addTagInfo(
-        {
-          'Team_01': ['Desc_01']
-        }
-        , undefined, 'Desc_02'),
+      let initial = utils.addTagInfo('Team_01', 'Desc_01');
+      assert.deepEqual(utils.addTagInfo(initial, undefined, 'Desc_02'),
         {
           'Team_01': ['Desc_01']
         });
     });
     it('Add new Tag to owners', function () {
-      assert.deepEqual(utils.addTagInfo(
-      {
-        'Team_01': ['Desc_01']
-      }
-      , 'Team_02', 'Desc_02'),
+      let initial = utils.addTagInfo('Team_01', 'Desc_01');
+      assert.deepEqual(utils.addTagInfo(initial, 'Team_02', 'Desc_02'),
       {
         'Team_01': ['Desc_01'],
         'Team_02': ['Desc_02']
       });
     });
     it('Add same Tag to owners with new description', function () {
-      assert.deepEqual(utils.addTagInfo(
-      {
-        'Team_01': ['Desc_01']
-      }
-      , 'Team_01', 'Desc_02'),
+      let initial = utils.addTagInfo('Team_01', 'Desc_01');
+      assert.deepEqual(utils.addTagInfo(initial, 'Team_01', 'Desc_02'),
       {
         'Team_01': ['Desc_01', 'Desc_02']
       });
     });
     it('Add same multi Tags to owners with new description', function () {
-      assert.deepEqual(utils.addTagInfo(
-      {
-        'Team_01': ['Desc_01']
-      }
-      , ['Team_01', 'Team_02'] , 'Desc_02'),
+      let initial = utils.addTagInfo('Team_01', 'Desc_01');
+      assert.deepEqual(utils.addTagInfo(initial, ['Team_01', 'Team_02'] , 'Desc_02'),
       {
         'Team_01': ['Desc_01', 'Desc_02'],
         'Team_02': ['Desc_02']
       });
     });
     it('Add same Tag to owners with new multiple descriptions', function () {
-      assert.deepEqual(utils.addTagInfo(
-        {
-          'Team_01': ['Desc_01']
-        }
-        , 'Team_01', ['Desc_02', 'Desc_03']),
+      let initial = utils.addTagInfo('Team_01', 'Desc_01');
+      assert.deepEqual(utils.addTagInfo(initial, 'Team_01', ['Desc_02', 'Desc_03']),
         {
           'Team_01': ['Desc_01', 'Desc_02', 'Desc_03']
         });
     });
     it('Add a map of Tags to owners', function () {
-      assert.deepEqual(utils.addTagInfo(
-          // Existing team
-        {
-          'Team_01': ['Desc_01']
-        }
+      let initial = utils.addTagInfo('Team_01', 'Desc_01');
+      assert.deepEqual(utils.addTagInfo(initial
         , // Adding team
         {
           'Team_02': ['Desc_02'],
@@ -211,11 +193,8 @@ describe('corUtils', function() {
         });
     });
     it('Add a map of Tags to owners, with one preexisting', function () {
-      assert.deepEqual(utils.addTagInfo(
-          // Existing team
-        {
-          'Team_01': ['Desc_01']
-        }
+      let initial = utils.addTagInfo('Team_01', 'Desc_01');
+      assert.deepEqual(utils.addTagInfo(initial
         , // Adding team
         {
           'Team_01': ['Desc_01_02'],
