@@ -118,13 +118,13 @@ const fTestInventoryFileUtil = {
    *    success: boolean,
    *    errors: [ 'Error 1 information' ],
    *    found: boolean,
-   *    owners: { 'scrumTeam1': [ 'FTestInventory category scrumteam' ]},
+   *    owners: [ { name: 'scrumTeam1', desc: [ 'FTestInventory category scrumteam' ] } ],
    *    categoryElements: ['category1', 'SubCategory2']
    *}
    */
   async findTestOwnershipInfo(inventoryInfo, testClassName) {
     let result = {
-      owners: {},
+      owners: [],
       categoryElements: [],
       errors: [],
       found: false,

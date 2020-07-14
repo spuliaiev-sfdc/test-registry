@@ -276,38 +276,91 @@ const utils = {
     return info;
   },
 
-  addTagInfo(ownersCollection, tagName, sourceDescription) {
+  getTagInfo(tagsList, tagName) {
+    let index = this.indexOfTag(tagsList, tagName);
+    return tagsList[index].desc;
+  },
+  getTagDesc(tagsList, tagName) {
+    let index = this.indexOfTag(tagsList, tagName);
+    return tagsList[index].desc;
+  },
+  indexOfTag(tagsList, tagName){
+    for(let i = 0; i < tagsList.length; i++) {
+      if (tagsList[i].name === tagName) {
+        return i;
+      }
+    }
+    return -1;
+  },
+  copyTags(sourceTagsList, targetTagsList){
+    for(let i = 0; i < sourceTagsList.length; i++) {
+      this.addTagInfo(targetTagsList, sourceTagsList[i].name, sourceTagsList[i].desc);
+    }
+  },
+  addTagInfo(tagsList, tagName, sourceDescription) {
+    if (typeof sourceDescription === "undefined" && typeof tagsList === "string") {
+      // Shift everything one step right - the initial collection is undefined
+      sourceDescription = tagName;
+      tagName = tagsList;
+      tagsList = [];
+    }
+    if (typeof tagsList === "undefined") {
+      tagsList = [];
+    }
+    if (!Array.isArray(tagsList)) {
+      this.error(`Provided tags list is not an array!`, tagsList);
+      return;
+    }
     if (Array.isArray(tagName)) {
-      // If array - process tags one by one
-      tagName.forEach( tagName => this.addTagInfo(ownersCollection, tagName, sourceDescription) );
-      return ownersCollection;
+      if (tagName.length > 0) {
+        // Two cases
+        // 1) there might be multiple tags with the same description,
+        // 2) or it's complete new tagsList
+
+        if (typeof tagName[0] === "object" && tagName[0].name && tagName[0].desc) {
+          // this is complete tag
+          // If array of tags - process tags one by one
+          tagName.forEach(tagInfo => this.addTagInfo(tagsList, tagInfo.name, tagInfo.desc));
+        } else {
+          // this is tag name!
+          // If array of tags - process tags one by one
+          tagName.forEach(tagName => this.addTagInfo(tagsList, tagName, sourceDescription));
+        }
+      }
+      return tagsList;
     }
     if (Array.isArray(sourceDescription)) {
       // If array - process descriptions one by one
-      sourceDescription.forEach( description => this.addTagInfo(ownersCollection, tagName, description) );
-      return ownersCollection;
+      sourceDescription.forEach( description => this.addTagInfo(tagsList, tagName, description) );
+      return tagsList;
     }
     if (typeof tagName === "object") {
       let ownersMap = tagName;
       // If object - process one by one as it is a map of owners
       for (const teamOwner in ownersMap) {
         let descriptions = ownersMap[teamOwner];
-        this.addTagInfo(ownersCollection, teamOwner, descriptions);
+        this.addTagInfo(tagsList, teamOwner, descriptions);
       }
-      return ownersCollection;
+      return tagsList;
     }
     if (tagName) {
-      // If one - process the addition
-      let existingTeam = ownersCollection[tagName];
-      if (!existingTeam) {
-        ownersCollection[tagName] = [sourceDescription];
+      // find the index of the tag in tags array
+      let index = this.indexOfTag(tagsList, tagName);
+      if (index === -1) {
+        tagsList.push({
+          name: tagName,
+          desc: [ sourceDescription ]
+        });
       } else {
-        ownersCollection[tagName].push(sourceDescription);
+        let tagInfo = tagsList[index];
+        if (!tagInfo.desc.includes(sourceDescription)) {
+          tagInfo.desc.push(sourceDescription);
+        }
       }
     } else {
       utils.warn(`Attempt to add undefined tag`);
     }
-    return ownersCollection;
+    return tagsList;
   },
 
   /**

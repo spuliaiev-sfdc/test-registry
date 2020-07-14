@@ -54,9 +54,9 @@ describe('fTestInventory', function() {
         .then((classInventoryInfo) => {
           assert.equal(classInventoryInfo.success, true);
           assert.equal(classInventoryInfo.found, true);
-          assert.deepEqual(classInventoryInfo.owners, {
-            'FTEnvTeam_Main': ['FTestInventory category scrumteam']
-          });
+          assert.deepEqual(classInventoryInfo.owners, [
+            { name:'FTEnvTeam_Main', desc: ['FTestInventory category scrumteam'] }
+          ]);
           assert.deepStrictEqual(classInventoryInfo.categoryElements, [
             'All functional tests',
             'Example Tests',
@@ -95,9 +95,9 @@ describe('fTestInventory', function() {
         .then((classInventoryInfo) => {
           assert.equal(classInventoryInfo.success, true);
           assert.equal(classInventoryInfo.found, true);
-          assert.deepEqual(classInventoryInfo.owners, {
-            'FTEnvTeam_Second': ['FTestInventory test scrumteam']
-          });
+          assert.deepEqual(classInventoryInfo.owners, [
+            { name: 'FTEnvTeam_Second', desc: ['FTestInventory test scrumteam'] }
+          ]);
           assert.deepStrictEqual(classInventoryInfo.categoryElements, [
             'All functional tests',
             'Example Tests',

@@ -19,7 +19,7 @@ const testRecord = {
       const inserted = await coll.replaceOne({class: record.class, relative: record.relative}, record, {upsert: true});
       return inserted && inserted.insertedCount === 1 ? inserted.insertedId : null;
     } catch (e) {
-      corUtils.warn(`Failed to insert TestRecord`, e);
+      corUtil.warn(`Failed to insert TestRecord`, e);
       return null;
     }
   },

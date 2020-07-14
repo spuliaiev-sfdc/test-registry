@@ -39,18 +39,18 @@ describe('projectIndexer', function() {
           assert.equal(fileInfo.javaInfo.info.classes[0].className, "SimpleJavaTest");
           assert.deepEqual(fileInfo.javaInfo.javaOwnershipInfo, {
             classInfo: {
-              labels: {
-                'SomeLabel.ClassLabel01': ['TestLabel class annotation']
-              },
-              owners: {
-                'FTEnvTeam_Main': ['FTestInventory category scrumteam'],
-                'Team_01': ['ScrumTeam class annotation'],
-                'Team_01_Sub': ['ScrumTeam javadoc'],
-                "The Other Team 03 Name": ['Ownership.yaml']
-              },
-              ownersPartial: {
-                'Team_02': ['ScrumTeam method annotation']
-              },
+              labels: [
+                { name: 'SomeLabel.ClassLabel01', desc : ['TestLabel class annotation'] }
+              ],
+              owners: [
+                { name: 'Team_01', desc: ['ScrumTeam class annotation']},
+                { name: 'Team_01_Sub', desc: ['ScrumTeam javadoc']},
+                { name: "The Other Team 03 Name", desc: ['Ownership.yaml']},
+                { name: 'FTEnvTeam_Main', desc: ['FTestInventory category scrumteam']}
+              ],
+              ownersPartial: [
+                { name: 'Team_02', desc: ['ScrumTeam method annotation']}
+              ],
               partialIN_DEV: [
                 'testFirstMethod_01'
               ]
@@ -58,21 +58,21 @@ describe('projectIndexer', function() {
             methodsInfo: {
               'testFirstMethod_01': {
                 IN_DEV: true,
-                labels: {
-                  'IgnoreFailureReason.IN_DEV': ['TestLabel method annotation']
-                },
+                labels: [
+                  { name: 'IgnoreFailureReason.IN_DEV', desc: ['TestLabel method annotation']}
+                ],
                 name: 'testFirstMethod_01',
-                owners: {}
+                owners: []
               },
               'testSecondMethod_02': {
-                labels: {
-                  'IgnoreFailureReason.Label1': ['TestLabel method annotation'],
-                  'IgnoreFailureReason.Label2': ['TestLabel method annotation']
-                },
+                labels: [
+                  { name: 'IgnoreFailureReason.Label1', desc: ['TestLabel method annotation']},
+                  { name: 'IgnoreFailureReason.Label2', desc: ['TestLabel method annotation']}
+                ],
                 name: 'testSecondMethod_02',
-                owners: {
-                  'Team_02': ['ScrumTeam method annotation']
-                }
+                owners: [
+                  { name: 'Team_02', desc: ['ScrumTeam method annotation']}
+                ]
               }
             }
           });
@@ -88,18 +88,18 @@ describe('projectIndexer', function() {
             relative: 'module01/test/func/java/src/some/production/folder/SimpleJavaTest.java',
             testKind: 'func',
             classInfo: {
-              labels: {
-                'SomeLabel.ClassLabel01': ['TestLabel class annotation']
-              },
-              owners: {
-                "FTEnvTeam_Main": ["FTestInventory category scrumteam"],
-                'Team_01': ['ScrumTeam class annotation'],
-                'Team_01_Sub': ['ScrumTeam javadoc'],
-                'The Other Team 03 Name': ['Ownership.yaml']
-              },
-              ownersPartial: {
-                'Team_02': ['ScrumTeam method annotation']
-              },
+              labels: [
+                { name: 'SomeLabel.ClassLabel01', desc: ['TestLabel class annotation'] }
+              ],
+              owners: [
+                { name: 'Team_01', desc: ['ScrumTeam class annotation']},
+                { name: 'Team_01_Sub', desc: ['ScrumTeam javadoc']},
+                { name: 'The Other Team 03 Name', desc : ['Ownership.yaml']},
+                { name: "FTEnvTeam_Main", desc: ["FTestInventory category scrumteam"]}
+              ],
+              ownersPartial: [
+                { name: 'Team_02', desc: ['ScrumTeam method annotation'] }
+              ],
               partialIN_DEV: [
                 "testFirstMethod_01"
               ]
@@ -107,21 +107,21 @@ describe('projectIndexer', function() {
             methodsInfo: {
               'testFirstMethod_01': {
                 IN_DEV: true,
-                labels: {
-                  'IgnoreFailureReason.IN_DEV': ['TestLabel method annotation']
-                },
+                labels: [
+                  { name: 'IgnoreFailureReason.IN_DEV', desc: ['TestLabel method annotation'] }
+                ],
                 name: 'testFirstMethod_01',
-                owners: {}
+                owners: []
               },
               'testSecondMethod_02': {
-                labels: {
-                  'IgnoreFailureReason.Label1': ['TestLabel method annotation'],
-                  'IgnoreFailureReason.Label2': ['TestLabel method annotation']
-                },
+                labels: [
+                  { name: 'IgnoreFailureReason.Label1', desc: ['TestLabel method annotation']},
+                  { name: 'IgnoreFailureReason.Label2', desc: ['TestLabel method annotation']}
+                ],
                 name: 'testSecondMethod_02',
-                owners: {
-                  'Team_02': ['ScrumTeam method annotation']
-                }
+                owners: [
+                  { name: 'Team_02', desc: ['ScrumTeam method annotation']}
+                ]
               }
             }
           });

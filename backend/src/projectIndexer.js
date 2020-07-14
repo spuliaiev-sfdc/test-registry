@@ -194,7 +194,7 @@ const projectIndexer = {
         populated = true;
         fileInfo.fTestInventoryInfo = {
           testInfo: {
-            owners: {},
+            owners: [],
             categoryElements: invRecord.categoryElements,
             module: invRecord.module,
             file: invRecord.file
