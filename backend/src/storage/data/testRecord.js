@@ -53,10 +53,10 @@ const testRecord = {
     let query = { $or: queryCriteria };
 
     let criterion = {};
-    criterion["classInfo.owners."+teamName] = { $exists: true };
+    criterion["classInfo.owners.name"] = teamName;
     queryCriteria.push(criterion);
     criterion = {};
-    criterion["classInfo.ownersPartial."+teamName] = { $exists: true };
+    criterion["classInfo.ownersPartial.name"] = teamName;
     queryCriteria.push(criterion);
 
     let queryParameters = {};

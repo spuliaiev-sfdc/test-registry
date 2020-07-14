@@ -18,6 +18,11 @@ $.fn.dataTable.pipeline = function ( opts ) {
   var cacheLastJson = null;
 
   return function ( request, drawCallback, settings ) {
+    if (conf.populateMoreFilters) {
+      conf.populateMoreFilters(request, settings, conf);
+    }
+
+
     var ajax          = false;
     var requestStart  = request.pageOffset;
     var drawStart     = request.pageOffset;
@@ -33,11 +38,13 @@ $.fn.dataTable.pipeline = function ( opts ) {
       // outside cached data - need to make a request
       ajax = true;
     }
-    else if ( JSON.stringify( request.order )   !== JSON.stringify( cacheLastRequest.order ) ||
+    else if (
+      JSON.stringify( request.order )   !== JSON.stringify( cacheLastRequest.order ) ||
       JSON.stringify( request.columns ) !== JSON.stringify( cacheLastRequest.columns ) ||
-      JSON.stringify( request.search )  !== JSON.stringify( cacheLastRequest.search )
+      JSON.stringify( request.search )  !== JSON.stringify( cacheLastRequest.search ) ||
+      JSON.stringify( request.filters ) !== JSON.stringify( cacheLastRequest.filters )
     ) {
-      // properties changed (ordering, columns, searching)
+      // properties changed (ordering, columns, searching or filters)
       ajax = true;
     }
 
@@ -75,9 +82,23 @@ $.fn.dataTable.pipeline = function ( opts ) {
         $.extend( request, conf.data );
       }
 
+      let prependedHost = conf.url.startsWith("http");
+      let url;
+      if (prependedHost) {
+        url = new URL(conf.url);
+      } else {
+        url = new URL("http://host/"+conf.url);
+      }
+      // if filters are defined - add them to the url
+      let search_params = url.searchParams;
+      for(let filterName in request.filters) {
+        search_params.set(filterName, request.filters[filterName]);
+      }
+      let finalUrl = prependedHost ? url.toString() : url.toString().substring(12);
+
       return $.ajax( {
         "type":     conf.method,
-        "url":      conf.url,
+        "url":      finalUrl,
         "data":     request,
         "dataType": "json",
         "cache":    false,

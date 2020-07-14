@@ -1,18 +1,30 @@
+let testsByTeamDataTable;
+
 $(document).ready(function() {
   // $('#example').DataTable();
   $('#button-find').click( (e) => {
     e.preventDefault();
-    $.get("/api/tests/find?team=Accounts&pageSize=15&pageIndex=1", null, ( data, textStatus, jqXHR ) => {
-
-
-    });
+    testsByTeamDataTable.ajax.reload();
   });
 
-  $('#example').DataTable( {
+  testsByTeamDataTable = $('#example').DataTable( {
     "processing": true,
     "serverSide": true,
     "ajax": $.fn.dataTable.pipeline( {
-      url: '/api/tests/find?team=Accounts', // &pageSize=15&pageIndex=1
+      url: '/api/tests/find',
+      populateMoreFilters: (request, settings, conf) => {
+        if(!request.filters) {
+          request.filters = {};
+        }
+        try {
+          let teamFilter = $("#teamName")[0].value;
+          if (teamFilter.trim().length > 0) {
+            request.filters["team"] = teamFilter;
+          }
+        } catch (e) {
+          console.error("Failed to populate the filters", e);
+        }
+      },
       pages: 5 // number of pages to cache
     }),
     "columns": [
