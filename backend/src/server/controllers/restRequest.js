@@ -26,6 +26,9 @@ const restRequest = {
       if (req.query.pageOffset) {
         result.pagination.pageOffset = parseInt(req.query.pageOffset);
         result.pagination.pageIndex = result.pagination.pageOffset / result.pagination.pageSize;
+      } else {
+        result.pagination.pageOffset = 0;
+        result.pagination.pageIndex = 0;
       }
       if (req.query.pageIndex) {
         result.pagination.pageIndex = parseInt(req.query.pageIndex);

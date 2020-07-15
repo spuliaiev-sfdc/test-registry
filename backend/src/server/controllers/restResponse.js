@@ -36,5 +36,6 @@ const restResponse = {
   }
 }
 restResponse.INVALID_PARAMETER = restResponse.failedTemplate(400, "Invalid parameter ");
+restResponse.MISSING_PARAMETER = restResponse.failedTemplate(400, "Missing parameter ");
 
 module.exports = restResponse;
