@@ -16,7 +16,7 @@ const restResponse = {
   },
   failed(code, message) {
     return {
-      success: true,
+      success: false,
       errorCode: code,
       errors: [message]
     };
@@ -25,7 +25,7 @@ const restResponse = {
   failedTemplate(code, message) {
     return (paramName) => {
       return {
-      success: true,
+      success: false,
       errorCode: code,
       errors: [message+paramName]
     }};

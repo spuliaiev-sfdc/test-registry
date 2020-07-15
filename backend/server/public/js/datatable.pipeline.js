@@ -24,9 +24,9 @@ $.fn.dataTable.pipeline = function ( opts ) {
 
 
     var ajax          = false;
-    var requestStart  = request.pageOffset;
-    var drawStart     = request.pageOffset;
-    var requestLength = request.pageSize;
+    var requestStart  = request.start;
+    var drawStart     = request.start;
+    var requestLength = request.length;
     var requestEnd    = requestStart + requestLength;
 
     if ( settings.clearCache ) {
@@ -64,8 +64,8 @@ $.fn.dataTable.pipeline = function ( opts ) {
       cacheLower = requestStart;
       cacheUpper = requestStart + (requestLength * conf.pages);
 
-      request.pageOffset = requestStart;
-      request.pageSize = requestLength*conf.pages;
+      request.start = requestStart;
+      request.length = requestLength*conf.pages;
 
       // Provide the same `data` options as DataTables.
       if ( typeof conf.data === 'function' ) {
@@ -103,16 +103,20 @@ $.fn.dataTable.pipeline = function ( opts ) {
         "dataType": "json",
         "cache":    false,
         "success":  function ( json ) {
-          cacheLastJson = $.extend(true, {}, json);
+          if (json.success) {
+            cacheLastJson = $.extend(true, {}, json);
 
-          if ( cacheLower != drawStart ) {
-            json.data.splice( 0, drawStart-cacheLower );
-          }
-          if ( requestLength >= -1 ) {
-            json.data.splice( requestLength, json.data.pageSize );
-          }
+            if (cacheLower != drawStart) {
+              json.data.splice(0, drawStart - cacheLower);
+            }
+            if (requestLength >= -1) {
+              json.data.splice(requestLength, json.data.length);
+            }
 
-          drawCallback( json );
+            drawCallback(json);
+          } else {
+            console.log(`Failed to get data for getTestsByTeam`, json);
+          }
         }
       } );
     }
@@ -120,7 +124,7 @@ $.fn.dataTable.pipeline = function ( opts ) {
       json = $.extend( true, {}, cacheLastJson );
       json.draw = request.draw; // Update the echo for each response
       json.data.splice( 0, requestStart-cacheLower );
-      json.data.splice( requestLength, json.data.pageSize );
+      json.data.splice( requestLength, json.data.length );
 
       drawCallback(json);
     }

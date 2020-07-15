@@ -40,8 +40,8 @@ const mongoStorage = {
       pagination: pagination
     }
     if (pagination) {
-      queryParameters.skip = pagination.pageOffset;
-      queryParameters.limit = pagination.pageSize;
+      queryParameters.skip = pagination.start;
+      queryParameters.limit = pagination.length;
     }
 
     let request = await coll.find(query, queryParameters).sort(querySorting);
@@ -49,7 +49,8 @@ const mongoStorage = {
     response.data = result;
 
     if (pagination) {
-      pagination.length = await coll.find(query).count();
+      pagination.recordsTotal = await coll.find(query).count();
+      pagination.recordsFiltered = pagination.recordsTotal;
     }
     return response;
   }
