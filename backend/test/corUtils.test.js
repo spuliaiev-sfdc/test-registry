@@ -192,8 +192,11 @@ describe('corUtils', function() {
         }]);
     });
     it('Add a map of Tags to owners', function () {
-      let initial = utils.addTagInfo('Team_01', 'Desc_01');
-      assert.deepEqual(utils.addTagInfo(initial
+      assert.deepEqual(utils.addTagInfo(
+          // Existing team
+        {
+          'Team_01': ['Desc_01']
+        }
         , // Adding team
         {
           'Team_02': ['Desc_02'],
