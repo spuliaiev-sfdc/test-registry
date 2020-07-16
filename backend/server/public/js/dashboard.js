@@ -54,7 +54,6 @@ function initDemoCharts() {
     });
   }
 }
-let chartTestsByType;
 let chartsDefinitions = {};
 
 function initStatsCharts() {
@@ -70,7 +69,8 @@ function initChart(chartElementId, url, chartType, chartOptions) {
     options: chartOptions || {}
   });
   chartsDefinitions[chartElementId] = {
-    chartElementId, url, chartType, chartOptions, chartComponent
+    chartElementId, url, chartType, chartOptions, chartComponent,
+    type: 'chart'
   };
   refreshChart(chartElementId);
   return chartsDefinitions[chartElementId];
@@ -83,16 +83,23 @@ function updateChartWithData(chart, data) {
   chart.data.datasets = data.datasets;
   chart.update();
 }
-function flagLoading(chartElementId, status){
+function flagLoading(chartElementId, status, alert){
   let cardElement = document.getElementById(chartElementId);
-  let chartCanvas = $('canvas', cardElement)[0];
-  let chartSpinner = $('div.spinner-border', cardElement)[0];
+  let chartCanvas = $('.content', cardElement);
+  let chartSpinner = $('div.spinner-border', cardElement);
+  let chartAlert = $('div.alert-icon', cardElement);
   if (status) {
     $(chartSpinner).removeClass('hidden');
     $(chartCanvas).addClass('hidden');
   } else {
     $(chartSpinner).addClass('hidden');
-    $(chartCanvas).removeClass('hidden');
+    if (typeof alert === 'boolean' && alert){
+      $(chartCanvas).addClass('hidden');
+      $(chartAlert).removeClass('hidden');
+    } else {
+      $(chartAlert).addClass('hidden');
+      $(chartCanvas).removeClass('hidden');
+    }
   }
 }
 function refreshChart(chartElementId) {
@@ -107,8 +114,15 @@ function refreshChart(chartElementId) {
     "success" : function ( json ) {
       flagLoading(chartElementId, false);
       if (json.success) {
-        updateChartWithData(chartElementId, json.data);
+        let chart = chartsDefinitions[chartElementId];
+        if (chart.type === 'chart') {
+          updateChartWithData(chartElementId, json.data);
+        }
+        if (chart.type === 'text') {
+          updateChartWithData(chartElementId, json.data);
+        }
       } else {
+        flagLoading(chartElementId, false, true);
         console.log(`Failed to get data for chart TestsByType`, json);
       }
     }
@@ -117,4 +131,5 @@ function refreshChart(chartElementId) {
 $(document).ready(function() {
   initDemoCharts();
   initStatsCharts();
+  flagLoading("libraryCounts", false, true);
 });

@@ -38,17 +38,23 @@ block layout-content
                 h5.card-title Tests by type
                 div.spinner-border
                     span.sr-only Loading...
-                canvas.hidden
+                div.alert-icon.text-danger.hidden
+                    span.glyphicon.glyphicon-exclamation-sign
+                canvas.content.hidden
         div.col-sm
-          div.card
+          div.card(id="libraryCounts")
              div.card-body
                 h5.card-title Size of library
-                div.spinner-border
+                div.spinner-border.text-center
                     span.sr-only 'Loading...'
-                p.card-text.hidden
+                div.alert-icon.hidden.text-danger.text-center
+                    svg(class="bi" width="32" height="32" fill="currentColor")
+                      use(xlink:href="bootstrap-icons/bootstrap-icons.svg#exclamation-triangle-fill")
+                p.card-text.hidden.content
+
                     | Tests:
                     | p(id="testsCount")
-                p.card-text.hidden
+                p.card-text.hidden.content
                     | FTest Inventory:
                     | p(id="testsCount")
         div.col-sm
