@@ -16,6 +16,7 @@ block layout-content
           | Demo charts
       div.row
         div.col-sm
+          div.card
              div.card-body
                 h5.card-title Card title
                 canvas(id="chPie")
@@ -32,11 +33,12 @@ block layout-content
           | Stats charts
       div.row
         div.col-sm
+          div.card(id="testsByType")
              div.card-body
                 h5.card-title Tests by type
                 div.spinner-border
                     span.sr-only Loading...
-                canvas.hidden(id="testsByType")
+                canvas.hidden
         div.col-sm
           div.card
              div.card-body
@@ -44,10 +46,10 @@ block layout-content
                 div.spinner-border
                     span.sr-only 'Loading...'
                 p.card-text.hidden
-                    | Tests: 
+                    | Tests:
                     | p(id="testsCount")
                 p.card-text.hidden
-                    | FTest Inventory: 
+                    | FTest Inventory:
                     | p(id="testsCount")
         div.col-sm
           One of three columns

@@ -55,36 +55,59 @@ function initDemoCharts() {
   }
 }
 let chartTestsByType;
+let chartsDefinitions = {};
+
 function initStatsCharts() {
-  let chartTestsByTypeCanvas = document.getElementById("testsByType");
-  chartTestsByType = new Chart(chartTestsByTypeCanvas, {
-    type: 'pie',
+  initChart('testsByType', '/api/stats/testDistribution', 'pie', {});
+}
+
+function initChart(chartElementId, url, chartType, chartOptions) {
+  let cardElement = document.getElementById(chartElementId);
+  let chartCanvas = $('canvas', cardElement)[0];
+  let chartComponent = new Chart(chartCanvas, {
+    type: chartType || 'pie',
     data: {},
-    options: {}
+    options: chartOptions || {}
   });
+  chartsDefinitions[chartElementId] = {
+    chartElementId, url, chartType, chartOptions, chartComponent
+  };
+  refreshChart(chartElementId);
+  return chartsDefinitions[chartElementId];
 }
 function updateChartWithData(chart, data) {
+  if (typeof chart === "string") {
+    chart = chartsDefinitions[chart].chartComponent;
+  }
   chart.data.labels = data.labels;
   chart.data.datasets = data.datasets;
   chart.update();
 }
-
-function refreshChart(chartElementId, chart, url) {
-  let chartCanvas = document.getElementById(chartElementId);
-  $('div.spinner-border', chartCanvas.parentElement).removeClass('hidden');
-  $(chartCanvas).addClass('hidden');
+function flagLoading(chartElementId, status){
+  let cardElement = document.getElementById(chartElementId);
+  let chartCanvas = $('canvas', cardElement)[0];
+  let chartSpinner = $('div.spinner-border', cardElement)[0];
+  if (status) {
+    $(chartSpinner).removeClass('hidden');
+    $(chartCanvas).addClass('hidden');
+  } else {
+    $(chartSpinner).addClass('hidden');
+    $(chartCanvas).removeClass('hidden');
+  }
+}
+function refreshChart(chartElementId) {
+  let chartInfo = chartsDefinitions[chartElementId];
+  flagLoading(chartElementId, true);
   $.ajax( {
     "type"    : 'GET',
-    "url"     : url,
+    "url"     : chartInfo.url,
     "data"    : undefined,
     "dataType": "json",
     "cache"   : false,
     "success" : function ( json ) {
+      flagLoading(chartElementId, false);
       if (json.success) {
-        let chartCanvas = document.getElementById(chartElementId);
-        $('div.spinner-border', chartCanvas.parentElement).addClass('hidden');
-        $(chartCanvas).removeClass('hidden');
-        updateChartWithData(chart, json.data);
+        updateChartWithData(chartElementId, json.data);
       } else {
         console.log(`Failed to get data for chart TestsByType`, json);
       }
@@ -94,5 +117,4 @@ function refreshChart(chartElementId, chart, url) {
 $(document).ready(function() {
   initDemoCharts();
   initStatsCharts();
-  refreshChart("testsByType", chartTestsByType, "/api/stats/testDistribution");
 });
