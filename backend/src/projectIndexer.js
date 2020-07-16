@@ -12,7 +12,7 @@ const projectIndexer = {
 
   async iterateProject(runInfo) {
     this.prepareRootFolderInfo(runInfo);
-    utils.info("Execution information", runInfo);
+    utils.info("Iterate Tests Execution information", runInfo);
 
     await this.iterateRootFolder(runInfo);
 
@@ -21,9 +21,9 @@ const projectIndexer = {
 
   async iterateProjectFTestInventory(runInfo) {
     this.prepareRootFolderInfo(runInfo);
-    utils.info("Execution information", runInfo);
+    utils.info("Iterate FTest Inventory Execution information", runInfo);
 
-    await this.iterateRootFolder(runInfo);
+    await fTestInventory.enumerateAllTests(runInfo);
 
     return runInfo;
   },

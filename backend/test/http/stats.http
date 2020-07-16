@@ -1,0 +1,4 @@
+GET http://localhost:8072/api/stats/testDistribution
+Accept: application/json
+
+###

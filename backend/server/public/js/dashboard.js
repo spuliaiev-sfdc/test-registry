@@ -24,7 +24,7 @@ let pieData = {
     'Blue'
   ]
 };
-$(document).ready(function() {
+function initDemoCharts() {
   var chPie = document.getElementById("chPie");
   if (chPie) {
     var myPieChart = new Chart(chPie, {
@@ -53,4 +53,46 @@ $(document).ready(function() {
       }
     });
   }
+}
+let chartTestsByType;
+function initStatsCharts() {
+  let chartTestsByTypeCanvas = document.getElementById("testsByType");
+  chartTestsByType = new Chart(chartTestsByTypeCanvas, {
+    type: 'pie',
+    data: {},
+    options: {}
+  });
+}
+function updateChartWithData(chart, data) {
+  chart.data.labels = data.labels;
+  chart.data.datasets = data.datasets;
+  chart.update();
+}
+
+function refreshChart(chartElementId, chart, url) {
+  let chartCanvas = document.getElementById(chartElementId);
+  $('div.spinner-border', chartCanvas.parentElement).removeClass('hidden');
+  $(chartCanvas).addClass('hidden');
+  $.ajax( {
+    "type"    : 'GET',
+    "url"     : url,
+    "data"    : undefined,
+    "dataType": "json",
+    "cache"   : false,
+    "success" : function ( json ) {
+      if (json.success) {
+        let chartCanvas = document.getElementById(chartElementId);
+        $('div.spinner-border', chartCanvas.parentElement).addClass('hidden');
+        $(chartCanvas).removeClass('hidden');
+        updateChartWithData(chart, json.data);
+      } else {
+        console.log(`Failed to get data for chart TestsByType`, json);
+      }
+    }
+  });
+}
+$(document).ready(function() {
+  initDemoCharts();
+  initStatsCharts();
+  refreshChart("testsByType", chartTestsByType, "/api/stats/testDistribution");
 });

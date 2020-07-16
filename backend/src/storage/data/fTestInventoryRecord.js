@@ -71,6 +71,18 @@ const fTestInventoryRecord = {
       utils.warn(`Failed to insert fTestInventoryRecord`, e);
       return null;
     }
+  },
+  async getFTestInventorySize(database) {
+    let coll = database.collection(this.collectionName);
+    let list = await coll.aggregate( [
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    return await list.toArray();
   }
 };
 

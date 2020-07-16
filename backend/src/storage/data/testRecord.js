@@ -93,6 +93,32 @@ const testRecord = {
     return await storage.runQuery(coll, query, queryParameters, requestContent.sorting, requestContent.pagination);
   },
 
+  async getTestsDistributionByKind(database) {
+    let coll = database.collection(this.collectionName);
+    let list = await coll.aggregate([
+      {
+        $group: {
+          _id: "$testKind",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    return await list.toArray();
+  },
+  
+  async getTestsCount(database) {
+    let coll = database.collection(this.collectionName);
+    let list = await coll.aggregate([
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    return await list.toArray();
+  },
+  
 };
 
 module.exports = testRecord;

@@ -58,7 +58,9 @@ const testAnalyser = {
     let reportObject = this.renderReport(fileInfo);
     if (reportFolder) {
       let reportFolderForModule = path.join(reportFolder, fileInfo.module);
-      fs.mkdirSync(reportFolderForModule, {recursive: true});
+      if (!fs.existsSync(reportFolderForModule)) {
+        fs.mkdirSync(reportFolderForModule, {recursive: true});
+      }
       let reportFileYaml = resolve(reportFolderForModule, fileInfo.filename + ".yaml");
       let reportTextYaml = yaml.stringify(reportObject);
       fs.writeFileSync(reportFileYaml, reportTextYaml);

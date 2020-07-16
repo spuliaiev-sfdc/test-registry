@@ -1,6 +1,7 @@
 extends layout
 
 block layout-head
+    script(type="text/javascript" src="/js/charthelper.js")
     script(type="text/javascript" src="/js/dashboard.js")
 
 block  layout-header-nav-buttons
@@ -9,23 +10,10 @@ block  layout-header-nav-buttons
 
 block layout-content
     h1.mt-3 Find by Owning Team
-    p.lead
-        | Pin a fixed-height footer to the bottom of the viewport in desktop browsers with this custom HTML and CSS. A fixed navbar has been added with
-        code padding-top: 60px;
-        |  on the
-        code body > .container
-        | .
-    p
-        | Back to
-        a(href='../sticky-footer') the default sticky footer
-        |  minus the navbar.
-    div.View
-        div.Message
-            div.Title
-                h3 Making the Best
-                h1 Food For Devs
-            span.Details Access the WHATABYTE Team Portal
     div.container
+      div.row
+        div.col-sm
+          | Demo charts
       div.row
         div.col-sm
              div.card-body
@@ -36,6 +24,31 @@ block layout-content
           div.card
              div.card-body
                 canvas(id="chLine")
+        div.col-sm
+          One of three columns
+
+      div.row
+        div.col-sm
+          | Stats charts
+      div.row
+        div.col-sm
+             div.card-body
+                h5.card-title Tests by type
+                div.spinner-border
+                    span.sr-only Loading...
+                canvas.hidden(id="testsByType")
+        div.col-sm
+          div.card
+             div.card-body
+                h5.card-title Size of library
+                div.spinner-border
+                    span.sr-only 'Loading...'
+                p.card-text.hidden
+                    | Tests: 
+                    | p(id="testsCount")
+                p.card-text.hidden
+                    | FTest Inventory: 
+                    | p(id="testsCount")
         div.col-sm
           One of three columns
 

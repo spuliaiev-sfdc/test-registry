@@ -4,6 +4,7 @@ const
   utils = require('../corUtils.js'),
   morgan = require('morgan'), // HTTP logging
   testController = require('./controllers/testsController'),
+  statsController = require('./controllers/statsController'),
   fTestInventoryController = require('./controllers/fTestInventoryController'),
   bodyParser = require('body-parser');
 
@@ -60,6 +61,7 @@ const server = {
     utils.impt(`HTTP Server registration start`);
     this.setupController(testController, app);
     this.setupController(fTestInventoryController, app);
+    this.setupController(statsController, app);
 
     app.get("/", (req, res) => {
       res.render("index", { title: "Home" });
