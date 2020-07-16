@@ -119,11 +119,12 @@ function updateTextWithData(chart, data) {
 function flagLoading(chartElementId, status, alert){
   let cardElement = document.getElementById(chartElementId);
   let chartCanvas = $('.content', cardElement);
-  let chartSpinner = $('div.spinner-border', cardElement);
+  let chartSpinner = $('div.spinner-block', cardElement);
   let chartAlert = $('div.alert-icon', cardElement);
   if (status) {
-    $(chartSpinner).removeClass('hidden');
     $(chartCanvas).addClass('hidden');
+    $(chartAlert).addClass('hidden');
+    $(chartSpinner).removeClass('hidden');
   } else {
     $(chartSpinner).addClass('hidden');
     if (typeof alert === 'boolean' && alert){
@@ -164,5 +165,4 @@ function refreshChart(chartElementId) {
 $(document).ready(function() {
   initDemoCharts();
   initStatsCharts();
-  flagLoading("libraryCounts", false, true);
 });

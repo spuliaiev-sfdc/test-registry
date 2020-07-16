@@ -45,3 +45,11 @@ div.content {
     border: 1px solid green;
     width: 100%;
 }
+
+div.card-body div.alert-icon {
+    text-align: center !important;
+}
+
+div.card-body div.spinner-block {
+    text-align: center !important;
+}
