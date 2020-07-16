@@ -51,12 +51,11 @@ block layout-content
                     svg(class="bi" width="32" height="32" fill="currentColor")
                       use(xlink:href="bootstrap-icons/bootstrap-icons.svg#exclamation-triangle-fill")
                 p.card-text.hidden.content
-
                     | Tests:
-                    | p(id="testsCount")
+                    span.data-values(data-field="testsCount" data-target="text")
                 p.card-text.hidden.content
                     | FTest Inventory:
-                    | p(id="testsCount")
+                    span.data-values(data-field="fTestInvCount" data-target="text")
         div.col-sm
           One of three columns
 

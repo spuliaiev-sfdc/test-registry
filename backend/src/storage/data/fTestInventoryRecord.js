@@ -82,7 +82,8 @@ const fTestInventoryRecord = {
         }
       }
     ]);
-    return await list.toArray();
+    let data = await list.toArray();
+    return data[0].count;
   }
 };
 

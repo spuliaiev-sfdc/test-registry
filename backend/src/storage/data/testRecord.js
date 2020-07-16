@@ -105,7 +105,7 @@ const testRecord = {
     ]);
     return await list.toArray();
   },
-  
+
   async getTestsCount(database) {
     let coll = database.collection(this.collectionName);
     let list = await coll.aggregate([
@@ -116,9 +116,10 @@ const testRecord = {
         }
       }
     ]);
-    return await list.toArray();
+    let data = await list.toArray();
+    return data[0].count;
   },
-  
+
 };
 
 module.exports = testRecord;

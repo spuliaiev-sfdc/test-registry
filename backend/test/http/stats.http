@@ -2,3 +2,8 @@ GET http://localhost:8072/api/stats/testDistribution
 Accept: application/json
 
 ###
+
+GET http://localhost:8072/api/stats/counts
+Accept: application/json
+
+###

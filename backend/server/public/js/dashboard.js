@@ -58,30 +58,63 @@ let chartsDefinitions = {};
 
 function initStatsCharts() {
   initChart('testsByType', '/api/stats/testDistribution', 'pie', {});
+  initChart('libraryCounts', '/api/stats/counts', 'text', {});
 }
 
 function initChart(chartElementId, url, chartType, chartOptions) {
   let cardElement = document.getElementById(chartElementId);
   let chartCanvas = $('canvas', cardElement)[0];
-  let chartComponent = new Chart(chartCanvas, {
-    type: chartType || 'pie',
-    data: {},
-    options: chartOptions || {}
-  });
-  chartsDefinitions[chartElementId] = {
-    chartElementId, url, chartType, chartOptions, chartComponent,
-    type: 'chart'
-  };
+  let chartComponent;
+  let type;
+  if (chartType === "pie" || chartType === "line") {
+    chartComponent = new Chart(chartCanvas, {
+      type: chartType || 'pie',
+      data: {},
+      options: chartOptions || {}
+    });
+    type = 'chart';
+  } else {
+    chartComponent = new TextCard(chartCanvas, chartOptions || {});
+    type = 'text';
+  }
+  chartsDefinitions[chartElementId] = { chartElementId, url, chartType, chartOptions, chartComponent, type };
   refreshChart(chartElementId);
   return chartsDefinitions[chartElementId];
 }
 function updateChartWithData(chart, data) {
+  let chartInfo = chart;
   if (typeof chart === "string") {
-    chart = chartsDefinitions[chart].chartComponent;
+    chartInfo = chartsDefinitions[chart];
+    chart = chartInfo.chartComponent;
   }
   chart.data.labels = data.labels;
   chart.data.datasets = data.datasets;
   chart.update();
+}
+function updateTextWithData(chart, data) {
+  let chartInfo = chart;
+  if (typeof chart === "string") {
+    chartInfo = chartsDefinitions[chart];
+  }
+  let cardElement = document.getElementById(chartInfo.chartElementId);
+  let dataElements = $('.data-values', cardElement);
+  for(let dataIndex = 0; dataIndex < dataElements.length; dataIndex++) {
+    let element = $(dataElements[dataIndex]);
+    let dataField = element.attr('data-field');
+    let dataTarget = element.attr('data-target');
+    if (dataField && data[dataField]) {
+      if (dataTarget === 'value') {
+        element.val(data[dataField]);
+      }
+      if (dataTarget === 'text') {
+        element.text(data[dataField]);
+      }
+      if (dataTarget === 'html') {
+        element.html(data[dataField]);
+      }
+    }
+  }
+
 }
 function flagLoading(chartElementId, status, alert){
   let cardElement = document.getElementById(chartElementId);
@@ -119,7 +152,7 @@ function refreshChart(chartElementId) {
           updateChartWithData(chartElementId, json.data);
         }
         if (chart.type === 'text') {
-          updateChartWithData(chartElementId, json.data);
+          updateTextWithData(chartElementId, json.data);
         }
       } else {
         flagLoading(chartElementId, false, true);
