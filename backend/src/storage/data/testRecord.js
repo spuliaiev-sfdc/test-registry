@@ -120,6 +120,13 @@ const testRecord = {
     return data[0].count;
   },
 
+  async getUniqueTeamNames(database) {
+    let coll = database.collection(this.collectionName);
+    let listOwners = await coll.distinct("classInfo.owners.name");
+    let listOwnersPartial = await coll.distinct("classInfo.ownersPartial.name");
+    let completeSet = new Set([...listOwners, ...listOwnersPartial]);
+    return Array.from(completeSet);
+  },
 };
 
 module.exports = testRecord;

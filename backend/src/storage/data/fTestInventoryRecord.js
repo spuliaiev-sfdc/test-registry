@@ -84,7 +84,13 @@ const fTestInventoryRecord = {
     ]);
     let data = await list.toArray();
     return data[0].count;
-  }
+  },
+
+  async getUniqueTeamNames(database) {
+    let coll = database.collection(this.collectionName);
+    let listTeams = await coll.distinct("scrumTeam");
+    return listTeams;
+  },
 };
 
 module.exports = fTestInventoryRecord;

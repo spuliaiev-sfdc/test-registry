@@ -1,6 +1,7 @@
 let
   repositoryTests = require('../../storage/data/testRecord'),
   repositoryFTestInv = require('../../storage/data/fTestInventoryRecord'),
+  repositoryTeams = require('../../storage/data/teamsRecord'),
   restResponse = require('./restResponse'),
   restRequest = require('./restRequest'),
   chartsUtils = require('../utils/chartsUtils'),
@@ -25,9 +26,14 @@ const controller = {
     if (arguments.length === 0) return "counts";
     let testsCount = await repositoryTests.getTestsCount(this.database);
     let fTestInvCount = await repositoryFTestInv.getFTestInventorySize(this.database);
+    let teamsNamesFromFTestInv = await repositoryFTestInv.getUniqueTeamNames(this.database);
+    let teamsNamesFromTests = await repositoryTests.getUniqueTeamNames(this.database);
+    let completeTeamsSet = new Set([...teamsNamesFromFTestInv, ...teamsNamesFromTests]);
+
     let response = restResponse.ok({
       testsCount: testsCount,
-      fTestInvCount: fTestInvCount
+      fTestInvCount: fTestInvCount,
+      teamsCount: completeTeamsSet.size
     });
     res.send(response);
   },
