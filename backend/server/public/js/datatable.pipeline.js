@@ -123,8 +123,12 @@ $.fn.dataTable.pipeline = function ( opts ) {
     else {
       json = $.extend( true, {}, cacheLastJson );
       json.draw = request.draw; // Update the echo for each response
-      json.data.splice( 0, requestStart-cacheLower );
-      json.data.splice( requestLength, json.data.length );
+      if (json.data) {
+        json.data.splice(0, requestStart - cacheLower);
+        json.data.splice(requestLength, json.data.length);
+      } else {
+        json.data = [];
+      }
 
       drawCallback(json);
     }

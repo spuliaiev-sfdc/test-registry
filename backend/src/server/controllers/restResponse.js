@@ -8,6 +8,15 @@ const restResponse = {
   },
 
   oklist(entity) {
+    if (typeof entity === 'undefined' || !entity ) {
+      entity = { data: [], pagination: {
+          length: 0,
+          start: 0,
+          pageIndex: 0,
+          recordsTotal: 0,
+          recordsFiltered: 0
+      }};
+    }
     return {
       data: entity.data,
       pagination: entity.pagination,

@@ -30,7 +30,7 @@ const controller = {
     if (team) {
       res.send(restResponse.oklist(await  repository.getRecordsByTeam(this.database, requestContent, team)));
     } else {
-      res.send(restResponse.failed(restResponse.MISSING_PARAMETER('team')));
+      res.send(restResponse.oklist());
     }
   },
 
