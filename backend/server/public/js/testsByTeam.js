@@ -28,7 +28,14 @@ $(document).ready(function() {
       pages: 5 // number of pages to cache
     }),
     "columns": [
-        { "data": "class" },
+        { "data": "class",
+          "render": function(data, type, row, meta){
+            if(type === 'display'){
+              data = '<a href="/api/files/viewFile?filePath=' + row.relative + '">' + data + '</a>';
+            }
+            return data;
+          }
+        },
         { "data": "module" },
         // { "data": "relative" },
         { "data": "testKind" },

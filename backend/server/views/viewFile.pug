@@ -1,0 +1,22 @@
+extends layout
+
+block layout-head
+    script(type="text/javascript" src="/prismjs/prism.js")
+    script(type="text/javascript" src="/prismjs/components/prism-java.js")
+    link(rel="stylesheet" href="/prismjs/themes/prism.css")
+
+block  layout-header-nav-buttons
+        li.nav-item
+          a.nav-link(href='#') NEWITEM
+
+block layout-content
+    h1.mt-3
+      span(class="success_{#fileInfo.success} found_#{fileInfo.found}") #{fileInfo.filePath}
+    div.container
+      div.row
+        pre
+          code.language-java
+            | #{fileInfo.content}
+
+block layout-footer
+     span.text-muted Place sticky footer content here.

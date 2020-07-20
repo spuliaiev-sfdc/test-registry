@@ -6,6 +6,7 @@ const
   testController = require('./controllers/testsController'),
   statsController = require('./controllers/statsController'),
   fTestInventoryController = require('./controllers/fTestInventoryController'),
+  filesController = require('./controllers/filesController'),
   bodyParser = require('body-parser');
 
 /**
@@ -26,6 +27,7 @@ const server = {
     app.use('/popper', express.static(staticPrefix + '/node_modules/@popperjs/core/dist/umd/'));
     app.use('/charts', express.static(staticPrefix + '/node_modules/chart.js/dist/'));
     app.use('/bootstrap-icons', express.static(staticPrefix + '/node_modules/bootstrap-icons/'));
+    app.use('/prismjs', express.static(staticPrefix + '/node_modules/prismjs/'));
   },
 
   async startServer(options) {
@@ -63,6 +65,7 @@ const server = {
     this.setupController(testController, app);
     this.setupController(fTestInventoryController, app);
     this.setupController(statsController, app);
+    this.setupController(filesController, app);
 
     app.get("/", (req, res) => {
       res.render("index", { title: "Home" });
