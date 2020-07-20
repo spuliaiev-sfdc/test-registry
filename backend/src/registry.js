@@ -6,6 +6,7 @@ const
   utils = require('./corUtils.js'),
   server = require('./server/server.js'),
   projectIndexer = require('./projectIndexer'),
+  filesStorage = require('./storage/filesStorage'),
   dateFormat = require('dateformat');
 
 const homedir = require('os').homedir();
@@ -144,6 +145,7 @@ if (args.h) {
 if (!fs.existsSync(outputFolder)) {
   fs.mkdirSync(outputFolder, { recursive: true });
 }
+filesStorage.rootFolder = coreFolder;
 
 async function runIndex(runInfo) {
   const mongoStorage = await require("./storage/mongoStorage").getDatabase();
