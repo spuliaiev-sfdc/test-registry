@@ -1,10 +1,16 @@
 let testsByTeamDataTable;
 
 $(document).ready(function() {
-  // $('#example').DataTable();
+  initTeamsAutocomplete();
   $('#button-find').click( (e) => {
     e.preventDefault();
     testsByTeamDataTable.ajax.reload();
+  });
+
+  $('#teamName').on('keypress click', function(e){
+    if (e.which === 13 || e.type === 'click') {
+      testsByTeamDataTable.ajax.reload();
+    }
   });
 
   testsByTeamDataTable = $('#example').DataTable( {

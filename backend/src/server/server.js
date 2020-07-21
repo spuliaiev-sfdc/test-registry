@@ -7,6 +7,7 @@ const
   statsController = require('./controllers/statsController'),
   fTestInventoryController = require('./controllers/fTestInventoryController'),
   filesController = require('./controllers/filesController'),
+  teamsController = require('./controllers/teamsController'),
   bodyParser = require('body-parser');
 
 /**
@@ -24,9 +25,10 @@ const server = {
     app.use('/bootstrap-material-design', express.static(staticPrefix + '/node_modules/bootstrap-material-design/dist/'));
     app.use('/datatables', express.static(staticPrefix + '/node_modules/datatables.net/'));
     app.use('/datatables-bs4', express.static(staticPrefix + '/node_modules/datatables.net-bs4/'));
-    app.use('/popper', express.static(staticPrefix + '/node_modules/@popperjs/core/dist/umd/'));
+    app.use('/popper', express.static(staticPrefix + '/node_modules/@popperjs/core/dist/'));
     app.use('/charts', express.static(staticPrefix + '/node_modules/chart.js/dist/'));
     app.use('/bootstrap-icons', express.static(staticPrefix + '/node_modules/bootstrap-icons/'));
+    app.use('/bootstrap-4-autocomplete', express.static(staticPrefix + '/node_modules/bootstrap-4-autocomplete/dist/'));
     app.use('/prismjs', express.static(staticPrefix + '/node_modules/prismjs/'));
   },
 
@@ -66,6 +68,7 @@ const server = {
     this.setupController(fTestInventoryController, app);
     this.setupController(statsController, app);
     this.setupController(filesController, app);
+    this.setupController(teamsController, app);
 
     app.get("/", (req, res) => {
       res.render("index", { title: "Home" });
