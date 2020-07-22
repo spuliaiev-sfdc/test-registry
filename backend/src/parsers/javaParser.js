@@ -320,7 +320,7 @@ const javaParser = {
         labels: [],
         ownersPartial: [] // for example some of the methods are owned by a different team
       },
-      methodsInfo: {}
+      methodsInfo: []
     };
     if (info.classes && info.classes.length > 0) {
       let classInfo = info.classes[0];
@@ -337,7 +337,7 @@ const javaParser = {
             owners: [],
             labels: []
           };
-          javaOwn.methodsInfo[method.name] = methodInfo;
+          javaOwn.methodsInfo.push(methodInfo);
           this.checkForAnnotations(method.annotations, methodInfo, "method annotation");
         }
       }
@@ -348,20 +348,24 @@ const javaParser = {
   },
   classInfoPostprocessing(info, classInfo, javaOwn) {
     // remove methods not starting with test
-    for (let methodName in javaOwn.methodsInfo) {
+    let oldMethodsInfo = javaOwn.methodsInfo;
+    javaOwn.methodsInfo = [];
+    for (let methodIndex in oldMethodsInfo) {
+      let methodInfo = oldMethodsInfo[methodIndex];
+      let methodName = methodInfo.name;
       if (!methodName.startsWith("test")) {
         if (!javaOwn.ignoredMethods) {
           javaOwn.ignoredMethods = [];
         }
         javaOwn.ignoredMethods.push(methodName);
-        delete javaOwn.methodsInfo[methodName];
         continue;
       }
-      let labels = javaOwn.methodsInfo[methodName].labels;
+      javaOwn.methodsInfo.push(methodInfo);
+      let labels = methodInfo.labels;
       for (let labelIndex in labels) {
         let labelInfo = labels[labelIndex];
         if (labelInfo.name.endsWith("IN_DEV")) {
-          javaOwn.methodsInfo[methodName].IN_DEV = true;
+          methodInfo.IN_DEV = true;
           if (!classInfo.partialIN_DEV) {
             javaOwn.classInfo.partialIN_DEV = [];
           }
@@ -371,8 +375,8 @@ const javaParser = {
     }
 
     // Copy method owners to the class.ownersPartial
-    for (let methodName in javaOwn.methodsInfo) {
-      corUtil.copyTags(javaOwn.methodsInfo[methodName].owners, javaOwn.classInfo.ownersPartial);
+    for (let methodIndex in javaOwn.methodsInfo) {
+      corUtil.copyTags(javaOwn.methodsInfo[methodIndex].owners, javaOwn.classInfo.ownersPartial);
     }
     // check for IN_DEV labels in class or methods
     let labels = javaOwn.classInfo.labels;
@@ -382,12 +386,14 @@ const javaParser = {
         javaOwn.classInfo.IN_DEV = true;
       }
     }
-    for (let methodName in javaOwn.methodsInfo) {
-      let labels = javaOwn.methodsInfo[methodName].labels;
+    for (let methodIndex in javaOwn.methodsInfo) {
+      let methodInfo = javaOwn.methodsInfo[methodIndex];
+      let methodName = methodInfo.name;
+      let labels = methodInfo.labels;
       for (let labelIndex in javaOwn.classInfo.labels) {
         let labelInfo = javaOwn.classInfo.labels[labelIndex];
         if (labelInfo.name.endsWith("IN_DEV")) {
-          javaOwn.methodsInfo[methodName].IN_DEV = true;
+          methodInfo.IN_DEV = true;
           if (!classInfo.partialIN_DEV) {
             javaOwn.classInfo.partialIN_DEV = [];
           }

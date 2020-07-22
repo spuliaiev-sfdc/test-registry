@@ -194,14 +194,18 @@ describe('corUtils', function() {
     it('Add a map of Tags to owners', function () {
       assert.deepEqual(utils.addTagInfo(
           // Existing team
-        {
-          'Team_01': ['Desc_01']
-        }
+        [{
+          desc: ['Desc_01'],
+          name: 'Team_01'
+        }]
         , // Adding team
-        {
-          'Team_02': ['Desc_02'],
-          'Team_03': ['Desc_03']
-        }
+        [{
+          desc: ['Desc_02'],
+          name: 'Team_02'
+        },{
+          desc: ['Desc_03'],
+          name: 'Team_03'
+        }]
         ), // Result team
         [{
           desc: ['Desc_01'],

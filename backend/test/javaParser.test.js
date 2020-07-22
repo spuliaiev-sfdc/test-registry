@@ -158,8 +158,8 @@ describe('javaParser', function() {
           'fsetPresetup',
           'internalMethod'
         ],
-        methodsInfo: {
-          'testFirstMethod_01': {
+        methodsInfo: [
+          {
             IN_DEV: true,
             labels: [
               { name: 'IgnoreFailureReason.IN_DEV', desc: ['TestLabel method annotation']}
@@ -167,14 +167,14 @@ describe('javaParser', function() {
             name: 'testFirstMethod_01',
             owners: []
           },
-          'testSecondMethod_02': {
+          {
             labels: [],
             name: 'testSecondMethod_02',
             owners: [
               { name: 'Team_02', desc: ['ScrumTeam method annotation'] }
             ]
           }
-        }
+        ]
       });
     });
   });
