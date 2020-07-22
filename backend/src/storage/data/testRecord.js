@@ -49,15 +49,19 @@ const testRecord = {
   async getRecordsByTeam(database, requestContent, teamName) {
     let coll = database.collection(this.collectionName);
 
-    let queryCriteria = [];
-    let query = { $or: queryCriteria };
+    let query;
 
     let criterion = {};
-    criterion["classInfo.owners.name"] = teamName;
-    queryCriteria.push(criterion);
-    criterion = {};
-    criterion["classInfo.ownersPartial.name"] = teamName;
-    queryCriteria.push(criterion);
+    if (teamName && teamName.trim().length > 0) {
+      let queryCriteria = [];
+      query = { $or: queryCriteria };
+
+      criterion["classInfo.owners.name"] = teamName;
+      queryCriteria.push(criterion);
+      criterion = {};
+      criterion["classInfo.ownersPartial.name"] = teamName;
+      queryCriteria.push(criterion);
+    }
 
     let queryParameters = {};
 
@@ -65,16 +69,20 @@ const testRecord = {
       requestContent.sorting = {class: 1, relative: 1};
     }
     if (requestContent.filter) {
-      let oldQuery = query;
       let filterByTextCriteria = [];
-      query = { $and: [ oldQuery, {$or: filterByTextCriteria }] };
+      if (query) {
+        let oldQuery = query;
+        query = { $and: [ oldQuery, {$or: filterByTextCriteria }] };
+      } else {
+        query = {$or: filterByTextCriteria };
+      }
 
-      criterion = {$text: {
-              $search: requestContent.filter.searchString,
-              $caseSensitive: false,
-              $diacriticSensitive: false
-            }};
-      filterByTextCriteria.push(criterion);
+      // criterion = {$text: {
+      //         $search: requestContent.filter.searchString,
+      //         $caseSensitive: false,
+      //         $diacriticSensitive: false
+      //       }};
+      // filterByTextCriteria.push(criterion);
 
       criterion = this.addStringContains("class", requestContent.filter.isRegExp, requestContent.filter.searchString);
       filterByTextCriteria.push(criterion);

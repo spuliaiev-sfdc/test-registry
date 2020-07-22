@@ -38,3 +38,13 @@ Content-Type: application/json
   "kind": "Inventory3"
 }
 ###
+
+###
+GET http://localhost:8072/api/tests/find?search%5Bregex%5D=false&search%5Bvalue%5D=OneAppContactRelatedAccountsUiTest
+Accept: application/json, text/javascript, */*; q=0.01
+
+###
+GET http://localhost:8072/api/tests/find?search%5Bregex%5D=false&search%5Bvalue%5D=testNavigationToAccountFromPersonAccount
+Accept: application/json, text/javascript, */*; q=0.01
+
+###
