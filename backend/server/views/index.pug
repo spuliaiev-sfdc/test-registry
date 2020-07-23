@@ -13,16 +13,15 @@ block  layout-header-nav-buttons
 block layout-content
     h1.mt-3 Core application tests ownership library
     div.container
-      div.row
+      div.row.hidden
         div.col-sm
           | Demo charts
-      div.row
+      div.row.hidden
         div.col-sm
           div.card
-             div.card-body
-                h5.card-title Card title
-                canvas(id="chPie")
-                a.card-link(href="#") Link1
+            h5.card-title Card title
+            canvas.card-body(id="chPie")
+            a.card-link(href="#") Link1
         div.col-sm
           div.card
              div.card-body
@@ -32,40 +31,39 @@ block layout-content
 
       div.row
         div.col-sm
-          | Stats charts
+            span &nbsp;
       div.row
         div.col-sm
           div.card(id="testsByType")
-             div.card-body
-                h5.card-title Tests by type
-                div.spinner-block
-                    div.spinner-border
-                        span.sr-only 'Loading...'
-                div.alert-icon.text-danger.hidden
-                    svg(class="bi" width="32" height="32" fill="currentColor")
-                      use(xlink:href="bootstrap-icons/bootstrap-icons.svg#exclamation-triangle-fill")
-                canvas.content.hidden
+            div.card-header.card-title Tests by type
+            div.spinner-block
+                div.spinner-border
+                    span.sr-only 'Loading...'
+            div.alert-icon.text-danger.hidden
+                svg(class="bi" width="32" height="32" fill="currentColor")
+                  use(xlink:href="bootstrap-icons/bootstrap-icons.svg#exclamation-triangle-fill")
+            canvas.card-body.content.hidden
         div.col-sm
           div.card(id="libraryCounts")
-             div.card-body
-                h5.card-title Size of library
-                div.spinner-block
-                    div.spinner-border
-                        span.sr-only 'Loading...'
-                div.alert-icon.hidden.text-danger
-                    svg(class="bi" width="32" height="32" fill="currentColor")
-                      use(xlink:href="bootstrap-icons/bootstrap-icons.svg#exclamation-triangle-fill")
-                p.card-text.hidden.content
-                    | Tests:
-                    span.data-values(data-field="testsCount" data-target="text")
-                p.card-text.hidden.content
-                    | FTest Inventory:
-                    span.data-values(data-field="fTestInvCount" data-target="text")
-                p.card-text.hidden.content
-                    | Teams:
-                    span.data-values(data-field="teamsCount" data-target="text")
-        div.col-sm
-          One of three columns
+            div.card-header.card-title Library
+            div.spinner-block
+                div.spinner-border
+                    span.sr-only 'Loading...'
+            div.alert-icon.hidden.text-danger
+                svg(class="bi" width="32" height="32" fill="currentColor")
+                  use(xlink:href="bootstrap-icons/bootstrap-icons.svg#exclamation-triangle-fill")
+            div.card-body.row.text-center.hidden.content
+                div.col
+                    div.text-value-xl.data-values(data-field="testsCount" data-target="text")
+                    div.text-uppercase.text-muted.small Tests
+                div.vr
+                div.col
+                    div.text-value-xl.data-values(data-field="fTestInvCount" data-target="text")
+                    div.text-uppercase.text-muted.small FTest Inventory
+                div.vr
+                div.col
+                    div.text-value-xl.data-values(data-field="teamsCount" data-target="text")
+                    div.text-uppercase.text-muted.small Teams
 
 block layout-footer
      span.text-muted Place sticky footer content here.

@@ -118,7 +118,7 @@ function updateTextWithData(chart, data) {
 }
 function flagLoading(chartElementId, status, alert){
   let cardElement = document.getElementById(chartElementId);
-  let chartCanvas = $('.content', cardElement);
+  let chartCanvas = $('.card-body', cardElement);
   let chartSpinner = $('div.spinner-block', cardElement);
   let chartAlert = $('div.alert-icon', cardElement);
   if (status) {
