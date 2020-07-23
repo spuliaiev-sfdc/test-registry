@@ -8,12 +8,8 @@ block  layout-header-nav-buttons
           a.nav-link(href='#') NEWITEM
 
 block layout-content
-    h1.mt-3 Find tests by Owning Team
+    h1.mt-3 Find tests
     p.lead
-        div.input-group.mb-3.hidden
-          div.input-group-prepend
-            span.input-group-text Team name
-
         div.input-group.mb-3
           input(id="teamName" class="form-control typeahead" type="text" placeholder="Team name" aria-label="Team name" aria-describedby="button-addon2" data-provide="typeahead" autocomplete="off")
           input(id="className" class="form-control typeahead" type="text" placeholder="Class name" aria-label="Class name" aria-describedby="button-addon2" data-provide="typeahead" autocomplete="off")
@@ -25,7 +21,7 @@ block layout-content
         div.container-fluid
             div.row
                 div.col.col-8
-                    table#example.table.table-striped.table-bordered
+                    table#classesTable.table.table-striped.table-bordered
                         thead
                             tr
                                 th Class
@@ -34,14 +30,37 @@ block layout-content
                         tbody
                 div.col.col-4
                     div.card
-                        div.card-body.classInformation
-                            h5.card-title Test class information
-                            ul.list-group.list-group-flush
-                                li.list-group-item Cras justo odio
-                                li.list-group-item Dapibus ac facilisis in
-                                li.list-group-item Vestibulum at eros
-                            a.card-link(href="#" id='classLinkCodeSearch') CodeSearch
-                            a.card-link(href="#" id='classLinkIntelliJ') IntelliJ
+                        div.classInformation
+                            div.card-header
+                                span.card-title Test class information
+                                | &nbsp;
+                                a.card-link(href="#" id='classLinkCodeSearch') CodeSearch
+                                a.card-link(href="#" id='classLinkIntelliJ') IntelliJ
+                            div.card-body
+                                dl.row(id = 'flags-row')
+                                    dt.col
+                                        span.badge.badge-pill.hidden.badge-warning(id='badge_INDEV') IN_DEV
+                                dl.row
+                                    dt.col-sm-3 Class name
+                                    dd.col-sm-9(name='class')
+                                dl.row
+                                    dt.col-sm-3 Module
+                                    dd.col-sm-9(name='module')
+                                dl.row
+                                    dt.col-sm-3 TestKind
+                                    dd.col-sm-9(name='testKind')
+                                dl.row
+                                    dt.col-sm-3 Relative path
+                                    dd.col-sm-9(name='relative')
+                                dl.row
+                                    dt.col-sm-3 Methods
+                                    dd.col-sm-12
+                                      ul.list-group.list-group-flush(id="methodsList")
+                                        div.template
+                                          li.list-group-item
+                                            span.ideLink(name="name")
+
+
 
 block layout-footer
      span.text-muted Place sticky footer content here.

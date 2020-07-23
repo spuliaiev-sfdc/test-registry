@@ -339,6 +339,61 @@ FormHelper.validate = function($form){
     return everythingIsValid;
 };
 
+FormHelper.moveChildren = function (source, target) {
+    if (!source.childNodes && source.length) {
+        // dereference jQuery node
+        source = source[0];
+    }
+    if (!target.childNodes && target.length) {
+        // dereference jQuery node
+        target = target[0];
+    }
+    var sourceNodes = source.childNodes;
+    var children = [];
+    if (sourceNodes == null || sourceNodes.length === 0) {
+        return children;
+    }
+    var nodesList = [];
+    sourceNodes.forEach(function(child) {
+        nodesList.push(child);
+    });
+    nodesList.forEach(function(child) {
+        target.appendChild(child);
+        children.push(child);
+    });
+    $(target).data($(source).data());
+    $(children).data($(source).data());
+    return children;
+}
+FormHelper.populateTemplate = function (template, dataObject, target) {
+    template = $(template);
+    var filledTemplate = template.clone();
+    filledTemplate.removeClass('template');
+    filledTemplate.removeAttr("id");
+    if (dataObject) {
+        FormHelper.populate(filledTemplate, dataObject);
+    }
+
+    if (target) {
+        filledTemplate = $(FormHelper.moveChildren(filledTemplate, target));
+    }
+    filledTemplate.addClass('populated');
+    return filledTemplate;
+}
+FormHelper.populateList = function (targetList, dataObject, onElementPopulated) {
+    targetList = $(targetList);
+    $(".populated", targetList).remove();
+    if (Array.isArray(dataObject)) {
+        for(let index=0; index < dataObject.length; index++) {
+            let templateRow = $(".template", targetList);
+            let populatedElement = FormHelper.populateTemplate(templateRow, dataObject[index], targetList);
+            if (onElementPopulated) {
+                onElementPopulated(populatedElement, dataObject[index], dataObject);
+            }
+        }
+    }
+}
+
 /**
  * Fixing the content, applying changed basing on the class - like formatting of file size, dates, time and
  * extracting the simple file name
@@ -473,3 +528,6 @@ $( document ).ready(function() {
 
     })(jQuery);
 });
+function validValue(val) {
+    return (typeof val != "undefined" && val != null);
+}
