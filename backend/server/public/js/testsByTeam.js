@@ -33,6 +33,11 @@ function populateClassInformationDiv(classData) {
   let intelliJUrl = `http://localhost:63342/api/openFile/${className}/${methodName}`;
   $('#classLinkIntelliJ').attr("href-data", intelliJUrl);
 
+  // Populate class IntelliJ Link
+  let classPath = classData.relative;
+  let codeSearchUrl = `https://codesearch.data.sfdc.net/source/xref/app_main_core/app/main/core/${classPath}`;
+  $('#classLinkCodeSearch').attr("href", codeSearchUrl);
+
   // populating badged
   setBadBadge('#badge_INDEV', classData.classInfo.IN_DEV, classData.classInfo.partialIN_DEV);
 
