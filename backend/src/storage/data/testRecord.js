@@ -36,31 +36,53 @@ const testRecord = {
     return true;
   },
 
-  addStringContains(fieldName, isRegExp, substring) {
+  addStringContains(fieldName, isRegExp, substring, asExpr) {
     if (isRegExp) {
       let criterion = {};
       criterion[fieldName] = {$regex: substring};
       return criterion;
     } else {
-      return {$expr: { $gt: [{ $indexOfCP: [ "$" + fieldName, substring ] }, -1]}}
+      if (asExpr) {
+        return {$expr: { $gt: [{ $indexOfCP: [ "$" + fieldName, substring ] }, -1]}}
+      }
+      return { $gt: [{ $indexOfCP: [ "$" + fieldName, substring ] }, -1]}
     }
   },
 
-  async getRecordsByTeam(database, requestContent, teamName) {
+  async getRecordsByTeam(database, requestContent) {
     let coll = database.collection(this.collectionName);
 
-    let query;
+    let query = [];
 
     let criterion = {};
-    if (teamName && teamName.trim().length > 0) {
-      let queryCriteria = [];
-      query = { $or: queryCriteria };
+    if (requestContent.filters) {
+      let teamName = requestContent.filters.team;
+      if (teamName && teamName.trim().length > 0) {
+        let queryCriteria = [];
+        query.push({$or: queryCriteria});
 
-      criterion["classInfo.owners.name"] = teamName;
-      queryCriteria.push(criterion);
-      criterion = {};
-      criterion["classInfo.ownersPartial.name"] = teamName;
-      queryCriteria.push(criterion);
+        criterion["classInfo.owners.name"] = teamName;
+        queryCriteria.push(criterion);
+        criterion = {};
+        criterion["classInfo.ownersPartial.name"] = teamName;
+        queryCriteria.push(criterion);
+      }
+
+      let className = requestContent.filters.class;
+      if (className && className.trim().length > 0) {
+        query.push({"class": {$regex: className, $options: 'i'}});
+      }
+
+      let methodName = requestContent.filters.method;
+      if (methodName && methodName.trim().length > 0) {
+        query.push({
+          "methodsInfo": {
+            "$elemMatch": {
+              "name": {$regex: methodName, $options: 'i'}
+            }
+          }
+        });
+      }
     }
 
     let queryParameters = {};
@@ -70,12 +92,7 @@ const testRecord = {
     }
     if (requestContent.filter) {
       let filterByTextCriteria = [];
-      if (query) {
-        let oldQuery = query;
-        query = { $and: [ oldQuery, {$or: filterByTextCriteria }] };
-      } else {
-        query = {$or: filterByTextCriteria };
-      }
+      query.push({ $or: filterByTextCriteria });
 
       // criterion = {$text: {
       //         $search: requestContent.filter.searchString,
@@ -84,18 +101,35 @@ const testRecord = {
       //       }};
       // filterByTextCriteria.push(criterion);
 
-      criterion = this.addStringContains("class", requestContent.filter.isRegExp, requestContent.filter.searchString);
+      criterion = this.addStringContains("class", requestContent.filter.isRegExp, requestContent.filter.searchString, true);
       filterByTextCriteria.push(criterion);
-      criterion = this.addStringContains("module", requestContent.filter.isRegExp, requestContent.filter.searchString);
+      criterion = this.addStringContains("module", requestContent.filter.isRegExp, requestContent.filter.searchString, true);
       filterByTextCriteria.push(criterion);
-      criterion = this.addStringContains("relative", requestContent.filter.isRegExp, requestContent.filter.searchString);
+      criterion = this.addStringContains("relative", requestContent.filter.isRegExp, requestContent.filter.searchString, true);
       filterByTextCriteria.push(criterion);
-      // criterion = this.addStringContains("classInfo.owners.name", requestContent.filter.isRegExp, requestContent.filter.searchString);
-      // filterByTextCriteria.push(criterion);
-      // criterion = this.addStringContains("methodsInfo.name", requestContent.filter.isRegExp,requestContent.filter.searchString);
-      // filterByTextCriteria.push(criterion);
-    }
 
+      criterion = {
+        "classInfo.owners": {
+          "$elemMatch": {
+            "name": { $regex: requestContent.filter.searchString, $options: 'i' }
+          }
+        }
+      };
+
+      criterion = {
+        "methodsInfo": {
+          "$elemMatch": {
+            "name": { $regex: requestContent.filter.searchString, $options: 'i' }
+          }
+        }
+      };
+      filterByTextCriteria.push(criterion);
+    }
+    if (query.length > 0) {
+      query = { $and: query };
+    } else {
+      query = {};
+    }
     corUtil.log('[testRecord] Query', JSON.stringify(query, null, 2));
 
     return await storage.runQuery(coll, query, queryParameters, requestContent.sorting, requestContent.pagination);

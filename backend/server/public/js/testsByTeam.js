@@ -7,7 +7,7 @@ $(document).ready(function() {
     testsByTeamDataTable.ajax.reload();
   });
 
-  $('#teamName').on('keypress click', function(e){
+  $('#teamName,#className,#methodName').on('keypress click', function(e){
     if (e.which === 13 || e.type === 'click') {
       testsByTeamDataTable.ajax.reload();
     }
@@ -26,6 +26,14 @@ $(document).ready(function() {
           let teamFilter = $("#teamName")[0].value;
           if (teamFilter.trim().length > 0) {
             request.filters["team"] = teamFilter;
+          }
+          let methodNameFilter = $("#methodName")[0].value;
+          if (methodNameFilter.trim().length > 0) {
+            request.filters["method"] = methodNameFilter;
+          }
+          let classNameFilter = $("#className")[0].value;
+          if (classNameFilter.trim().length > 0) {
+            request.filters["class"] = classNameFilter;
           }
         } catch (e) {
           console.error("Failed to populate the filters", e);

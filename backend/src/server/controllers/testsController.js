@@ -26,8 +26,8 @@ const controller = {
   async getByTeamName(req, res) {
     if (arguments.length === 0) return "find";
     let requestContent = restRequest.analyse(req);
-    let team = req.query.team;
-    res.send(restResponse.oklist(await  repository.getRecordsByTeam(this.database, requestContent, team)));
+    requestContent.filters = req.query.filters;
+    res.send(restResponse.oklist(await  repository.getRecordsByTeam(this.database, requestContent)));
   },
 
   async putTest(req, res) {
