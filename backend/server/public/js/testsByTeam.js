@@ -11,6 +11,32 @@ function setBadBadge(badgeElementId, status, status2) {
   let kind = status ? 'danger' : status2 ? 'warning' : 'danger';
   setBadge(badgeElementId, kind, status);
 }
+function resetSearchParameters() {
+  console.log('resetSearchParameters');
+  $("#teamName").val("");
+  $("#methodName").val("");
+  $("#className").val("");
+  $("#classesTable_filter input[type='search']").val("");
+  updateSearchParametersCookies();
+}
+function updateSearchParametersCookies(){
+  console.log('updateSearchParametersCookies');
+  let teamFilter = $("#teamName")[0].value;
+  setCookie("Search_Team",teamFilter.trim(), 7);
+  let methodNameFilter = $("#methodName")[0].value;
+  setCookie("Search_Method",methodNameFilter.trim(), 7);
+  let classNameFilter = $("#className")[0].value;
+  setCookie("Search_Class",classNameFilter.trim(), 7);
+  let searchString = $("#classesTable_filter input[type='search']")[0].value;
+  setCookie("Search_Search",searchString.trim(), 7);
+}
+function fetchSearchParametersFromCookies(){
+  console.log('fetchSearchParametersFromCookies');
+  $("#teamName").val(getCookie("Search_Team"));
+  $("#methodName").val(getCookie("Search_Method"));
+  $("#className").val(getCookie("Search_Class"));
+  $("#classesTable_filter input[type='search']").val(getCookie("Search_Search"));
+}
 function setBadge(badgeElementId, kind, status) {
   let badge = $('#badgeElementId');
   badge.addClass('hidden');
@@ -56,6 +82,10 @@ $(document).ready(function() {
     e.preventDefault();
     testsByTeamDataTable.ajax.reload();
   });
+  $('#button-reset').click( (e) => {
+    e.preventDefault();
+    resetSearchParameters();
+  });
 
   $('#classLinkIntelliJ').click( (e) => {
     e.preventDefault();
@@ -74,9 +104,30 @@ $(document).ready(function() {
     }
   } );
 
+  $('ul#methodsList').on( 'click', 'span.methodLinks span.badge', function () {
+    let methodData = $(this).parents('.populated').data("populatedBy");
+    let classData = $('.classInformation').data("populatedBy");
+    if (classData && methodData) {
+      let className = classData.class;
+      let methodName = methodData.name;
+      let badge = $(this).attr('name');
+      let url = `http://localhost:63342/api/openFile/${className}/${methodName}`;
+      if (badge === 'method-ATF') {
+        url=`https://portal.prod.ci.sfdc.net/testhistory?pageType=history&testClass=${className}&testName=${methodName}`
+      }
+      if (badge === 'method-IDE') {
+        url = `http://localhost:63342/api/openFile/${className}/${methodName}`;
+        $.get(url);
+        return;
+      }
+      window.open(url , '_blank');
+    }
+  } );
+
   $('#methodsList').on( 'click', '.ideLink', function () {
     let methodData = $(this).parents('.populated').data("populatedBy");
     let classData = $('.classInformation').data("populatedBy");
+    let badge = $(this).attr('name');
     if (classData && methodData) {
       let className = classData.class;
       let methodName = methodData.name;
@@ -91,12 +142,14 @@ $(document).ready(function() {
     }
   });
 
+  fetchSearchParametersFromCookies();
   testsByTeamDataTable = $('#classesTable').DataTable( {
     "processing": true,
     "serverSide": true,
     "ajax": $.fn.dataTable.pipeline( {
       url: '/api/tests/find',
       populateMoreFilters: (request, settings, conf) => {
+        updateSearchParametersCookies();
         if(!request.filters) {
           request.filters = {};
         }
@@ -133,7 +186,6 @@ $(document).ready(function() {
         { "data": "testKind" },
     ]
   } );
-
 } );
 
 

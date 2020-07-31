@@ -15,12 +15,12 @@ block layout-content
           input(id="className" class="form-control typeahead" type="text" placeholder="Class name" aria-label="Class name" aria-describedby="button-addon2" data-provide="typeahead" autocomplete="off")
           input(id="methodName" class="form-control typeahead" type="text" placeholder="Method name" aria-label="Method name" aria-describedby="button-addon2" data-provide="typeahead" autocomplete="off")
           div.input-group-append
-            button.btn.btn-outline-secondary(type="button" id="button-find")
-                | Find
+            button.btn.btn-outline-secondary(type="button" id="button-find") Find
+            button.btn.btn-outline-secondary(type="button" id="button-reset") Reset
 
         div.container-fluid
             div.row
-                div.col.col-8
+                div.col.col-lg-8
                     table#classesTable.table.table-striped.table-bordered
                         thead
                             tr
@@ -28,7 +28,7 @@ block layout-content
                                 th Module
                                 th TestKind
                         tbody
-                div.col.col-4
+                div.col.col-lg-4
                     div.card
                         div.classInformation
                             div.card-header
@@ -38,8 +38,8 @@ block layout-content
                                 a.card-link(href="#" id='classLinkIntelliJ') IntelliJ
                             div.card-body
                                 dl.row(id = 'flags-row')
-                                    dt.col
-                                        span.badge.badge-pill.hidden.badge-warning(id='badge_INDEV') IN_DEV
+                                  dt.col
+                                    span.badge.badge-pill.hidden.badge-warning(id='badge_INDEV') IN_DEV
                                 dl.row
                                     dt.col-sm-3 Class name
                                     dd.col-sm-9(name='class')
@@ -57,8 +57,15 @@ block layout-content
                                     dd.col-sm-12
                                       ul.list-group.list-group-flush(id="methodsList")
                                         div.template
-                                          li.list-group-item
-                                            span.ideLink(name="name")
+                                          li.list-group-item.method-row
+                                            div.row
+                                                div.col.col-lg-auto
+                                                  span.ideLink(name="name")
+                                                div.col.col-lg-2.align-items-end
+                                                  span.methodLinks
+                                                    span.badge.badge-pill.badge-info(name='method-ATF' preserve='true') TestHistory
+                                                    span.badge.badge-pill.badge-info(name='method-IDE' preserve='true') IntelliJ
+
 
 
 
