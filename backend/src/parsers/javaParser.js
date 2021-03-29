@@ -59,6 +59,7 @@ const javaParser = {
     let content;
     try {
       content = parser.parse(fileContent);
+      content.fileName = fileInfo.relative;
       if (!content) {
         throw Error(`Java file parsing failed ${fileInfo.related}`);
       }
@@ -173,49 +174,97 @@ const javaParser = {
     }
 
     let value = this.checkParticularChild(false, content, "extractExpressionValue", "expression");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "variableInitializer"); // Boolean constant
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "ternaryExpression");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "binaryExpression");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "unaryExpression");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "parenthesisExpression");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "lambdaExpression");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "primary");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "primaryPrefix");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "literal");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "StringLiteral");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "CharLiteral");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "integerLiteral");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "DecimalLiteral");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "FloatLiteral");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "floatingPointLiteral");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "booleanLiteral");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "False"); // Boolean constant
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "True"); // Boolean constant
+
     if (!value) {
+      // Check some tricky cases need specific logic
       let fqnDecl = this.checkParticularChild(false, content, "extractExpressionValue", "fqnOrRefType");
       if (fqnDecl) {
+        // some fully qualified class name
         return this.extractFQNString(fqnDecl);
       }
-      let arrayDecl = this.checkParticularChild(false, content, "extractExpressionValue", "elementValueArrayInitializer", "elementValueList");
+      let arrayDecl = this.checkParticularChild(false, content, "extractExpressionValue", "elementValueArrayInitializer");
       if (arrayDecl) {
-        let elements = this.checkParticularChildren(false, arrayDecl, "extractExpressionValue", "elementValue");
-        value = [];
-        for (let ind=0; ind < elements.length; ind ++) {
-          value.push(this.extractExpressionValue(elements[ind]));
+        // some array
+        let arrayDisplayValue = [];
+        let elements = this.checkParticularChildren(false, arrayDecl, "extractExpressionValue", "elementValueList", "elementValue");
+        if (elements) {
+          for (let ind=0; ind < elements.length; ind ++) {
+            arrayDisplayValue.push(this.extractExpressionValue(elements[ind]));
+          }
         }
-        return value;
+        return arrayDisplayValue;
+      }
+      let arrayInitDecl = this.checkParticularChild(false, content, "extractExpressionValue", "arrayInitializer");
+      if (arrayInitDecl) {
+        // some array
+        let arrayDisplayValue = [];
+        let elements = this.checkParticularChildren(false, arrayInitDecl, "extractExpressionValue", "variableInitializerList");
+        if (elements) {
+          for (let ind = 0; ind < elements.length; ind++) {
+            arrayDisplayValue.push(this.extractExpressionValue(elements[ind]));
+          }
+        }
+        return arrayDisplayValue;
+      }
+      if (this.checkParticularChild(false, content, "extractExpressionValue", "newExpression")) {
+        // is new Object() expression
+        let classToNew = this.getParticularChildValue(false, content, "extractExpressionValue", "newExpression", "unqualifiedClassInstanceCreationExpression", "classOrInterfaceTypeToInstantiate", "Identifier");
+        return "new " + (classToNew ? classToNew : "Object")+"(*)";
+      }
+      if (this.checkParticularChild(false, content, "extractExpressionValue", "Null")) {
+        // null
+        return "null";
+      }
+      if ( // ignore all these as not relevant for us
+           this.checkParticularChild(false, content, "extractExpressionValue", "annotation")
+        || this.checkParticularChild(false, content, "extractExpressionValue", "lambdaBody")
+        || this.checkParticularChild(false, content, "extractExpressionValue", "castExpression")
+      ) {
+        // null
+        return null;
       }
     }
-    if (!value) {
-      let props = [];
-      for (var prop in content.children) {
-        if (Object.prototype.hasOwnProperty.call(content.children, prop)) {
-          props.push(prop);
-        }
-      }
-      console.log(`[extractExpressionValue] failed to find expression value. Existing nodes:`, props);
-      return null;
-    } else {
-      if (value["children"]) {
-        value = this.extractExpressionValue(value);
-      } else {
-        if (Object.prototype.hasOwnProperty.call(value, "image")) {
-          return value.image;
-        } else {
-          console.log(`[extractExpressionValue] failed to extract expression value. Current value node:`, value);
-        }
-      }
-      return value;
+
+    if (value && value["children"]) {
+      return this.extractExpressionValue(value);
     }
+
+    let valueOrContent = value;
+    if (!valueOrContent) {
+      valueOrContent = content;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(valueOrContent, "image")) {
+      return valueOrContent.image;
+    }
+
+    // If value is not parsable - raise error
+    let props = [];
+    for (var prop in valueOrContent.children) {
+      if (Object.prototype.hasOwnProperty.call(valueOrContent.children, prop)) {
+        props.push(prop);
+      }
+    }
+    console.log(`[extractExpressionValue] failed to find expression value. Existing nodes:`, props);
+    return null;
   },
 
   getIdentifier(identifierContainer, containerName) {
@@ -261,11 +310,41 @@ const javaParser = {
         memberInfo.name = this.getParticularChildValue(false, declarator, "extractClassBodyInfo", "variableDeclaratorId", "Identifier");
         memberInfo.value = this.getParticularChildValue(false, declarator, "extractClassBodyInfo", "variableInitializer");
         if (memberInfo.value) {
-          memberInfo.value = memberInfo.value.replace(/(^\"|\"$)/g,'');
+          if (typeof memberInfo.value === 'string') {
+            // Removing the surrounding " if a string
+            memberInfo.value = memberInfo.value.replace(/(^\"|\"$)/g,'');
+          }
         }
       }
       memberInfo.annotations = this.extractAnnotationsInfo(fieldDeclaration, "methodModifier");
       return memberInfo;
+    }
+    let firstChildName = Object.keys(memberDeclaration.children)[0];
+
+    if ([
+        "constructorDeclaration"
+      , "instanceInitializer"
+    ].includes(firstChildName)) {
+      // ignore that - not needed
+      return memberInfo;
+    }
+    if (memberDeclaration.name === 'classMemberDeclaration') {
+        let firstMemberName = Object.keys(memberDeclaration.children)[0];
+        if ([
+          "classDeclaration"
+          , 'Semicolon'
+          , 'staticInitializer'
+        ].includes(firstMemberName)) {
+          // ignore that - not needed
+          return memberInfo;
+        } else {
+          corUtil.warn(`Unknown kind of class member ${classInfo.className}`);
+          return memberInfo;
+        }
+    }
+    if (memberDeclaration.name === 'classBodyDeclaration') { // Subclass declaration - ignore
+          // ignore that - not needed
+          return memberInfo;
     }
     corUtil.warn(`Unknown kind of entity member ${classInfo.className}`);
     return memberInfo;

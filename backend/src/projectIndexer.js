@@ -68,7 +68,7 @@ const projectIndexer = {
         stats = fs.statSync(path);
       } catch (ex) {
       }
-      if (stats.isDirectory()) {
+      if (stats && stats.isDirectory()) {
         runInfo.rootFoldersDetected++;
         if (runInfo.foldersProcessedAlready.has(entries[i])) {
           utils.trace(`  folder ${entries[i]} is skipped as already processed`);

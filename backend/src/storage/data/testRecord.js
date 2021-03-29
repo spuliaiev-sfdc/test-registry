@@ -6,7 +6,7 @@ const testRecord = {
 
   async setupCollection(database) {
     let collection = database.collection(this.collectionName);
-    collection.createIndex( { class: 1 }, { unique: 1 });
+    collection.createIndex( { class: 1, relative: 1 }, { unique: 1 });
     collection.createIndex( { module: 1 }, { unique: 0 });
     collection.createIndex( { "$**": "text" } );
 
@@ -14,12 +14,24 @@ const testRecord = {
   },
 
   async insertRecord(database, record) {
+    let coll = database.collection(this.collectionName);
+    record.lastUpdate = new Date();
     try {
-      let coll = database.collection(this.collectionName);
       const inserted = await coll.replaceOne({class: record.class, relative: record.relative}, record, {upsert: true});
       return inserted && inserted.insertedCount === 1 ? inserted.insertedId : null;
     } catch (e) {
-      corUtil.warn(`Failed to insert TestRecord`, e);
+      if (e.code === 11000) {
+        try {
+          const existingButDifferent = await coll.findOne({class: record.class});
+          corUtil.warn(`Replaced TestRecord for class ${record.class}:\nexistingPath:${existingButDifferent.relative}\n     newPath:${record.relative}`);
+          const inserted = await coll.replaceOne({class: record.class}, record, {upsert: true});
+          return inserted && inserted.insertedCount === 1 ? inserted.insertedId : null;
+        } catch (e) {
+          corUtil.warn(`Failed to upsert TestRecord`, e);
+        }
+      } else {
+        corUtil.warn(`Failed to insert TestRecord`, e);
+      }
       return null;
     }
   },
