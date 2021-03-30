@@ -105,6 +105,10 @@ const testAnalyser = {
       report.testInventoryMissing = true;
     }
 
+    if (fileInfo.javaInfo && fileInfo.javaInfo.libsInfo) {
+      report.testLibs = fileInfo.javaInfo.libsInfo.testLibs;
+      report.libsInfo = fileInfo.javaInfo.libsInfo;
+    }
     return report;
   },
 

@@ -58,6 +58,7 @@ let chartsDefinitions = {};
 
 function initStatsCharts() {
   initChart('testsByType', '/api/stats/testDistribution', 'pie', {});
+  initChart('testsByLibs', '/api/stats/testDistributionByLibs', 'pie', {});
   initChart('libraryCounts', '/api/stats/counts', 'text', {});
 }
 
@@ -157,7 +158,7 @@ function refreshChart(chartElementId) {
         }
       } else {
         flagLoading(chartElementId, false, true);
-        console.log(`Failed to get data for chart TestsByType`, json);
+        console.log(`Failed to get data for chart `+chartElementId, json);
       }
     }
   });

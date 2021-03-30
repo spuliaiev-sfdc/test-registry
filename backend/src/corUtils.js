@@ -249,9 +249,9 @@ const utils = {
             info.testKind = "unit";
           } else {
             if (parts[moduleRootOffset+3] === "strictunit") {
-              info.testKind = "strictunit";
+              info.testKind = "unit-strict";
             } else {
-              info.testKind = "unknown-unit-test";
+              info.testKind = "unit-unknown";
             }
           }
           // add the kind of unit test

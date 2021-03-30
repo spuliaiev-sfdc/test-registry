@@ -22,6 +22,14 @@ const controller = {
     res.send(response);
   },
 
+  async getTestsDistributionByLibs(req, res) {
+    if (arguments.length === 0) return "testDistributionByLibs";
+    let testsByKind = await repositoryTests.getTestsDistributionByArea(this.database);
+    let chartData = chartsUtils.convertToPieChart(testsByKind);
+    let response = restResponse.ok(chartData);
+    res.send(response);
+  },
+
   async getCounts(req, res) {
     if (arguments.length === 0) return "counts";
     let testsCount = await repositoryTests.getTestsCount(this.database);

@@ -160,6 +160,19 @@ const testRecord = {
     return await list.toArray();
   },
 
+  async getTestsDistributionByArea(database) {
+    let coll = database.collection(this.collectionName);
+    let list = await coll.aggregate([
+      {
+        $group: {
+          _id: "$testLibs",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    return await list.toArray();
+  },
+
   async getTestsCount(database) {
     let coll = database.collection(this.collectionName);
     let list = await coll.aggregate([

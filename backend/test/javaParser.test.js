@@ -87,18 +87,18 @@ describe('javaParserSample', function() {
 describe('javaParser', function() {
   describe('#parseJavaContent() - Simple Class', function() {
     it('should successfully parse simple Java', function() {
-      let fileInfo = { related: 'SomeFile.java' };
+      let fileInfo = { relative: 'SomeFile.java' };
       let parsingResult = javaParser.parseJavaContent(javaSimpleClass, fileInfo);
       assert.equal(parsingResult.success, true);
     });
   });
   describe('#parseJavaContent() - Simple Test Class', function() {
     it('should successfully parse simple Java with JavaDoc', function() {
-      let fileInfo = { related: 'SomeFile.java' };
+      let fileInfo = { relative: 'SomeFile.java', testKind: 'sample' };
       let parsingResult = javaParser.parseJavaContent(javaDocClass, fileInfo);
       assert.equal(parsingResult.success, true);
       assert.deepEqual(parsingResult.info, {
-        'classes': [{
+        classes: [{
           'annotations': [{
             'name': 'Annotation',
             'value': 'Value01'
@@ -126,19 +126,20 @@ describe('javaParser', function() {
             'since': '2020.05.01'
           },
           'methods': []
-        }]
+        }],
+        testLibs: "sample"
       });
     });
     // it('should fail to parse Particular Test Java', function() {
       // let someContent = fs.readFileSync("/Users/spuliaiev/blt/app/main/core/ui-services-private/test/unit/java/src/strictunit/ui/services/internal/cache/UnAuthorizedSerializableForTest.java", 'utf8');
       // let someContent = fs.readFileSync("/Users/spuliaiev/blt/app/main/core/industries-mfg-rebates/test/func/java/src/industries/mfg/rebates/entities/rebatetypebenefit/ProgramRebateTypeBenefitCreateTest.java", 'utf8');
       // let someContent = fs.readFileSync("/Users/spuliaiev/blt/app/main/core/zero-shared/test/unit/java/src/strictunit/zero/zorse/ZorseMessageEnqueueTest.java", 'utf8');
-      // let fileInfo = { related: 'SomeFile.java' };
+      // let fileInfo = { relative: 'SomeFile.java' };
       // let parsingResult = javaParser.parseJavaContent(someContent, fileInfo);
       // assert.equal(parsingResult.success, false);
     // });
     it('should successfully parse simple Test Java', function() {
-      let fileInfo = { related: 'SomeFile.java' };
+      let fileInfo = { relative: 'SomeFile.java' };
       let parsingResult = javaParser.parseJavaContent(javaTestClass, fileInfo);
       assert.equal(parsingResult.success, true);
       assert.deepEqual(parsingResult.javaOwnershipInfo, {

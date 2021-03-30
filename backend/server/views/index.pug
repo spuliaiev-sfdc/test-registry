@@ -3,7 +3,7 @@ extends layout
 block layout-head
     script(type="text/javascript" src="/js/charthelper.js")
     script(type="text/javascript" src="/js/dashboard.js")
-    link(rel="stylesheet" href="/Chart.css")
+    link(rel="stylesheet" href="/charts/Chart.css")
     script(type="text/javascript" src="/charts/Chart.js")
 
 block  layout-header-nav-buttons
@@ -32,6 +32,7 @@ block layout-content
       div.row
         div.col-sm
             span &nbsp;
+
       div.row
         div.col-sm
           div.card(id="testsByType")
@@ -41,8 +42,24 @@ block layout-content
                     span.sr-only 'Loading...'
             div.alert-icon.text-danger.hidden
                 svg(class="bi" width="32" height="32" fill="currentColor")
+                    use(xlink:href="bootstrap-icons/bootstrap-icons.svg#exclamation-triangle-fill")
+            canvas.card-body.content.hidden
+        div.col-sm
+          div.card(id="testsByLibs")
+            div.card-header.card-title Tests by libs
+            div.spinner-block
+                div.spinner-border
+                    span.sr-only 'Loading...'
+            div.alert-icon.text-danger.hidden
+                svg(class="bi" width="32" height="32" fill="currentColor")
                   use(xlink:href="bootstrap-icons/bootstrap-icons.svg#exclamation-triangle-fill")
             canvas.card-body.content.hidden
+
+      div.row
+        div.col-sm
+          span &nbsp;
+
+      div.row
         div.col-sm
           div.card(id="libraryCounts")
             div.card-header.card-title Library

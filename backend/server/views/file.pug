@@ -43,6 +43,18 @@ block layout-content
                     svg(class="bi" width="32" height="32" fill="currentColor")
                       use(xlink:href="bootstrap-icons/bootstrap-icons.svg#exclamation-triangle-fill")
                 canvas.content.hidden
+          div.col-sm
+             div.card(id="testsByArea")
+                div.card-body
+                    h5.card-title Tests by area
+                    div.spinner-block
+                        div.spinner-border
+                            span.sr-only 'Loading...'
+                    div.alert-icon.text-danger.hidden
+                        svg(class="bi" width="32" height="32" fill="currentColor")
+                            use(xlink:href="bootstrap-icons/bootstrap-icons.svg#exclamation-triangle-fill")
+                    canvas.content.hidden
+    div.row
         div.col-sm
           div.card(id="libraryCounts")
              div.card-body

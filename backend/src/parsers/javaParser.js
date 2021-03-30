@@ -61,20 +61,22 @@ const javaParser = {
       content = parser.parse(fileContent);
       content.fileName = fileInfo.relative;
       if (!content) {
-        throw Error(`Java file parsing failed ${fileInfo.related}`);
+        throw Error(`Java file parsing failed ${fileInfo.relative}`);
       }
     } catch (e) {
-      corUtil.error(`Failed to parse java file ${fileInfo.related}`, e);
+      corUtil.error(`Failed to parse java file ${fileInfo.relative}`, e);
       return {
         success: false,
-        errors: [ `Failed to parse java file ${fileInfo.related}`]
+        errors: [ `Failed to parse java file ${fileInfo.relative}`]
       };
     }
     let info = this.extractClassesInfo(content, fileContent);
 
     let javaOwnershipInfo = this.extractOwnershipInfo(info, content);
 
-    return { success: true, content, info, javaOwnershipInfo };
+    let libsInfo = this.extractLibsUsedInfo(info, content, fileInfo, fileContent);
+
+    return { success: true, content, info, javaOwnershipInfo, libsInfo };
   },
 
   getFirstClassDeclaration(content) {
@@ -182,6 +184,7 @@ const javaParser = {
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "lambdaExpression");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "primary");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "primaryPrefix");
+    value = value || this.checkParticularChild(false, content, "extractExpressionValue", "primarySuffix");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "literal");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "StringLiteral");
     value = value || this.checkParticularChild(false, content, "extractExpressionValue", "CharLiteral");
@@ -353,7 +356,10 @@ const javaParser = {
   extractFQNString(fqnDecl) {
     let first = this.getParticularChildValue(false, fqnDecl, "extractFQNString", "fqnOrRefTypePartFirst", "fqnOrRefTypePartCommon", "Identifier");
     let second = this.getParticularChildValue(false, fqnDecl, "extractFQNString", "fqnOrRefTypePartRest", "fqnOrRefTypePartCommon", "Identifier");
-    return first + "."+second;
+    if (second) {
+      return first + "."+second;
+    }
+    return first;
   },
 
   getClassJavadoc(typeDeclaration, classInfo) {
@@ -377,16 +383,21 @@ const javaParser = {
     return javadoc;
   },
 
-
-  checkForAnnotations(annotations, elementInfo, description){
-    if (annotations && annotations.length > 0){
-      for(let i = 0; i < annotations.length; i++) {
+  addTagsForAnnotations(annotations, elementInfo, description){
+    if (annotations && annotations.length > 0) {
+      for (let i = 0; i < annotations.length; i++) {
         let annotation = annotations[i];
         if (annotation.name.endsWith("ScrumTeam")) {
           corUtil.addTagInfo(elementInfo.owners, annotation.value, 'ScrumTeam ' + description);
         }
+        if (annotation.name.endsWith("Owner")) {
+          corUtil.addTagInfo(elementInfo.owners, annotation.value, 'Owner ' + description);
+        }
         if (annotation.name.endsWith("TestLabels")) {
           corUtil.addTagInfo(elementInfo.labels, annotation.value, 'TestLabel ' + description);
+        }
+        if (annotation.name.endsWith("RunWith")) {
+          corUtil.addTagInfo(elementInfo.labels, annotation.value, 'RunWith ' + description);
         }
       }
     }
@@ -403,7 +414,7 @@ const javaParser = {
     };
     if (info.classes && info.classes.length > 0) {
       let classInfo = info.classes[0];
-      this.checkForAnnotations(classInfo.annotations, javaOwn.classInfo, "class annotation");
+      this.addTagsForAnnotations(classInfo.annotations, javaOwn.classInfo, "class annotation");
 
       if (classInfo.javadoc && classInfo.javadoc.team) {
         corUtil.addTagInfo(javaOwn.classInfo.owners, classInfo.javadoc.team, "ScrumTeam javadoc");
@@ -417,7 +428,7 @@ const javaParser = {
             labels: []
           };
           javaOwn.methodsInfo.push(methodInfo);
-          this.checkForAnnotations(method.annotations, methodInfo, "method annotation");
+          this.addTagsForAnnotations(method.annotations, methodInfo, "method annotation");
         }
       }
 
@@ -480,7 +491,167 @@ const javaParser = {
         }
       }
     }
-  }
+  },
+
+  extractLibsUsedInfo(info, content, fileInfo, fileContent) {
+    let libsInfo = {
+      tags: new Set(),
+      uiFrameworks: new Set(),
+      unitFrameworks: new Set(),
+      uiContext: new Set(),
+      uiContextNot: new Set(),
+      targetBrowsers: new Set(),
+      targetBrowsersNot: new Set()
+    };
+    if ( fileContent.indexOf("import aloha.page") >= 0
+      || fileContent.indexOf("aloha.page.") >= 0
+      || fileContent.indexOf("aloha.page.common.pagefactory.") >= 0) {
+      libsInfo.uiFrameworks.add("Aloha");
+      // Navigate always mean browser
+      libsInfo.uiFrameworks.add("Selenium");
+      libsInfo.tags.add("AlohaPage");
+    }
+
+    if (fileContent.indexOf("getApp().navigateTo") >= 0) {
+      libsInfo.uiFrameworks.add("SFX");
+      // Navigate always mean browser
+      libsInfo.uiFrameworks.add("Selenium");
+      libsInfo.tags.add("getApp");
+    }
+
+    if (fileContent.indexOf("org.mockito2.") >= 0) {
+      libsInfo.unitFrameworks.add("Mockito");
+      libsInfo.tags.add("Mockito2");
+    }
+
+    if (fileContent.indexOf("org.mockito.") >= 0) {
+      libsInfo.unitFrameworks.add("Mockito");
+      libsInfo.tags.add("Mockito1");
+    }
+
+    if (fileContent.indexOf("s1DesktopEnabled") >= 0) {
+      libsInfo.uiFrameworks.add("S1");
+      // S1 is for SFX
+      libsInfo.uiFrameworks.add("SFX");
+      libsInfo.uiFrameworks.add("Selenium");
+      // That not always means that we use Selenium - it might be Actions test!
+      libsInfo.tags.add("s1DesktopEnabled");
+    }
+
+    if ( fileContent.indexOf("pageobjects.feature.") >= 0
+      || fileContent.indexOf("pageobjects.framework.") >= 0
+      || fileContent.indexOf("getApp().navigateTo") >= 0) {
+      libsInfo.uiFrameworks.add("LPOP");
+      // LPOP is for SFX
+      libsInfo.uiFrameworks.add("SFX");
+      libsInfo.uiFrameworks.add("Selenium");
+      // That not always means that we use Selenium - it might be Actions test!
+      libsInfo.tags.add("pageobjects.framework");
+    }
+
+    if ( fileContent.indexOf("import test.util.ui") >= 0
+      || fileContent.indexOf("test.util.ui.") >= 0
+      || fileContent.indexOf("BaseUiTest") >= 0) {
+      libsInfo.uiFrameworks.add("BaseUiTest");
+      libsInfo.uiFrameworks.add("Selenium");
+      libsInfo.tags.add("BaseUiTest");
+    }
+
+    if ( fileContent.indexOf("import admin.organization.BlackTabTest") >= 0
+      || fileContent.indexOf("BlackTabTest") >= 0) {
+      libsInfo.uiFrameworks.add("BlackTabTest");
+      libsInfo.tags.add("BlackTabTest");
+    }
+
+    if ( fileContent.indexOf("TargetBrowsers") >= 0
+      || fileContent.indexOf("WebDriverUtil") >= 0
+      || fileContent.indexOf("getCurrentWebDriver()") >= 0
+      || fileContent.indexOf("getSfdcWebDriverUtil()") >= 0) {
+      libsInfo.uiFrameworks.add("Selenium");
+      libsInfo.tags.add("Selenium");
+    }
+
+    if (info.classes && info.classes.length > 0) {
+      this.checkForClassAnnotations(info.classes[0].annotations, libsInfo);
+    }
+
+    libsInfo.testLibs = fileInfo.testKind;
+
+    if (libsInfo.uiFrameworks.size > 0) {
+      libsInfo.uiTest = true;
+      libsInfo.testSelenium = true;
+      if (libsInfo.uiFrameworks.has("Selenium")) {
+        libsInfo.testLibs += "-Selenium";
+      }
+      if (libsInfo.uiFrameworks.has("Aloha")) {
+        libsInfo.testLibs += "-Aloha";
+      }
+      if (libsInfo.uiFrameworks.has("SFX")) {
+        libsInfo.testLibs += "-SFX";
+      }
+      if (libsInfo.uiFrameworks.has("S1")) {
+        libsInfo.testLibs += "-S1";
+      }
+      if (libsInfo.uiFrameworks.has("LPOP")) {
+        libsInfo.testLibs += "-LPOP";
+      }
+    }
+
+    if (libsInfo.unitFrameworks.size > 0) {
+      libsInfo.unitTest = true;
+      if (libsInfo.unitFrameworks.has("Mockito")) {
+        libsInfo.testLibs += "-Mockito";
+      }
+      if (libsInfo.unitFrameworks.has("PowerMock")) {
+        libsInfo.testLibs += "-PowerMock";
+      }
+    }
+    info.testLibs = libsInfo.testLibs;
+    return libsInfo;
+  },
+
+  addToSet(setToAddTo, newValueOrValues) {
+    if (!setToAddTo || !newValueOrValues) return;
+    if (Array.isArray(newValueOrValues)) {
+      newValueOrValues.forEach(setToAddTo.add, setToAddTo);
+    } else {
+      setToAddTo.add(newValueOrValues);
+    }
+  },
+  checkForClassAnnotations(annotations, libsInfo){
+    // Process Annotations like
+    // @TargetBrowsers({BrowserType.GOOGLECHROME})
+    // @ExcludeBrowsers({BrowserType.Firefox})
+    // @AppContexts({StdNav_ConsoleNav.class})
+    // @ExcludedNavContext(ConsoleNav.class)
+    if (annotations && annotations.length > 0){
+      for(let i = 0; i < annotations.length; i++) {
+        let annotation = annotations[i];
+        if (annotation.name === "AppContexts") {
+          this.addToSet(libsInfo.uiContext, annotation.value);
+        }
+        if (annotation.name === "ExcludedNavContext") {
+          this.addToSet(libsInfo.uiContextNot, annotation.value);
+        }
+        if (annotation.name === "TargetBrowsers") {
+          this.addToSet(libsInfo.targetBrowsers, annotation.value);
+        }
+        if (annotation.name === "ExcludeBrowsers") {
+          this.addToSet(libsInfo.targetBrowsersNot, annotation.value);
+        }
+        if (annotation.name === "RunWith") {
+          libsInfo.tags.add("RunWith:"+annotation.value);
+          if ( annotation.value === "MockitoJUnitRunner"
+            || annotation.value === "MockitoJUnitRunner.Silent") {
+            libsInfo.unitFrameworks.add("Mockito");
+          }
+          if (annotation.value === "PowerMockRunner") {
+            libsInfo.unitFrameworks.add("PowerMock");
+          }
+        }
+      }
+    }
+  },
 };
 
 

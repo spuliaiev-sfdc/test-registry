@@ -112,7 +112,7 @@ describe('corUtils', function() {
           javaClassFQN: 'pk1.pk2.StrinctUnitClassWithOtherLogicTest',
           root: '~/blt/app/main/core',
           testFolder: true,
-          testKind: 'strictunit'
+          testKind: 'unit-strict'
       });
     });
     it('Check for java func test file without test parent folder', function () {

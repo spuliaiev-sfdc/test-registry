@@ -44,8 +44,9 @@ const projectIndexer = {
     let lastScanFileFullPath = resolve(runInfo.rootFolder, runInfo.lastScanFile);
     if (fs.existsSync(lastScanFileFullPath)) {
       utils.info(` lastScan.log file is found in the folder will be excluded from reindex. remove the file if full scan needed`);
+      utils.info(` lastScan.log full path is ${lastScanFileFullPath}`);
       if (runInfo.rescan) {
-        utils.info(` lastScan.log file is backed up because of rescan option`);
+        utils.info(` lastScan.log file is backed up because of rescan option and ignored.`);
         fs.renameSync(lastScanFileFullPath, lastScanFileFullPath+"-"+utils.timestamp()+".bak");
       } else {
         runInfo.lastScanFound = true;

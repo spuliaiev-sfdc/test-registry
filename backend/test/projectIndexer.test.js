@@ -104,6 +104,16 @@ describe('projectIndexer', function() {
                 "testFirstMethod_01"
               ]
             },
+            libsInfo: {
+              tags: new Set(),
+              targetBrowsers: new Set(),
+              targetBrowsersNot: new Set(),
+              testLibs: "func",
+              uiContext: new Set(),
+              uiContextNot: new Set(),
+              uiFrameworks: new Set(),
+              unitFrameworks: new Set()
+            },
             methodsInfo: [
               {
                 IN_DEV: true,
@@ -123,7 +133,8 @@ describe('projectIndexer', function() {
                   { name: 'Team_02', desc: ['ScrumTeam method annotation']}
                 ]
               }
-            ]
+            ],
+            testLibs: "func"
           });
         });
     });

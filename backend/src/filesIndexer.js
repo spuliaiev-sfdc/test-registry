@@ -84,7 +84,9 @@ const filesIndexer = {
                 statFile = fs.statSync(foundFilePath);
               } catch (ex) {
                 if (ex.code === 'ENOENT') {
-                  return await callbackErr(status, "not_found", foundFilePath);
+                  await callbackErr(status, "not_found", foundFilePath);
+                  utils.log(`  Failed to enter the folder ${foundFilePath}`);
+                  continue;
                 } else {
                   return await callbackErr(status, "other", foundFilePath, ex);
                 }
