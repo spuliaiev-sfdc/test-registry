@@ -3,3 +3,4 @@
 /backend/data-*
 /backend/.nyc_output/
 /backend/test/*-Develop.test.js
+/backend/*.log
