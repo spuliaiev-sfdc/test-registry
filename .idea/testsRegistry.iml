@@ -7,6 +7,12 @@
       <sourceFolder url="file://$MODULE_DIR$/backend/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/backend/test-projects" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/backend/2020-06-27_23_23_51-Accounts" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/data-2021-03-29_14_14_46" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/data-2021-03-29_14_29_50" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/data-2021-03-29_16_56_20" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/data-2021-03-30_12_40_57" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/data-2021-04-01_10_14_35" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/data-2021-04-01_10_48_24" />
       <excludeFolder url="file://$MODULE_DIR$/backend/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
     </content>
