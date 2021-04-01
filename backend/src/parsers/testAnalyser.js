@@ -46,6 +46,10 @@ const testAnalyser = {
         corUtil.error(`[analyseJavaTestFile] failed file analysis ${fileInfo.relative} Error: ${parsingResult.success}`);
       }
       fileInfo.javaInfo = parsingResult;
+      if (!fileInfo.javaClassFQN &&
+        fileInfo.javaInfo != null && fileInfo.javaInfo.info && fileInfo.javaInfo.info.classes && fileInfo.javaInfo.info.classes.length > 0) {
+        fileInfo.javaClassFQN = fileInfo.javaInfo.info.classes[0].javaClassFQN;
+      }
     } catch (e) {
       corUtil.error(`Failed parsing of java file ${fileInfo.relative}`, e);
     }

@@ -230,12 +230,17 @@ const utils = {
     info.testFolder = parts[1] === "test" || parts[1] === "func" || parts[1] === "unit";
     let moduleRootOffset = 0;
     let moduleSrcOffset = 0;
+    let subPathForJava = 3; // like java/src/subKind  - but sometimes src is missing - test for that
     if (info.testFolder) {
       moduleRootOffset = 1;
       if (parts[1] === "test") {
         // step one level down
         moduleRootOffset++;
       }
+      // Valid paths are:
+      // module/test/func/java/src/com/company/package/Class.java
+      // module/test/unit/java/src/strictunit/com/company/package/Class.java
+      // module/test/unit/java/src/unit/com/company/package/Class.java
       if (parts[moduleRootOffset] === "func") {
         info.testKind = "func";
         moduleRootOffset = parts[1] === "test" ? 2 : 1;
@@ -245,10 +250,14 @@ const utils = {
           // clarify the kind of unit test - generic or strict
           // type of unit test + one more time in sources
           moduleSrcOffset++;
-          if (parts[moduleRootOffset+3] === "unit") {
+          if (! (parts[moduleRootOffset+subPathForJava-1] === "src")) {
+            // Looks like SRC is missing - shorten the offset
+            subPathForJava--;
+          }
+          if (parts[moduleRootOffset+subPathForJava] === "unit") {
             info.testKind = "unit";
           } else {
-            if (parts[moduleRootOffset+3] === "strictunit") {
+            if (parts[moduleRootOffset+subPathForJava] === "strictunit") {
               info.testKind = "unit-strict";
             } else {
               info.testKind = "unit-unknown";
@@ -261,7 +270,7 @@ const utils = {
         }
       }
     }
-    info.moduleSrcPath = parts.slice(0, moduleRootOffset+3+moduleSrcOffset).join("/");
+    info.moduleSrcPath = parts.slice(0, moduleRootOffset+subPathForJava+moduleSrcOffset).join("/");
     info.moduleRoot = parts.slice(0, moduleRootOffset+1).join("/");
 
     // remove the module path and following slash

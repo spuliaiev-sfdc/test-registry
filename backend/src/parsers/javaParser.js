@@ -155,11 +155,31 @@ const javaParser = {
     let classesInfo = {};
     classesInfo.classes = [];
 
+    let packageDeclaration = this.checkParticularChildren(false, content, "getFirstClassDeclaration", "ordinaryCompilationUnit", "packageDeclaration", "Identifier");
+    let packageName;
+    if (packageDeclaration) {
+      if (Array.isArray(packageDeclaration)) {
+        packageName = "";
+        packageDeclaration.forEach( packageElement => {
+          let packEl = this.extractExpressionValue(packageElement);
+          if (packageName.length > 0) packageName+=".";
+          packageName =  packageName + packEl;
+        });
+      } else {
+        packageName = this.extractExpressionValue(packageDeclaration);
+      }
+    }
+
+
     let ordinaryCompilationUnit = this.checkParticularChild(true, content, "getFirstClassDeclaration", "ordinaryCompilationUnit");
     let typeDeclaration = this.checkParticularChild(true, ordinaryCompilationUnit, "getFirstClassDeclaration", "typeDeclaration");
     let firstClassDeclaration = this.checkParticularChild(false, typeDeclaration, "getFirstClassDeclaration", "classDeclaration");
     if (firstClassDeclaration) {
       let classInfo = this.extractClassInfo(firstClassDeclaration, typeDeclaration);
+      if (packageName) {
+        classInfo.package = packageName;
+        classInfo.javaClassFQN = classInfo.package+"."+classInfo.className;
+      }
       classesInfo.classes.push(classInfo);
       // this might be an Interface or Enum - so no class to parse
     }

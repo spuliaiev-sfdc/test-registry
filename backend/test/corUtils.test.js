@@ -115,6 +115,25 @@ describe('corUtils', function() {
           testKind: 'unit-strict'
       });
     });
+    it('Check for java unit test file without java src folder', function () {
+      let result = utils.analyseFileLocation('~/blt/app/main/core', 'moduleName/test/unit/java/unit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java');
+
+      assert.deepEqual(result , {
+        ext: 'java',
+        filename: 'StrinctUnitClassWithOtherLogicTest',
+        module: 'moduleName',
+        modulePath: 'moduleName',
+        moduleRoot: 'moduleName/test/unit',
+        moduleSrcPath: 'moduleName/test/unit/java/unit',
+        relative: 'moduleName/test/unit/java/unit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
+        relativeToModuleRoot: 'java/unit/pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
+        relativeToModuleSrc: 'pk1/pk2/StrinctUnitClassWithOtherLogicTest.java',
+        javaClassFQN: 'pk1.pk2.StrinctUnitClassWithOtherLogicTest',
+        root: '~/blt/app/main/core',
+        testFolder: true,
+        testKind: 'unit'
+      });
+    });
     it('Check for java func test file without test parent folder', function () {
       let result = utils.analyseFileLocation('~/blt/app/main/core', 'module-test/func/java/src/pk1/pk2/ClassWithOtherLogicTest.java');
       assert.deepEqual(result , {
