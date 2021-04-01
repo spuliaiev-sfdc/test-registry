@@ -4,7 +4,7 @@ const
   resolve = require('path').resolve,
   yaml = require('yaml'),
   utils = require('../corUtils.js'),
-  micromatch = require('micromatch'),
+  xml2js = require('xml2js'),
   streamZip = require('node-stream-zip');
 
 const teamDataSnapshot = {
@@ -31,6 +31,31 @@ const teamDataSnapshot = {
             teamDataSnapshot.loadedXml = true;
             teamDataSnapshot.filePathContents = filePathContents.toString("utf8");
             teamDataSnapshot.loaded = true;
+            teamDataSnapshot.teams = [];
+            teamDataSnapshot.teamsMap = {};
+            await xml2js.parseString(teamDataSnapshot.filePathContents, function (err, result) {
+              console.log("XMl Parsed");
+              if (result && result.TeamNameHistory && result.TeamNameHistory.Team && Array.isArray(result.TeamNameHistory.Team)) {
+                teamDataSnapshot.xmlValid = true;
+                for(let i = 0; i<result.TeamNameHistory.Team.length; i++) {
+                  let teamRef = result.TeamNameHistory.Team[i];
+                  let team = {
+                    name: teamRef.$.name,
+                    gusID: teamRef.$.gusID,
+                    alias: [teamRef.$.name]
+                  };
+                  teamDataSnapshot.teams.push(team);
+                  teamDataSnapshot.teamsMap[team.name] = team;
+                  // add aliases to map
+                  for(let a = 0; a < teamRef.Alias.length; a++) {
+                    let alias = teamRef.Alias[a].$.name;
+                    teamDataSnapshot.teamsMap[alias] = team;
+                    team.alias.push(alias);
+                  }
+                }
+              }
+              teamDataSnapshot.xmlParsed = true;
+            });
             return teamDataSnapshot;
           } catch (e) {
             teamDataSnapshot.error = error;
@@ -39,6 +64,13 @@ const teamDataSnapshot = {
         }
       }
     }
+  },
+
+  getTeamInfo(teamName) {
+    if (!teamDataSnapshot.teamsMap) {
+      return null;
+    }
+    return teamDataSnapshot.teamsMap[teamName];
   }
 };
 

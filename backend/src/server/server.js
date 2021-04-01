@@ -3,6 +3,7 @@ const
   path = require('path'),
   utils = require('../corUtils.js'),
   morgan = require('morgan'), // HTTP logging
+  teamDataSnapshot = require('../utils/teamDataSnapshot'),
   testController = require('./controllers/testsController'),
   statsController = require('./controllers/statsController'),
   fTestInventoryController = require('./controllers/fTestInventoryController'),
@@ -55,6 +56,14 @@ const server = {
       app.use(morgan('combined', { stream: accessLogStream }))
     } else {
       app.use(morgan('combined'));
+    }
+
+    console.log("Fetching teams information...");
+    try {
+      await teamDataSnapshot.loadTeamNamesFile({ rootFolder: this.coreFolder });
+      console.log(" done...");
+    } catch (e) {
+      console.log(" failed...", e);
     }
 
     this.setupRoutes(app);

@@ -1,0 +1,9 @@
+GET http://localhost:8072/api/teams/info?team=Accounts
+Accept: application/json
+
+###
+
+GET http://localhost:8072/api/stats/counts
+Accept: application/json
+
+###

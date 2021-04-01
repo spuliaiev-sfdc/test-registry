@@ -5,6 +5,7 @@ let
   repository = require('../../storage/data/testRecord'),
   restResponse = require('./restResponse'),
   restRequest = require('./restRequest'),
+  teamDataSnapshot = require('../../utils/teamDataSnapshot'),
   corUtil = require("../../corUtils"),
   path = require('path');
 
@@ -28,6 +29,20 @@ const controller = {
       corUtil.error(`Controller method error`, e);
     }
   },
+
+  async getTeamInformation(req, res) {
+    if (arguments.length === 0) return "info";
+    try {
+      let team = req.query.team;
+      let info = teamDataSnapshot.getTeamInfo(team);
+
+      let response = restResponse.ok(info);
+      res.send(response);
+    } catch (e) {
+      corUtil.error(`Controller method error`, e);
+    }
+
+  }
 
 
 }
