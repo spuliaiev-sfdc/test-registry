@@ -6,12 +6,13 @@ const
   fTestInventory = require('./utils/ftestInventory'),
   fTestInventoryRecord = require('./storage/data/fTestInventoryRecord'),
   testRecord = require('./storage/data/testRecord'),
+  configRecord = require('./storage/data/configRecord'),
   filesIndexer = require('./filesIndexer');
 
 const projectIndexer = {
 
   async iterateProject(runInfo) {
-    this.prepareRootFolderInfo(runInfo);
+    await this.prepareRootFolderInfo(runInfo);
     utils.info("Iterate Tests Execution information", runInfo);
 
     await this.iterateRootFolder(runInfo);
@@ -32,8 +33,12 @@ const projectIndexer = {
    * Prepare root folder information about modules and files.
    * Read the lastScan.log file and remove already processed modules.
    */
-  prepareRootFolderInfo(runInfo) {
+  async prepareRootFolderInfo(runInfo) {
     utils.trace(` Root folder scan started`);
+    let config = await configRecord.getConfig(runInfo.database);
+    runInfo.scanId = config.scanId ? config.scanId : 0;
+    runInfo.subScanId = config.subScanId ? config.subScanId : 0;
+
     runInfo.rootFoldersDetected = 0;
     runInfo.rootFilesDetected = 0;
     runInfo.foldersProcessedAlready = new Set();
@@ -48,18 +53,37 @@ const projectIndexer = {
       if (runInfo.rescan) {
         utils.info(` lastScan.log file is backed up because of rescan option and ignored.`);
         fs.renameSync(lastScanFileFullPath, lastScanFileFullPath+"-"+utils.timestamp()+".bak");
+        runInfo.scanId++;
+        runInfo.subScanId = 0;
       } else {
         runInfo.lastScanFound = true;
-        fs.readFileSync(lastScanFileFullPath, "UTF-8").toString().split("\n").map(line => {
+        fs.readFileSync(lastScanFileFullPath, "UTF-8").toString().split("\n").forEach(line => {
           let trimmed = line.trim();
           if (trimmed.length > 0) {
+            if (trimmed.startsWith("#ScanId:")) {
+                runInfo.scanId = trimmed.replace("#ScanId:","");
+            }
+            if (trimmed.startsWith("## SubId:")) {
+                runInfo.subScanId = trimmed.replace("# SubId:","");
+            }
             runInfo.foldersProcessedAlready.add(trimmed);
           }
         });
+        runInfo.subScanId++;
       }
     } else {
       utils.trace(` lastScan.log file is not found in the folder`);
+      runInfo.scanId++;
+      runInfo.subScanId = 0;
     }
+
+    config.scanId = runInfo.scanId;
+    config.subScanId = runInfo.subScanId;
+    // save config into DB
+    await configRecord.updateConfig(runInfo.database, config);
+    // save scanId and subScanId into lastScan file
+    this.addProcessedFolderToScanFile(runInfo, "#ScanId:"+runInfo.scanId);
+    this.addProcessedFolderToScanFile(runInfo, "# SubId:"+runInfo.subScanId);
 
     let entries = fs.readdirSync(runInfo.rootFolder);
     for(let i=0; i<entries.length; i++) {
@@ -77,7 +101,6 @@ const projectIndexer = {
         }
         if (runInfo.module && runInfo.module !== entries[i]) {
           utils.trace(`  folder ${entries[i]} is skipped as not the one requested`);
-          continue;
         }
       } else {
         runInfo.rootFilesDetected++;
@@ -96,6 +119,8 @@ const projectIndexer = {
       utils.trace(` File ${status.filesProcessed} ${fileName} in ${relativePath}`);
 
       let fileInfo = testAnalyser.verifyFileIsTest(runInfo.rootFolder, relativePath);
+      fileInfo.scanId = runInfo.scanId;
+      fileInfo.subScanId = runInfo.subScanId;
       if (fileInfo.testFile) {
         utils.info(` File ${status.filesProcessed+1} ${relativePath} is Test`);
         await this.runFileAnalysis(runInfo, status, fileInfo, onReportGenerated);

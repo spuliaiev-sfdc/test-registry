@@ -549,6 +549,11 @@ const javaParser = {
       libsInfo.tags.add("pageobjects.framework");
     }
 
+    if ( fileContent.indexOf("ApplicationType.LightningDesktop") >= 0) {
+      libsInfo.uiFrameworks.add("SFX");
+      libsInfo.uiFrameworks.add("Selenium");
+    }
+
     if ( fileContent.indexOf("import test.util.ui") >= 0
       || fileContent.indexOf("test.util.ui.") >= 0
       || fileContent.indexOf("BaseUiTest") >= 0) {
@@ -565,6 +570,7 @@ const javaParser = {
 
     if ( fileContent.indexOf("TargetBrowsers") >= 0
       || fileContent.indexOf("WebDriverUtil") >= 0
+      || fileContent.indexOf("org.openqa.selenium") >= 0
       || fileContent.indexOf("getCurrentWebDriver()") >= 0
       || fileContent.indexOf("getSfdcWebDriverUtil()") >= 0) {
       libsInfo.uiFrameworks.add("Selenium");
@@ -583,28 +589,28 @@ const javaParser = {
       if (libsInfo.uiFrameworks.has("Selenium")) {
         libsInfo.testLibs += "-Selenium";
       }
-      if (libsInfo.uiFrameworks.has("Aloha")) {
-        libsInfo.testLibs += "-Aloha";
-      }
-      if (libsInfo.uiFrameworks.has("SFX")) {
-        libsInfo.testLibs += "-SFX";
-      }
-      if (libsInfo.uiFrameworks.has("S1")) {
-        libsInfo.testLibs += "-S1";
-      }
-      if (libsInfo.uiFrameworks.has("LPOP")) {
-        libsInfo.testLibs += "-LPOP";
-      }
+      // if (libsInfo.uiFrameworks.has("Aloha")) {
+      //   libsInfo.testLibs += "-Aloha";
+      // }
+      // if (libsInfo.uiFrameworks.has("SFX")) {
+      //   libsInfo.testLibs += "-SFX";
+      // }
+      // if (libsInfo.uiFrameworks.has("S1")) {
+      //   libsInfo.testLibs += "-S1";
+      // }
+      // if (libsInfo.uiFrameworks.has("LPOP")) {
+      //   libsInfo.testLibs += "-LPOP";
+      // }
     }
 
     if (libsInfo.unitFrameworks.size > 0) {
       libsInfo.unitTest = true;
-      if (libsInfo.unitFrameworks.has("Mockito")) {
-        libsInfo.testLibs += "-Mockito";
-      }
-      if (libsInfo.unitFrameworks.has("PowerMock")) {
-        libsInfo.testLibs += "-PowerMock";
-      }
+      // if (libsInfo.unitFrameworks.has("Mockito")) {
+      //   libsInfo.testLibs += "-Mockito";
+      // }
+      // if (libsInfo.unitFrameworks.has("PowerMock")) {
+      //   libsInfo.testLibs += "-PowerMock";
+      // }
     }
     info.testLibs = libsInfo.testLibs;
     return libsInfo;

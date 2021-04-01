@@ -291,6 +291,8 @@ const fTestInventoryFileUtil = {
       await require('../storage/data/fTestInventoryRecord').testRecord(runInfo.database, 'mongoTest', ' Test from mongoTest 005+');
 
       let fileInfo = utils.analyseFileLocation(runInfo.rootFolder, relativePath);
+      fileInfo.scanId = runInfo.scanId;
+      fileInfo.subScanId = runInfo.subScanId;
       if (fileInfo.ext.toLocaleString() === 'xml' && fileInfo.filename.toLocaleString() !== 'pom') {
         utils.info(` File ${status.filesProcessed+1} ${relativePath} is potentially an inventory`);
 

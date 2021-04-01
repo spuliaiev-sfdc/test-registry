@@ -82,6 +82,8 @@ const testAnalyser = {
     report.module = fileInfo.moduleRoot;
     report.testKind = fileInfo.testKind;
     report.relative = fileInfo.relative;
+    report.scanId = fileInfo.scanId;
+    report.subScanId = fileInfo.subScanId;
 
     if (fileInfo.ownershipFile && fileInfo.ownershipFile.owningTeam && report.classInfo) {
       if (report.classInfo) {
