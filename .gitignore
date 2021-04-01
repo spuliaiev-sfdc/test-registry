@@ -1,3 +1,5 @@
 /tmp/
 /backend/2020-06-27_23_23_51-Accounts/
+/backend/data-*
 /backend/.nyc_output/
+/backend/test/*-Develop.test.js
