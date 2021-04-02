@@ -1,3 +1,5 @@
+const
+  teamDataSnapshot = require('../../utils/teamDataSnapshot');
 
 const restRequest = {
 
@@ -6,6 +8,7 @@ const restRequest = {
     this.detectPagination(req, result);
     this.detectSorting(req, result);
     this.detectSearchParameter(req, result);
+    this.detectTeamFiltering(req, result);
     return result;
   },
 
@@ -56,9 +59,21 @@ const restRequest = {
    */
   detectSearchParameter(req, result) {
     if (req.query.search && req.query.search.value.trim().length > 0) {
-      result.filter = {};
-      result.filter.searchString = req.query.search.value.trim();
-      result.filter.isRegExp = "true" === req.query.search.regex;
+      if (!result.filterByText) result.filterByText = {};
+      result.filterByText.searchString = req.query.search.value.trim();
+      result.filterByText.isRegExp = "true" === req.query.search.regex;
+    }
+  },
+
+  /**
+   * Expands the team name to list of team names using the aliases to cover old team names
+   */
+  detectTeamFiltering(req, result) {
+    if(req.query.filters) {
+      result.filters = req.query.filters;
+      if(result.filters.team) {
+        result.filters.team = teamDataSnapshot.getTeamAliases(result.filters.team);
+      }
     }
   }
 }

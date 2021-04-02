@@ -112,7 +112,8 @@ $.fn.dataTable.pipeline = function ( opts ) {
             if (requestLength >= -1) {
               json.data.splice(requestLength, json.data.length);
             }
-
+            json.recordsFiltered = json.pagination.recordsFiltered;
+            json.recordsTotal = json.pagination.recordsTotal;
             drawCallback(json);
           } else {
             console.log(`Failed to get data for getTestsByTeam`, json);
@@ -126,8 +127,12 @@ $.fn.dataTable.pipeline = function ( opts ) {
       if (json.data) {
         json.data.splice(0, requestStart - cacheLower);
         json.data.splice(requestLength, json.data.length);
+        json.recordsFiltered = json.pagination.recordsFiltered;
+        json.recordsTotal = json.pagination.recordsTotal;
       } else {
         json.data = [];
+        json.recordsFiltered = 0;
+        json.recordsTotal = 0;
       }
 
       drawCallback(json);
