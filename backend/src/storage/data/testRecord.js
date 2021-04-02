@@ -147,9 +147,22 @@ const testRecord = {
     return await storage.runQuery(coll, query, queryParameters, requestContent.sorting, requestContent.pagination);
   },
 
-  async getTestsDistributionByKind(database) {
+  async getTestsDistributionByKind(database, teams) {
     let coll = database.collection(this.collectionName);
-    let list = await coll.aggregate([
+
+    let criteria = [];
+    if (teams && teams.length > 0){
+      criteria.push({
+        $match: {
+          $or: [
+            { "classInfo.owners.name": { $in : teams } },
+            { "classInfo.ownersPartial.name" : { $in : teams }}
+          ]
+        }
+      });
+    }
+
+    let list = await coll.aggregate([ ...criteria,
       {
         $group: {
           _id: "$testKind",
@@ -160,9 +173,22 @@ const testRecord = {
     return await list.toArray();
   },
 
-  async getTestsDistributionByArea(database) {
+  async getTestsDistributionByArea(database, teams) {
     let coll = database.collection(this.collectionName);
-    let list = await coll.aggregate([
+
+    let criteria = [];
+    if (teams && teams.length > 0){
+      criteria.push({
+        $match: {
+          $or: [
+            { "classInfo.owners.name": { $in : teams } },
+            { "classInfo.ownersPartial.name" : { $in : teams }}
+          ]
+        }
+      });
+    }
+
+    let list = await coll.aggregate([ ...criteria,
       {
         $group: {
           _id: "$testLibs",

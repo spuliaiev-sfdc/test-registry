@@ -1,8 +1,6 @@
 extends layout
 
 block layout-head
-    script(type="text/javascript" src="/prismjs/prism.js")
-    script(type="text/javascript" src="/prismjs/components/prism-java.js")
     link(rel="stylesheet" href="/prismjs/themes/prism.css")
 
 block  layout-header-nav-buttons
@@ -19,4 +17,6 @@ block layout-content
             | #{fileInfo.content}
 
 block layout-footer
-     span.text-muted Place sticky footer content here.
+  span.text-muted Place sticky footer content here.
+  script(type="text/javascript" src="/prismjs/prism.js")
+  script(type="text/javascript" src="/prismjs/components/prism-java.js")

@@ -1,10 +1,7 @@
 extends layout
 
 block layout-head
-    script(type="text/javascript" src="/js/charthelper.js")
-    script(type="text/javascript" src="/js/dashboard.js")
     link(rel="stylesheet" href="/charts/Chart.css")
-    script(type="text/javascript" src="/charts/Chart.js")
 
 block  layout-header-nav-buttons
         li.nav-item
@@ -16,6 +13,15 @@ block layout-content
       div.row.hidden
         div.col-sm
           | Demo charts
+      div.row
+        div.col-sm
+          p.lead
+            div.input-group.mb-3
+              input(id="teamName" class="form-control typeahead" type="text" placeholder="Team name" aria-label="Team name" aria-describedby="button-addon2" data-provide="typeahead" autocomplete="off")
+        div.col-sm
+          p.lead
+            div.input-group.mb-3
+              p(id="teamsDescription")
       div.row.hidden
         div.col-sm
           div.card
@@ -83,4 +89,7 @@ block layout-content
                     div.text-uppercase.text-muted.small Teams
 
 block layout-footer
-     span.text-muted Place sticky footer content here.
+  span.text-muted Place sticky footer content here.
+  script(type="text/javascript" src="/js/charthelper.js")
+  script(type="text/javascript" src="/js/dashboard.js")
+  script(type="text/javascript" src="/charts/Chart.js")

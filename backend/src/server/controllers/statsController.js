@@ -2,6 +2,7 @@ let
   repositoryTests = require('../../storage/data/testRecord'),
   repositoryFTestInv = require('../../storage/data/fTestInventoryRecord'),
   repositoryTeams = require('../../storage/data/teamsRecord'),
+  teamDataSnapshot = require('../../utils/teamDataSnapshot'),
   restResponse = require('./restResponse'),
   restRequest = require('./restRequest'),
   chartsUtils = require('../utils/chartsUtils'),
@@ -16,17 +17,21 @@ const controller = {
 
   async getTestsDistribution(req, res) {
     if (arguments.length === 0) return "testDistribution";
-    let testsByKind = await repositoryTests.getTestsDistributionByKind(this.database);
+    let team = req.query.team;
+    let teams = teamDataSnapshot.getTeamAliases(team);
+    let testsByKind = await repositoryTests.getTestsDistributionByKind(this.database, teams);
     let chartData = chartsUtils.convertToPieChart(testsByKind);
-    let response = restResponse.ok(chartData);
+    let response = restResponse.ok({team, teams, chartData});
     res.send(response);
   },
 
   async getTestsDistributionByLibs(req, res) {
     if (arguments.length === 0) return "testDistributionByLibs";
-    let testsByKind = await repositoryTests.getTestsDistributionByArea(this.database);
+    let team = req.query.team;
+    let teams = teamDataSnapshot.getTeamAliases(team);
+    let testsByKind = await repositoryTests.getTestsDistributionByArea(this.database, teams);
     let chartData = chartsUtils.convertToPieChart(testsByKind);
-    let response = restResponse.ok(chartData);
+    let response = restResponse.ok({team, teams, chartData});
     res.send(response);
   },
 

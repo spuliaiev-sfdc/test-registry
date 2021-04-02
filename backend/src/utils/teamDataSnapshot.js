@@ -13,6 +13,9 @@ const teamDataSnapshot = {
   // files:
   /// sfdc/gus/data/snapshot/ProductTagInfo.xml
   /// sfdc/gus/data/snapshot/TeamNameHistory.xml
+
+  // Also possible to get mapping Cloud -> Team:
+  // sfdc-test/func/cloud-scrumteam-map.json
   async loadTeamNamesFile(runInfo) {
     teamDataSnapshot.loadedXml = true;
 
@@ -71,7 +74,18 @@ const teamDataSnapshot = {
       return null;
     }
     return teamDataSnapshot.teamsMap[teamName];
-  }
+  },
+
+  getTeamAliases(teamName) {
+    if (!teamName || teamName.trim().length === 0) {
+      return [];
+    }
+    let teamInfo = this.getTeamInfo(teamName);
+    if (!teamInfo) {
+      return [teamName];
+    }
+    return teamInfo.alias;
+  },
 };
 
 module.exports = teamDataSnapshot;

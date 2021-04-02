@@ -57,14 +57,18 @@ function initDemoCharts() {
 let chartsDefinitions = {};
 
 function initStatsCharts() {
-  initChart('testsByType', '/api/stats/testDistribution', 'pie', {});
-  initChart('testsByLibs', '/api/stats/testDistributionByLibs', 'pie', {});
+  initChart('testsByType', '/api/stats/testDistribution', 'pie', {}, 'Tests by type');
+  initChart('testsByLibs', '/api/stats/testDistributionByLibs', 'pie', {}, 'Tests by libs');
   initChart('libraryCounts', '/api/stats/counts', 'text', {});
 }
 
-function initChart(chartElementId, url, chartType, chartOptions) {
+function initChart(chartElementId, url, chartType, chartOptions, title) {
   let cardElement = document.getElementById(chartElementId);
   let chartCanvas = $('canvas', cardElement)[0];
+  if (title) {
+    let chartTitle = $('div.card-title', cardElement)[0];
+    $(chartTitle).text(title);
+  }
   let chartComponent;
   let type;
   if (chartType === "pie" || chartType === "line") {
@@ -78,7 +82,7 @@ function initChart(chartElementId, url, chartType, chartOptions) {
     chartComponent = new TextCard(chartCanvas, chartOptions || {});
     type = 'text';
   }
-  chartsDefinitions[chartElementId] = { chartElementId, url, chartType, chartOptions, chartComponent, type };
+  chartsDefinitions[chartElementId] = { chartElementId, url, chartType, chartOptions, chartComponent, type, title };
   refreshChart(chartElementId);
   return chartsDefinitions[chartElementId];
 }
@@ -88,9 +92,21 @@ function updateChartWithData(chart, data) {
     chartInfo = chartsDefinitions[chart];
     chart = chartInfo.chartComponent;
   }
-  chart.data.labels = data.labels;
-  chart.data.datasets = data.datasets;
+  let chartData = data.chartData ? data.chartData : data;
+  chart.data.labels = chartData.labels;
+  chart.data.datasets = chartData.datasets;
   chart.update();
+
+  if (chartInfo.title) {
+    let cardElement = document.getElementById(chartInfo.chartElementId);
+    let chartTitle = $('div.card-title', cardElement)[0];
+    let newTitle = chartInfo.title;
+    if (data.team) {
+      newTitle += ` for ${data.team}`;
+    }
+    $(chartTitle).text(newTitle);
+  }
+
 }
 function updateTextWithData(chart, data) {
   let chartInfo = chart;
@@ -142,7 +158,7 @@ function refreshChart(chartElementId) {
   flagLoading(chartElementId, true);
   $.ajax( {
     "type"    : 'GET',
-    "url"     : chartInfo.url,
+    "url"     : chartInfo.url+"?team="+$("#teamName")[0].value,
     "data"    : undefined,
     "dataType": "json",
     "cache"   : false,
@@ -152,6 +168,9 @@ function refreshChart(chartElementId) {
         let chart = chartsDefinitions[chartElementId];
         if (chart.type === 'chart') {
           updateChartWithData(chartElementId, json.data);
+          if (json.data.teams) {
+              $("#teamsDescription").text(json.data.teams);
+          }
         }
         if (chart.type === 'text') {
           updateTextWithData(chartElementId, json.data);
@@ -166,4 +185,13 @@ function refreshChart(chartElementId) {
 $(document).ready(function() {
   initDemoCharts();
   initStatsCharts();
+
+  initTeamsAutocomplete();
+  $('#teamName').on('keypress click', function(e){
+    if (e.which === 13 || e.type === 'click') {
+      refreshChart('testsByType');
+      refreshChart('testsByLibs');
+      refreshChart('libraryCounts');
+    }
+  });
 });
