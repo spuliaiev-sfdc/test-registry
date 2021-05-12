@@ -66,18 +66,18 @@ const server = {
       console.log(" failed...", e);
     }
 
-    this.setupRoutes(app);
+    await this.setupRoutes(app);
     app.listen(this.port, () => console.log(`Example app listening at http://localhost:${this.port}`))
 
   },
 
-  setupRoutes(app) {
+  async setupRoutes(app) {
     utils.impt(`HTTP Server registration start`);
-    this.setupController(testController, app);
-    this.setupController(fTestInventoryController, app);
-    this.setupController(statsController, app);
-    this.setupController(filesController, app);
-    this.setupController(teamsController, app);
+    await this.setupController(testController, app);
+    await this.setupController(fTestInventoryController, app);
+    await this.setupController(statsController, app);
+    await this.setupController(filesController, app);
+    await this.setupController(teamsController, app);
 
     app.get("/", (req, res) => {
       res.render("index", { title: "Home" });
