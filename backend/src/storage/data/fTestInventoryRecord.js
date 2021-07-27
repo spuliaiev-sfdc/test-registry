@@ -83,7 +83,7 @@ const fTestInventoryRecord = {
       }
     ]);
     let data = await list.toArray();
-    return data[0].count;
+    return data.length > 0 ? data[0].count : 0;
   },
 
   async getUniqueTeamNames(database) {

@@ -126,7 +126,7 @@ const testAnalyser = {
   async analyseFTestInventoryFile(fileInfo, cachedInventoryFile) {
     corUtil.trace(`[analyseJavaTestFile] FTestInventory file analysis for ${fileInfo.relative}`);
     await fTestInventoryFileUtil.getTestOwningTeam(fileInfo, cachedInventoryFile);
-    return fileInfo.fTestInventoryInfo;
+    return fileInfo;
   }
 };
 

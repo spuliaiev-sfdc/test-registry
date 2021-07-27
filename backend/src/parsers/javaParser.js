@@ -369,7 +369,7 @@ const javaParser = {
           // ignore that - not needed
           return memberInfo;
     }
-    corUtil.warn(`Unknown kind of entity member ${classInfo.className}`);
+    corUtil.warn(`Unknown kind of entity member ${classInfo.className} : ${memberDeclaration.name}`);
     return memberInfo;
   },
 
