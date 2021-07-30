@@ -1,6 +1,7 @@
 const
   express = require('express'),
   path = require('path'),
+  fs = require('fs'),
   utils = require('../corUtils.js'),
   morgan = require('morgan'), // HTTP logging
   teamDataSnapshot = require('../utils/teamDataSnapshot'),
@@ -35,11 +36,8 @@ const server = {
 
   async startServer(options) {
     const app = express();
-    this.coreFolder = options.coreFolder;
-    this.outputFolder = options.outputFolder;
-    this.logsFolder = options.logsFolder;
-    this.port = options.port;
-    this.database = options.database;
+    // copy all the options
+    Object.assign(this, options);
 
     app.set("views", path.resolve("server/views"));
     app.use(express.static(path.resolve("server/public")));
@@ -67,8 +65,19 @@ const server = {
     }
 
     await this.setupRoutes(app);
-    app.listen(this.port, () => console.log(`Example app listening at http://localhost:${this.port}`))
 
+    let http = require('http');
+    let https = require('https');
+    let privateKey  = fs.readFileSync('server/sslcert/localhost+2-key.pem', 'utf8');
+    let certificate = fs.readFileSync('server/sslcert/localhost+2.pem', 'utf8');
+
+    let credentials = {key: privateKey, cert: certificate};
+
+    let httpServer = http.createServer(app);
+    let httpsServer = https.createServer(credentials, app);
+
+    httpServer.listen(this.port, () => console.log(`Example app listening at http://localhost:${this.port}`));
+    httpsServer.listen(this.portSSL, () => console.log(`Example app listening at https://localhost:${this.portSSL}`));
   },
 
   async setupRoutes(app) {

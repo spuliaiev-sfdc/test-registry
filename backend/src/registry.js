@@ -33,8 +33,8 @@ let args = require('minimist')(process.argv.slice(2), {
     f: 'from-date',     // From Date for analysis
     t: 'to-date',       // From Date for analysis
     u: 'users',         // Users to analyse
-    // s: 'server',        // Run as Server
-    p: 'port',          //`Port to run the server on (default is ${defaultPort})`,
+    p: 'port',          //`HTTP Port to run the server on (default is ${defaultPort})`,
+    s: 'portSSL',          //`HTTPS Port to run the server on (default is ${defaultPort+1})`,
 
     m: 'module',         // verify only the following module
     g: 'google-sheet'    // add three additional columns for google sheet page
@@ -62,6 +62,8 @@ function printHelp() {
   utils.clean(`       -f <date> From date to run analisys in format 2020/02/10`);
   utils.clean(`       -t <date> To date to run analisys in format 2020/04/20`);
   utils.clean(`       -u <userNames> List of Perforace user names, separated with comma`);
+  utils.clean(`       -p <portForHTTP> Port number to serve HTTP requests`);
+  utils.clean(`       -s <portForHTTPS> Port number to serve HTTPS requests`);
 
   utils.clean("");
   utils.clean(`  Url to Google Sheet https://docs.google.com/spreadsheets/d/1uR0rspkRFk9itod_kDeqPTY4Y0iUD6DpAPm2rZYNddc/edit?usp=sharing`);
@@ -95,7 +97,8 @@ let inputFile = args.i;
 let rescan = args.r;
 let dateFrom = args.f;
 let dateTo = args.t;
-let port = args.port || defaultPort;
+let port = args.p || defaultPort;
+let portSSL = args.s || defaultPort+1;
 let moduleToRunFor = args.m;
 if(args.v) { // Verbose output
   utils.logLevelThreshold = 10;
@@ -172,15 +175,16 @@ async function runTestMongo(runInfo) {
   let records = await invRecord.getRecords(runInfo.database);
   console.log('Invs list', records);
 
-  utils.log(`CORE files Test Ownership checker App ${VERSION} is listening now! Send them requests my way http://127.0.0.1:${defaultPort}/** !`);
+  utils.log(`CORE files Test Ownership checker App ${VERSION} is starting...`);
   server.startServer(runInfo);
 }
 
 async function runServer(runInfo) {
+  utils.log(`Awaiting Mongo instance...`);
   const mongoStorage = await require("./storage/mongoStorage").getDatabase();
   runInfo.database = mongoStorage;
 
-  utils.log(`CORE files Test Ownership checker App ${VERSION} is listening now! Send them requests my way http://127.0.0.1:${defaultPort}/** !`);
+  utils.log(`CORE files Test Ownership checker App ${VERSION} is starting...`);
   server.startServer(runInfo);
 }
 
@@ -213,18 +217,19 @@ if (args._.includes("fTests")) {
 }
 
 if (args._.includes("server")) {
-  utils.log(`CORE files Test Ownership checker App ${VERSION} is listening now! Send them requests my way http://127.0.0.1:${defaultPort}/** !`);
+  utils.log(`CORE files Test Ownership checker App ${VERSION} starting...`);
   runServer({
     coreFolder,
     outputFolder,
     port,
+    portSSL,
     logsFolder
   });
   return;
 }
 
 if (args._.includes("mongoTest")) {
-  utils.log(`CORE files Test Ownership checker App ${VERSION} is listening now! Send them requests my way http://127.0.0.1:${defaultPort}/** !`);
+  utils.log(`CORE files Test Ownership checker App ${VERSION} is starting...`);
   runTestMongo({});
   return;
 }

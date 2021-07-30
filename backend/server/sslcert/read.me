@@ -1,0 +1,11 @@
+echo " from https://www.process-one.net/blog/using-a-local-development-trusted-ca-on-macos/"
+
+brew install mkcert
+mkcert -install
+mkcert localhost 127.0.0.1 ::1
+
+echo "   Use the files as key and certificate."
+echo '   The certificate is at "./localhost+2.pem" and the key at "./localhost+2-key.pem"'
+
+# import cacerts like that: 
+# keytool -importcert -file <cert file> -keystore <path to JDK used by IDE>/jre/lib/security/cacerts
