@@ -1,5 +1,14 @@
 
 const restResponse = {
+  EMPTY_LIST_PAGINATION: {
+    length: 0,
+    start: 0,
+    pageIndex: 0,
+    recordsTotal: 0,
+    recordsFiltered: 0
+  },
+
+
   ok(entity) {
     return {
       data: entity,
@@ -9,17 +18,11 @@ const restResponse = {
 
   oklist(entity) {
     if (typeof entity === 'undefined' || !entity ) {
-      entity = { data: [], pagination: {
-          length: 0,
-          start: 0,
-          pageIndex: 0,
-          recordsTotal: 0,
-          recordsFiltered: 0
-      }};
+      entity = { data: [], pagination: this.EMPTY_LIST_PAGINATION};
     }
     return {
-      data: entity.data,
-      pagination: entity.pagination,
+      data: entity.data || [],
+      pagination: entity.pagination || this.EMPTY_LIST_PAGINATION,
       success: true
     };
   },
