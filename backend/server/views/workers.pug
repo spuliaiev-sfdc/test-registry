@@ -1,0 +1,29 @@
+extends layout
+
+block  layout-header-nav-buttons
+  //li.nav-item
+  //  a.nav-link(href='#') NEWITEM222
+
+block layout-content
+    h1.mt-3 Workers
+    p.lead
+        | This is a list of Workers, both active and finished
+    div.View
+        div.container-fluid
+            div.row
+                div.col.col-lg-8
+                    table#workersTable.table.table-striped.table-bordered
+                        thead
+                            tr
+                                th Id
+                                th Name
+                                th Status
+                                th Started
+                                th Finished
+                                th Error
+                        tbody
+
+
+block layout-footer
+    span.text-muted Place sticky footer content here.
+    script(type="text/javascript" src="/js/workers.js")

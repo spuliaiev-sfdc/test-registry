@@ -1,0 +1,18 @@
+extends layout
+
+block  layout-header-nav-buttons
+//        li.nav-item
+//          a.nav-link(href='#') NEWITEM
+
+block layout-content
+    h1.mt-3 Workers
+    p.lead
+        | Request the ownership report
+    div.View
+        div.container-fluid
+      div.row
+          button.btn.btn-primary(type="button" id='RunOwnershipReport') Run Report
+
+block layout-footer
+  span.text-muted Place sticky footer content here.
+    script(type="text/javascript" src="/js/ownerReportRequest.js")

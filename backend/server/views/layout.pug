@@ -33,10 +33,17 @@ html
                   a.nav-link(href='testsByTeam') TestsByTeam
                 li.nav-item
                   a.nav-link(href='teams') Teams
+                li.nav-item
+                  a.nav-link(href='workers') Workers
                 li.nav-item.hidden
                   a.nav-link(href='#') Link
                 li.nav-item.hidden
                   a.nav-link.disabled(href='#') Disabled
+                li.nav-item.dropdown
+                  a.nav-link.dropdown-toggle(data-toggle="dropdown" aria-haspopup="true" aria-expanded="false") Commands
+                  div.dropdown-menu.dropdown-primary(aria-labelledby="navbarDropdownMenuLink")
+                    a.dropdown-item(href="#" id="commandReIndexAll") Re-index all
+                    a.dropdown-item(href="ownershipReport") Ownership Report
                 block layout-header-nav-buttons
               form.form-inline.mt-2.mt-md-0
                 input.form-control.mr-sm-2(type='text' placeholder='Search' aria-label='Search')
@@ -60,4 +67,5 @@ html
     script(type="text/javascript" src="/js/datatable.pipeline.js")
     script(type="text/javascript" src="/js/jquery.form.js")
     script(type="text/javascript" src="/js/common.js")
+    script(type="text/javascript" src="/js/commands.js")
 

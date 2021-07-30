@@ -1,8 +1,16 @@
 const
-    util = require('util'),
     utils = require('../corUtils.js');
 
+/**
+ * Worker statuses:
+ * * enqueued
+ * * started
+ * * finished
+ * * failed
+ * * killed
+ */
 const workersManager = {
+    last_worker_id: 0,
     MAX_COUNT: 5,
     workers: [],
 
@@ -11,15 +19,51 @@ const workersManager = {
         this.workers = [];
     },
 
-    async initWorker(workerName, functionToRun, parameters) {
+    cleanWorkersFinishedOrFailed() {
+        utils.log(`[WorkersManager] cleanWorkersFinishedOrFailed Before Cleanup\n`+workersManager.statusOfWorkers());
+
+        let new_workers = [];
+        this.workers
+            .filter( worker => worker.status !== 'failed' && worker.status !== 'failed' && worker.status !== 'killed' )
+            .forEach(
+                worker => new_workers.push(worker)
+            );
+
+        this.workers = new_workers;
+        utils.log(`[WorkersManager] cleanWorkersFinishedOrFailed After Cleanup:\n`+workersManager.statusOfWorkers());
+    },
+
+    cleanWorkersOlderAnHour() {
+        utils.log(`[WorkersManager] cleanWorkersOlderAnHour Before Cleanup\n`+workersManager.statusOfWorkers());
+
+        let new_workers = [];
+        this.workers
+            // Finished more than hour ago
+            .filter( worker => !worker.finished  || Date.now() - worker.finished > 60*60*1000)
+            .forEach(
+                worker => new_workers.push(worker)
+            );
+
+        this.workers = new_workers;
+        utils.log(`[WorkersManager] cleanWorkersOlderAnHour After Cleanup:\n`+workersManager.statusOfWorkers());
+    },
+
+    async initWorker(workerName, runInstance, parameters) {
         utils.log(`[WorkersManager] Enqueue ${workerName}`);
+        let next_id = workersManager.last_worker_id++;
+        let workerObject = typeof runInstance === "object" ? runInstance : { run: runInstance };
+        let functionToRun = workerObject.run;
         let worker = {
+            id: next_id,
             name: workerName,
-            promise: null,
-            functionToRun: functionToRun,
-            parameters: functionToRun,
             started: new Date(),
-            status: 'enqueued'
+            finished: null,
+            error: null,
+            status: 'enqueued',
+            promise: null,
+            workerObject: workerObject,
+            functionToRun: functionToRun,
+            parameters: parameters,
         };
         this.workers.push(worker);
         worker.promise = async (resolve, reject)  => {
@@ -27,9 +71,9 @@ const workersManager = {
                 worker.status = 'started';
                 try {
                     if (parameters) {
-                        await functionToRun(worker, ...parameters);
+                        await workerObject.run(worker, parameters);
                     } else {
-                        await functionToRun(worker);
+                        await workerObject.run(worker);
                     }
                     utils.log(`[WorkersManager] Finished ${worker.name}`);
                     worker.status = 'finished';
@@ -40,13 +84,31 @@ const workersManager = {
                 }
                 worker.finished = new Date();
             };
-            // () => utils.log(`[WorkersManager] Resolved ${worker.name}`),
-            // (err) => utils.log(`[WorkersManager] Failed ${worker.name}`)
-        // );
         worker.promise();
-        //     .then(() => utils.log(`[WorkersManager] Resolved ${worker.name}`))
-        //     .catch((err) => utils.log(`[WorkersManager] Failed ${worker.name}`));
         utils.log(`[WorkersManager] Enqueued ${worker.name}`);
+        return worker;
+    },
+
+    cleanupFromInternalInfo(list){
+        if (Array.isArray(list)) {
+            let finalList = [];
+            list.forEach(worker => finalList.push(this.cleanupFromInternalInfo(worker)));
+            return finalList;
+        } else {
+            if (list) {
+                let worker = list;
+                return {
+                    id: worker.id,
+                    name: worker.name,
+                    started: worker.started,
+                    finished: worker.finished,
+                    status: worker.status,
+                    error: worker.error
+                };
+            } else {
+                return null;
+            }
+        }
     },
 
     listWorkers() {
@@ -67,6 +129,11 @@ const workersManager = {
 
     statusOfWorkers() {
         return `Workers ${this.workers.length}:\n`+this.workers.map( worker => `${worker.name}:${worker.status}` ).join("\n");
+    },
+
+    getWorkerById (workerId) {
+        let result = this.workers.find( worker => worker.id === workerId);
+        return result;
     }
 
 }

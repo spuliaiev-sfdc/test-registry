@@ -1,7 +1,5 @@
 var
     assert = require('assert'),
-    // sleep = require('system-sleep'),
-    sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs)),
     utils = require('../../src/corUtils.js')
         // This is just to set logging to warnings level
         // .warningsOnly(),
@@ -30,7 +28,7 @@ describe('workersManager', function() {
                     workersManager.cleanWorkers();
                     workersManager.initWorker("WorkerSingle", async (worker) => {
                         utils.log("WaitOneWorker:Worker Start");
-                        await sleep(1000);
+                        await utils.sleep(1000);
                         utils.log("WaitOneWorker:Worker End");
                     });
                     let workers = workersManager.listWorkers();
@@ -47,7 +45,7 @@ describe('workersManager', function() {
                             utils.log("Awaiting in WaitOneWorker: worker started");
                         }
                         utils.log("Awaiting in WaitOneWorker");
-                        await sleep(300);
+                        await utils.sleep(300);
                     }
                     utils.log("Awaiting in WaitOneWorker is finished");
                     resolve(workersManager);
@@ -69,12 +67,12 @@ describe('workersManager', function() {
                     workersManager.cleanWorkers();
                     utils.log(`WaitThreeWorkers: active: ${workersManager.listActiveWorkers().length}`);
                     utils.log("WaitThreeWorkers:Worker01 Enqueue");
-                    workersManager.initWorker("Worker01", async (worker)=>{
+                    workersManager.initWorker("Worker01", async (workerInfo)=>{
                         utils.log("WaitThreeWorkers:Worker01 Start");
-                        await sleep(1000);
+                        await utils.sleep(1000);
                         utils.log("WaitThreeWorkers:Worker01 End");
                     });
-                    await sleep(200);
+                    await utils.sleep(200);
                     utils.log(workersManager.statusOfWorkers());
                     assert.strictEqual(workersManager.listWorkers().length, 1, "Should be 1 worker");
                     assert.strictEqual(workersManager.listPlannedOrActiveWorkers().length, 1, "If not 1 - it means the worker run not asynchronously");
@@ -82,15 +80,15 @@ describe('workersManager', function() {
                     utils.log("WaitThreeWorkers:Worker02 Enqueue");
                     workersManager.initWorker( "Worker02", async (worker)=>{
                         utils.log("WaitThreeWorkers:Worker02 Start");
-                        await sleep(3000);
+                        await utils.sleep(3000);
                         utils.log("WaitThreeWorkers:Worker02 End");
                     });
-                    await sleep(200);
+                    await utils.sleep(200);
                     utils.log(`WaitThreeWorkers: active: ${workersManager.listPlannedOrActiveWorkers().length}`);
                     utils.log("WaitThreeWorkers:Worker03 Enqueue");
                     workersManager.initWorker( "Worker03", async (worker)=>{
                         utils.log("WaitThreeWorkers:Worker03 Start");
-                        await sleep(5000);
+                        await utils.sleep(5000);
                         utils.log("WaitThreeWorkers:Worker03 End");
                     });
                     let workers = workersManager.listWorkers();
@@ -113,7 +111,7 @@ describe('workersManager', function() {
                             utils.log("Awaiting in WaitThreeWorkers: worker03 started");
                         }
                         utils.log("Awaiting in WaitThreeWorkers");
-                        await sleep(300);
+                        await utils.sleep(300);
                     }
                     utils.log("Awaiting in WaitOneWorker is finished");
                     resolve(workersManager);

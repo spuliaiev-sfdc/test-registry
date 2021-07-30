@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/backend/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/backend/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/backend/test-projects" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/backend/server/public" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/backend/2020-06-27_23_23_51-Accounts" />
       <excludeFolder url="file://$MODULE_DIR$/backend/data-2021-03-29_14_14_46" />
       <excludeFolder url="file://$MODULE_DIR$/backend/data-2021-03-29_14_29_50" />

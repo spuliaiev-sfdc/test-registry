@@ -7,6 +7,7 @@ const
   server = require('./server/server.js'),
   projectIndexer = require('./projectIndexer'),
   filesStorage = require('./storage/filesStorage'),
+  workersManager = require('./workers/workersManager'),
   dateFormat = require('dateformat');
 
 const homedir = require('os').homedir();
@@ -223,7 +224,8 @@ if (args._.includes("server")) {
     outputFolder,
     port,
     portSSL,
-    logsFolder
+    logsFolder,
+    workersManager
   });
   return;
 }

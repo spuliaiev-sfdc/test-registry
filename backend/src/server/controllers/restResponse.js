@@ -20,6 +20,17 @@ const restResponse = {
     if (typeof entity === 'undefined' || !entity ) {
       entity = { data: [], pagination: this.EMPTY_LIST_PAGINATION};
     }
+    if (Array.isArray(entity)) {
+      entity = {
+        data: entity,
+        pagination: {
+          length: entity.length,
+          start: 0,
+          pageIndex: 0,
+          recordsTotal: entity.length,
+          recordsFiltered: entity.length
+        }};
+    }
     return {
       data: entity.data || [],
       pagination: entity.pagination || this.EMPTY_LIST_PAGINATION,
