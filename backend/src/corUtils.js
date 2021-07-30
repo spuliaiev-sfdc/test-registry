@@ -14,6 +14,9 @@ const utils = {
   INFO: 6,
   TRACE: 7,
   LOWEST:10,
+  logTime: true,
+  startTime: undefined,
+  TIME_PADDING: 8,
 
   warningsOnly() {
     this.logLevelThreshold = utils.WARN;
@@ -52,39 +55,50 @@ const utils = {
     utils.logWithPrefix(utils.defaultLogPrefix, level, message, entity);
   },
 
+  logWithMessagePrefix(messagePrefix, logPrefix, level, message, entity) {
+    utils.logWithPrefix(logPrefix, level, messagePrefix + message, entity);
+  },
+
   logWithPrefix(logPrefix, level, message, entity) {
     if (!entity) {
       entity = "";
     }
-    if (typeof message == "undefined"  || level === "") {
-      message = level;
+    if (typeof message == "undefined" || level === "") {
+      message = level || logPrefix;
+      logPrefix = "";
       level = 6;
     }
     if (level > this.logLevelThreshold) {
       return;
     }
+    let levelText = level ? "["+level+"]" : "";
     if (level === this.INFO) {
-      console.log(logPrefix+"[INFO]\t"+message, entity);
-      return;
+      levelText = "[INFO]";
     }
     if (level === this.IMPORTANT) {
-      console.log(logPrefix+"[IMPTNT]\t"+message, entity);
-      return;
+      levelText = "[IMPTNT]";
     }
     if (level === this.ERROR) {
-      console.log(logPrefix+"[ERROR]\t"+message, entity);
-      return;
+      levelText = "[ERROR]\t";
     }
     if (level === this.WARN) {
-      console.log(logPrefix+"[WARN]\t"+message, entity);
-      return;
+      levelText = "[WARN]\t";
     }
-    if (isNaN(level)) {
-      // print out some custom level as text
-      console.log(logPrefix+level+"\t"+message, entity);
-    } else {
-      console.log(logPrefix+"\t"+message, entity);
+    let timeText = "";
+    if (utils.logTime) {
+      if (!utils.startTime) {
+        utils.startTime = Date.now();
+        timeText = ' '.repeat(utils.TIME_PADDING-1)+"0\t";
+      } else {
+        let now = (Date.now()-utils.startTime).toString();
+        timeText = ' '.repeat(utils.TIME_PADDING-now.length)+now+"\t";
+      }
     }
+    console.log(`${timeText}${logPrefix}${levelText}\t${message}`, entity);
+  },
+
+  resetLogTime() {
+    utils.startTime = undefined;
   },
 
   progressStart(message) {
