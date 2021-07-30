@@ -2,7 +2,6 @@ let
   repositoryTests = require('../../storage/data/testRecord'),
   repositoryFTestInv = require('../../storage/data/fTestInventoryRecord'),
   repositoryTeams = require('../../storage/data/teamsRecord'),
-  repository = require('../../storage/data/testRecord'),
   restResponse = require('./restResponse'),
   restRequest = require('./restRequest'),
   teamDataSnapshot = require('../../utils/teamDataSnapshot'),

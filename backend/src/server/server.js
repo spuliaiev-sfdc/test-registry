@@ -5,11 +5,6 @@ const
   utils = require('../corUtils.js'),
   morgan = require('morgan'), // HTTP logging
   teamDataSnapshot = require('../utils/teamDataSnapshot'),
-  testController = require('./controllers/testsController'),
-  statsController = require('./controllers/statsController'),
-  fTestInventoryController = require('./controllers/fTestInventoryController'),
-  filesController = require('./controllers/filesController'),
-  teamsController = require('./controllers/teamsController'),
   bodyParser = require('body-parser');
 
 /**
@@ -47,6 +42,7 @@ const server = {
     app.set("view engine", "pug");
     app.set('json spaces', 2);
     await this.setupLibraries(app);
+
     // adding morgan to log HTTP requests
     if (this.logsFolder) {
       // create a write stream (in append mode)
@@ -56,12 +52,12 @@ const server = {
       app.use(morgan('combined'));
     }
 
-    console.log("Fetching teams information...");
+    utils.log("Fetching teams information...");
     try {
       await teamDataSnapshot.loadTeamNamesFile({ rootFolder: this.coreFolder });
-      console.log(" done...");
+      utils.log(" done...");
     } catch (e) {
-      console.log(" failed...", e);
+      utils.log(" failed...", e);
     }
 
     await this.setupRoutes(app);
@@ -82,12 +78,17 @@ const server = {
 
   async setupRoutes(app) {
     utils.impt(`HTTP Server registration start`);
-    await this.setupController(testController, app);
-    await this.setupController(fTestInventoryController, app);
-    await this.setupController(statsController, app);
-    await this.setupController(filesController, app);
-    await this.setupController(teamsController, app);
 
+    // Loading and binding all the controllers
+    let entries = fs.readdirSync("src/server/controllers");
+    for(let i=0; i<entries.length; i++) {
+      if (entries[i].endsWith("Controller.js")) {
+        utils.log(`detected controller:${entries[i]}`)
+        await this.setupController(require("./controllers/" + entries[i]), app);
+      }
+    }
+
+    // Old style binding for pages
     app.get("/", (req, res) => {
       res.render("index", { title: "Home" });
     });
@@ -104,6 +105,9 @@ const server = {
     controller.database = this.database;
     let parentUrl = controller.mappingUrl;
     utils.impt(`  Controller registration ${controller.constructor.name} ${parentUrl}`);
+    if (controller.setupForServer) {
+      controller.setupForServer(this, expressApp, "");
+    }
 
     for(let elementName in controller) {
       if (controller.hasOwnProperty(elementName)) {
