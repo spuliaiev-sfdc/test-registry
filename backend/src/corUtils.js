@@ -393,6 +393,10 @@ const utils = {
     return new Date().toISOString().
       replace(/T/, '_').      // replace T with a space
       replace(/\..+/, '')     // delete the dot and everything after
+  },
+
+  sleep(waitTimeInMs) {
+    return new Promise(resolve => setTimeout(resolve, waitTimeInMs));
   }
 };
 

@@ -55,3 +55,22 @@ function getCookie(name) {
 function eraseCookie(name) {
   document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
+function setGoodBadge(badgeElementId, status) {
+  setBadge(badgeElementId, 'success', status);
+}
+function setBadBadge(badgeElementId, status, status2) {
+  let kind = status ? 'danger' : status2 ? 'warning' : 'danger';
+  setBadge(badgeElementId, kind, status);
+}
+function setBadge(badgeElementId, kind, status) {
+  let badge = $('#badgeElementId');
+  badge.addClass('hidden');
+  badge.removeClass('badge-warning');
+  badge.removeClass('badge-danger');
+  badge.removeClass('badge-success');
+  if (status) {
+    badge.addClass('badge-' + kind);
+    badge.removeClass('hidden');
+  }
+}
+

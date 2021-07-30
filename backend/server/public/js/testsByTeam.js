@@ -1,16 +1,5 @@
 let testsByTeamDataTable;
 
-function setGoodBadge(badgeElementId, status) {
-  setBadge(badgeElementId, 'success', status);
-}
-function setBadBadge(badgeElementId, status, status2) {
-  let kind = status ? 'success' : status2 ? 'warning' : 'success';
-  setBadge(badgeElementId, kind, status);
-}
-function setBadBadge(badgeElementId, status, status2) {
-  let kind = status ? 'danger' : status2 ? 'warning' : 'danger';
-  setBadge(badgeElementId, kind, status);
-}
 function resetSearchParameters() {
   console.log('resetSearchParameters');
   $("#teamName").val("");
@@ -36,17 +25,6 @@ function fetchSearchParametersFromCookies(){
   $("#methodName").val(getCookie("Search_Method"));
   $("#className").val(getCookie("Search_Class"));
   $("#classesTable_filter input[type='search']").val(getCookie("Search_Search"));
-}
-function setBadge(badgeElementId, kind, status) {
-  let badge = $('#badgeElementId');
-  badge.addClass('hidden');
-  badge.removeClass('badge-warning');
-  badge.removeClass('badge-danger');
-  badge.removeClass('badge-success');
-  if (status) {
-    badge.addClass('badge-' + kind);
-    badge.removeClass('hidden');
-  }
 }
 function populateClassInformationDiv(classData) {
   let classInfoDiv = $('.classInformation');
