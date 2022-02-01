@@ -10,7 +10,7 @@ const mongoStorage = {
   database: null,
 
   async startDatabase(withInMemoryDB) {
-    let mongoDBURL = "mongodb://localhost:27017/TestRegistry";
+    let mongoDBURL = "mongodb://127.0.0.1:27017/TestRegistry";
     try {
       if (withInMemoryDB) {
         const mongo = new MongoMemoryServer();

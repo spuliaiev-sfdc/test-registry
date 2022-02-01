@@ -5,3 +5,7 @@
 /backend/.nyc_output/
 /backend/test/*-Develop.test.js
 /backend/*.log
+/node_modules/
+/tests/node_modules/
+/.idea/mongoSettings.xml
+/package-lock.json
