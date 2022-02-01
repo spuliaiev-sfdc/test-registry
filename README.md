@@ -46,4 +46,30 @@ module: sfa/test/func
 testKind: func
 relative: sfa/test/func/java/src/sales/lead/WebToLeadDataPETest.java
 ```
+Example of test information with some methods marked IN_DEV (in development):
 
+```yaml
+classInfo:
+  owners:
+    Accounts:
+      - Ownership.yaml
+  labels: {}
+  ownersPartial: {}
+  partialIN_DEV:
+    - testNoError
+methodsInfo:
+  testNoError:
+    name: testNoError
+    owners: {}
+    labels:
+      IgnoreFailureReason.IN_DEV:
+        - TestLabel method annotation
+    IN_DEV: true
+ignoredMethods:
+  - ftestSetUp
+  - ftestTearDown
+class: system.security.csrf.OpportunityListCSRFSeleniumTest
+module: sfa/test/func
+testKind: func
+relative: sfa/test/func/java/src/system/security/csrf/OpportunityListCSRFSeleniumTest.java
+```
