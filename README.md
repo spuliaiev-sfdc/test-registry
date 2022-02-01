@@ -13,6 +13,21 @@ The supported ownership systems:
   * Java annotation @ScrumTeam
   * FTest Inventory XML files
 
+It also evaluates the code in Java and attempts to identify used Frameworks and Browsers if Selenium is detected.
+* unit
+* unit-strict
+* func (Functional tests)
+  * Selenium
+    * Aloha
+    * SFX
+    * S1
+* Frameworks:
+  * Mockito1
+  * Mockito2
+  * PowerMock
+  * LPOP
+  * BaseUITest
+  * BlackTabTest
 
 Home page with the overview of detected teams, tests and their categories:
 ![alt text](images/home.png)
