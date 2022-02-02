@@ -38,7 +38,7 @@ Home page with the overview of tests by specific team name, tests and their cate
 List of tests by team:
 ![alt text](images/tests_by_team.png)
 
-##Internal data
+### Internal data
 
 The stored information about the test class, which reveals the discrepancy between different source of ownership:
 `sfa/WebToLeadDataPETest.yaml`
